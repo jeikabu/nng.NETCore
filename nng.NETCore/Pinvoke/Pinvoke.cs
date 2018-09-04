@@ -6,7 +6,7 @@ namespace nng.Pinvoke
 {
     using static Globals;
     
-    public sealed class NngPinvoke
+    sealed class Basic
     {
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr nng_alloc(UIntPtr size);
@@ -19,5 +19,8 @@ namespace nng.Pinvoke
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern void nng_strfree(IntPtr str);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern string nng_strerror(int error);
     }
 }

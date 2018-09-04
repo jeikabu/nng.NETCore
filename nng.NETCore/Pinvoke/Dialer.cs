@@ -9,9 +9,6 @@ namespace nng.Pinvoke
     public sealed class Dialer
     {
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_dial(nng_socket socket, string url, out nng_dialer dialer, UInt32 flags);
-
-        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_dialer_create(out nng_dialer dialer, nng_socket socket, string url);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]

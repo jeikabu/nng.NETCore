@@ -15,6 +15,28 @@ namespace nng.Pinvoke
         public static extern Int32 nng_close(nng_socket socket);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_dial(nng_socket socket, string url, out nng_dialer dialer, UInt32 flags);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        static extern int nng_dial(nng_socket socket, string url, IntPtr not_used, UInt32 flags);
+
+        public static int nng_dial(nng_socket socket, string url, UInt32 flags)
+        {
+            return nng_dial(socket, url, IntPtr.Zero, flags);
+        }
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_listen(nng_socket socket, string url, out nng_listener listener, UInt32 flags);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        static extern int nng_listen(nng_socket socket, string url, IntPtr not_used, UInt32 flags);
+
+        public static int nng_listen(nng_socket socket, string url, UInt32 flags)
+        {
+            return nng_listen(socket, url, IntPtr.Zero, flags);
+        }
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern Int32 nng_socket_id(nng_socket socket);
 
         // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]

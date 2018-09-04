@@ -9,9 +9,6 @@ namespace nng.Pinvoke
     public sealed class Listener
     {
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_listen(nng_socket socket, string url, out nng_listener listener, UInt32 flags);
-
-        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_listener_create(out nng_listener listener, nng_socket socket, string url);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]

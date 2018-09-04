@@ -10,12 +10,17 @@ namespace nng.Pinvoke
     {
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_msg_alloc(out nng_msg message, UIntPtr size);
+        
+        public static int nng_msg_alloc(out nng_msg message, uint size)
+        {
+            return nng_msg_alloc(out message, (UIntPtr)size);
+        }
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern void nng_msg_free(nng_msg message);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_msg_realloc(out nng_msg message, UIntPtr size);
+        public static extern int nng_msg_realloc(ref nng_msg message, UIntPtr size);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr nng_msg_header(nng_msg message);
