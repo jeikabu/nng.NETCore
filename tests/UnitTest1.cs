@@ -11,24 +11,19 @@ namespace nng.Tests
 
     public class AioTests
     {
-        const string UrlIpcTest = "ipc://test";
+        string UrlRandomIpc() => "ipc://" + Guid.NewGuid().ToString();
 
         RepAsyncCtx CreateRepAsyncCtx(string url)
         {
-            var repSocket = RepSocket.Create(UrlIpcTest) as RepSocket;
-            Assert.NotNull(repSocket);
-            var repAioCtx = repSocket.CreateAioCtx() as RepAsyncCtx;
+            var repAioCtx = RepSocket.CreateAsyncContext(url) as RepAsyncCtx;
             Assert.NotNull(repAioCtx);
             return repAioCtx;
         }
 
         ReqAsyncCtx CreateReqAsyncCtx(string url)
         {
-            var reqSocket = ReqSocket.Create(UrlIpcTest) as ReqSocket;
-            Assert.NotNull(reqSocket);
-            var reqAioCtx = reqSocket.CreateAioCtx() as ReqAsyncCtx;
+            var reqAioCtx = ReqSocket.CreateAsyncContext(url) as ReqAsyncCtx;
             Assert.NotNull(reqAioCtx);
-
             return reqAioCtx;
         }
 
@@ -38,7 +33,7 @@ namespace nng.Tests
             return msg;
         }
 
-        async Task WaitAssert(int timeoutMs, params Task[] tasks)
+        async Task AssertWait(int timeoutMs, params Task[] tasks)
         {
             var timeout = Task.Delay(timeoutMs);
             Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
@@ -54,8 +49,9 @@ namespace nng.Tests
         [Fact]
         public async Task ReqRepBasic()
         {
-            var repAioCtx = CreateRepAsyncCtx(UrlIpcTest);
-            var reqAioCtx = CreateReqAsyncCtx(UrlIpcTest);
+            var url = UrlRandomIpc();
+            var repAioCtx = CreateRepAsyncCtx(url);
+            var reqAioCtx = CreateReqAsyncCtx(url);
 
             var asyncReq = reqAioCtx.Send(CreateMsg());
             var receivedReq = await repAioCtx.Receive();
@@ -66,9 +62,10 @@ namespace nng.Tests
         [Fact]
         public async Task ReqRepTasks()
         {
+            var url = UrlRandomIpc();
             var barrier = new AsyncBarrier(2);
             var rep = Task.Run(async () => {
-                var repAioCtx = CreateRepAsyncCtx(UrlIpcTest);
+                var repAioCtx = CreateRepAsyncCtx(url);
 
                 await barrier.SignalAndWait();
 
@@ -77,11 +74,62 @@ namespace nng.Tests
             });
             var req = Task.Run(async () => {
                 await barrier.SignalAndWait();
-                var reqAioCtx = CreateReqAsyncCtx(UrlIpcTest);
+                var reqAioCtx = CreateReqAsyncCtx(url);
                 var response = await reqAioCtx.Send(CreateMsg());
                 //Assert.NotNull(response);
             });
-            await WaitAssert(1000, rep, req);
+            await AssertWait(1000, rep, req);
+        }
+
+        [Fact]
+        public async Task PushPull()
+        {
+            var url = UrlRandomIpc();
+            var barrier = new AsyncBarrier(2);
+            var push = Task.Run(async () => {
+                var pushSocket = PushSocket.CreateAsyncContext(url, true) as PushAsyncCtx;
+                await barrier.SignalAndWait();
+                Assert.True(await pushSocket.Send(CreateMsg()));
+            });
+            var pull = Task.Run(async () => {
+                await barrier.SignalAndWait();
+                var pullSocket = PullSocket.CreateAsyncContext(url, false) as PullAsyncCtx;
+                await pullSocket.Receive();
+            });
+            
+            await AssertWait(10000, pull, push);
+        }
+
+        [Fact]
+        public async Task Broker()
+        {
+            var inUrl = UrlRandomIpc();
+            var outUrl = UrlRandomIpc();
+            
+            var brokerReady = new AsyncBarrier(3);
+            var clientsReady = new AsyncBarrier(3);
+            var broker = Task.Run(async () => {
+                var pullSocket = PullSocket.CreateAsyncContext(inUrl, true) as PullAsyncCtx;
+                var pushSocket = PushSocket.CreateAsyncContext(outUrl, true) as PushAsyncCtx;
+                await brokerReady.SignalAndWait(); // Broker is ready
+                await clientsReady.SignalAndWait(); // Wait for clients
+                var msg = await pullSocket.Receive();
+                await pushSocket.Send(msg);
+            });
+            var sender = Task.Run(async () => {
+                await brokerReady.SignalAndWait(); // Wait for broker
+                var pushSocket = PushSocket.CreateAsyncContext(inUrl, false) as PushAsyncCtx;
+                await clientsReady.SignalAndWait(); // This client ready, wait for rest
+                await pushSocket.Send(CreateMsg());
+            });
+            var receiver = Task.Run(async () => {
+                await brokerReady.SignalAndWait(); // Wait for broker
+                var pullSocket = PullSocket.CreateAsyncContext(outUrl, false) as PullAsyncCtx;
+                await clientsReady.SignalAndWait(); // This client ready, wait for rest
+                var msg = await pullSocket.Receive();
+                Console.WriteLine(msg);
+            });
+            await AssertWait(4000, broker, sender, receiver);
         }
     }
 }

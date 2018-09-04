@@ -10,15 +10,6 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-
-    public interface IReqSocket : ISocket
-    {
-    }
-
-    public interface IRepSocket : ISocket
-    {
-    }
-
     public class ReqSocket : IReqSocket
     {
         public static object Create(string url)
@@ -32,17 +23,20 @@ namespace nng
             {
                 return null;
             }
-            return new ReqSocket { nngSocket = socket };
+            return new ReqSocket { Socket = socket };
         }
 
-        public object CreateAioCtx()
+        public static object CreateAsyncContext(string url)
         {
-            return ReqAsyncCtx.Create(this);
+            var reqSocket = Create(url) as ReqSocket;
+            if (reqSocket == null)
+            {
+                return null;
+            }
+            return ReqAsyncCtx.Create(reqSocket);
         }
 
-        public nng_socket Socket => nngSocket;
-
-        nng_socket nngSocket;
+        public nng_socket Socket { get; private set; }
     }
 
     public class RepSocket : IRepSocket
@@ -58,16 +52,19 @@ namespace nng
             {
                 return null;
             }
-            return new RepSocket { nngSocket = socket };
+            return new RepSocket { Socket = socket };
         }
 
-        public object CreateAioCtx()
+        public static object CreateAsyncContext(string url)
         {
-            return RepAsyncCtx.Create(this);
+            var repSocket = RepSocket.Create(url) as RepSocket;
+            if (repSocket == null)
+            {
+                return null;
+            }
+            return RepAsyncCtx.Create(repSocket);
         }
 
-        public nng_socket Socket => nngSocket;
-
-        nng_socket nngSocket;
+        public nng_socket Socket { get; private set; }
     }
 }
