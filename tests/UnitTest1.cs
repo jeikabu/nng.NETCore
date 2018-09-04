@@ -38,6 +38,12 @@ namespace nng.Tests
             return msg;
         }
 
+        async Task WaitAssert(int timeoutMs, params Task[] tasks)
+        {
+            var timeout = Task.Delay(timeoutMs);
+            Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
+        }
+
         [Fact]
         public void Test1()
         {
@@ -60,27 +66,22 @@ namespace nng.Tests
         [Fact]
         public async Task ReqRepTasks()
         {
-            var barrier = new Barrier(2);
+            var barrier = new AsyncBarrier(2);
             var rep = Task.Run(async () => {
                 var repAioCtx = CreateRepAsyncCtx(UrlIpcTest);
 
-                barrier.SignalAndWait();
+                await barrier.SignalAndWait();
 
                 var msg = await repAioCtx.Receive();
                 Assert.True(await repAioCtx.Reply(CreateMsg()));
-            }).ContinueWith(task => {
-                Assert.False(task.IsFaulted);
             });
             var req = Task.Run(async () => {
-                barrier.SignalAndWait();
+                await barrier.SignalAndWait();
                 var reqAioCtx = CreateReqAsyncCtx(UrlIpcTest);
                 var response = await reqAioCtx.Send(CreateMsg());
                 //Assert.NotNull(response);
-            }).ContinueWith(task => {
-                Assert.False(task.IsFaulted);
             });
-            var timeout = Task.Delay(1000);
-            Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(rep, req)));
+            await WaitAssert(1000, rep, req);
         }
     }
 }
