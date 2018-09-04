@@ -8,11 +8,10 @@ namespace nng.Tests
 {
     using static nng.Native.Aio.UnsafeNativeMethods;
     using static nng.Native.Msg.UnsafeNativeMethods;
+    using static nng.Tests.Util;
 
-    public class AioTests
+    public class ReqRepTests
     {
-        string UrlRandomIpc() => "ipc://" + Guid.NewGuid().ToString();
-
         RepAsyncCtx CreateRepAsyncCtx(string url)
         {
             var repAioCtx = RepSocket.CreateAsyncContext(url) as RepAsyncCtx;
@@ -101,7 +100,7 @@ namespace nng.Tests
         }
 
         [Fact]
-        public async Task Broker()
+        public async Task PushPullBroker()
         {
             var inUrl = UrlRandomIpc();
             var outUrl = UrlRandomIpc();

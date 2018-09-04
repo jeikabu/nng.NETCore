@@ -110,6 +110,7 @@ namespace nng.Native
     }
     public struct nng_iov
     {
+        #pragma warning disable CS0169
         IntPtr ptr;
     }
 }
