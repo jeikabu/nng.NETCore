@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace nng.Pinvoke
+namespace nng.Native.Msg
 {
     using static Globals;
     
-    public sealed class Msg
+    [System.Security.SuppressUnmanagedCodeSecurity]
+    public sealed class UnsafeNativeMethods
     {
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_msg_alloc(out nng_msg message, UIntPtr size);

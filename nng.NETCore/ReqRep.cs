@@ -1,14 +1,14 @@
-using nng.Pinvoke;
+using nng.Native;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace nng
 {
-    using static nng.Pinvoke.Basic;
-    using static nng.Pinvoke.Ctx;
-    using static nng.Pinvoke.Protocols;
-    using static nng.Pinvoke.Socket;
+    using static nng.Native.Basic.UnsafeNativeMethods;
+    using static nng.Native.Ctx.UnsafeNativeMethods;
+    using static nng.Native.Protocols.UnsafeNativeMethods;
+    using static nng.Native.Socket.UnsafeNativeMethods;
 
 
     public interface IReqSocket : ISocket

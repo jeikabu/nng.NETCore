@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace nng.Pinvoke
+namespace nng.Native
 {
     using static Globals;
 
-    public sealed class Dialer
+    [System.Security.SuppressUnmanagedCodeSecurity]
+    public sealed class UnsafeNativeMethods
     {
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_dialer_create(out nng_dialer dialer, nng_socket socket, string url);

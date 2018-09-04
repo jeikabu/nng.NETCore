@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace nng.Pinvoke
+namespace nng.Native.Aio
 {
     using static Globals;
 
-    public sealed class Aio
+    [System.Security.SuppressUnmanagedCodeSecurity]
+    public sealed class UnsafeNativeMethods
     {
         public delegate void AioCallback(IntPtr arg);
         //public delegate void AioCancelFunction(nng_aio aio, IntPtr ptr, Int32 val);

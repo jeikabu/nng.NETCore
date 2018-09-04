@@ -1,4 +1,4 @@
-using nng.Pinvoke;
+using nng.Native;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -6,8 +6,8 @@ using Xunit;
 
 namespace nng.Tests
 {
-    using static nng.Pinvoke.Aio;
-    using static nng.Pinvoke.Msg;
+    using static nng.Native.Aio.UnsafeNativeMethods;
+    using static nng.Native.Msg.UnsafeNativeMethods;
 
     public class AioTests
     {

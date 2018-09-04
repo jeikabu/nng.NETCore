@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace nng.Pinvoke
+namespace nng.Native
 {
     sealed class Globals
     {

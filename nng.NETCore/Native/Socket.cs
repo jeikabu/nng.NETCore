@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace nng.Pinvoke
+namespace nng.Native.Socket
 {
     using static Globals;
     
-    public sealed class Socket
+    [System.Security.SuppressUnmanagedCodeSecurity]
+    public sealed class UnsafeNativeMethods
     {
         // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         // public static extern void nng_fini();

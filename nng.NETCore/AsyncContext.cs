@@ -1,14 +1,14 @@
-using nng.Pinvoke;
+using nng.Native;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace nng
 {
-    using static nng.Pinvoke.Aio;
-    using static nng.Pinvoke.Basic;
-    using static nng.Pinvoke.Ctx;
-    using static nng.Pinvoke.Msg;
+    using static nng.Native.Aio.UnsafeNativeMethods;
+    using static nng.Native.Basic.UnsafeNativeMethods;
+    using static nng.Native.Ctx.UnsafeNativeMethods;
+    using static nng.Native.Msg.UnsafeNativeMethods;
 
     public interface INngResource
     {
@@ -173,7 +173,6 @@ namespace nng
 
         public Task<nng_msg> Receive()
         {
-            System.Diagnostics.Debug.Assert(state == State.Recv);
             return request.requestTcs.Task;
         }
 
@@ -181,6 +180,7 @@ namespace nng
         {
             System.Diagnostics.Debug.Assert(state == State.Wait);
             request.response = message;
+            // Move from wait to send state
             callback(IntPtr.Zero);
             return request.replyTcs.Task;
         }
