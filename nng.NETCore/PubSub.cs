@@ -10,7 +10,7 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class PubSocket : IPubSocket
+    public class PubSocket<T> : IPubSocket
     {
         public static ISocket Create(string url)
         {
@@ -23,23 +23,23 @@ namespace nng
             {
                 return null;
             }
-            return new PubSocket { Socket = socket };
+            return new PubSocket<T> { Socket = socket };
         }
 
-        public static IAsyncContext CreateAsyncContext(string url)
+        public static ISendAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
         {
-            var socket = Create(url) as PubSocket;
+            var socket = Create(url);
             if (socket == null)
             {
                 return null;
             }
-            return SendAsyncCtx.Create(socket);
+            return SendAsyncCtx<T>.Create(socket, factory);
         }
 
         public nng_socket Socket { get; private set; }
     }
 
-    public class SubSocket : ISubSocket
+    public class SubSocket<T> : ISubSocket
     {
         public static ISocket Create(string url)
         {
@@ -52,17 +52,17 @@ namespace nng
             {
                 return null;
             }
-            return new SubSocket { Socket = socket };
+            return new SubSocket<T> { Socket = socket };
         }
 
-        public static IAsyncContext CreateAsyncContext(string url)
+        public static IReceiveAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
         {
-            var socket = SubSocket.Create(url);
+            var socket = SubSocket<T>.Create(url);
             if (socket == null)
             {
                 return null;
             }
-            return ResvAsyncCtx.Create(socket);
+            return ResvAsyncCtx<T>.Create(socket, factory);
         }
 
         public nng_socket Socket { get; private set; }

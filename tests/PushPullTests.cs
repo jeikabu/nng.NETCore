@@ -14,11 +14,7 @@ namespace nng.Tests
 
     public class PushPullTests
     {
-        nng_msg CreateMsg()
-        {
-            Assert.Equal(0, nng_msg_alloc(out var msg, 32));
-            return msg;
-        }
+        TestFactory factory = new TestFactory();
 
         [Fact]
         public async Task PushPull()
@@ -26,13 +22,13 @@ namespace nng.Tests
             var url = UrlRandomIpc();
             var barrier = new AsyncBarrier(2);
             var push = Task.Run(async () => {
-                var pushSocket = PushSocket.CreateAsyncContext(url, true) as SendAsyncCtx;
+                var pushSocket = factory.CreatePusher(url, true);
                 await barrier.SignalAndWait();
-                Assert.True(await pushSocket.Send(CreateMsg()));
+                Assert.True(await pushSocket.Send(factory.CreateMsg()));
             });
             var pull = Task.Run(async () => {
                 await barrier.SignalAndWait();
-                var pullSocket = PullSocket.CreateAsyncContext(url, false) as ResvAsyncCtx;
+                var pullSocket = factory.CreatePuller(url, false);
                 await pullSocket.Receive(CancellationToken.None);
             });
             
@@ -64,8 +60,8 @@ namespace nng.Tests
             for (var i = 0; i < numBrokers; ++i)
             {
                 var task = Task.Run(async () => {
-                    using (var pullSocket = PullSocket.CreateAsyncContext(inUrl, true) as ResvAsyncCtx)
-                    using (var pushSocket = PushSocket.CreateAsyncContext(outUrl, true) as SendAsyncCtx)
+                    using (var pullSocket = factory.CreatePuller(inUrl, true))
+                    using (var pushSocket = factory.CreatePusher(outUrl, true))
                     {
                         await brokersReady.SignalAndWait(); // Broker is ready
                         await clientsReady.SignalAndWait(); // Wait for clients
@@ -85,12 +81,12 @@ namespace nng.Tests
             for (var i = 0; i < numPushers; ++i)
             {
                 var task = Task.Run(async () => {
-                    using (var pushSocket = PushSocket.CreateAsyncContext(inUrl, false) as SendAsyncCtx)
+                    using (var pushSocket = factory.CreatePusher(inUrl, false))
                     {
                         await clientsReady.SignalAndWait(); // This client ready, wait for rest
                         for (var m = 0; m < numMessagesPerPusher; ++m)
                         {
-                            await pushSocket.Send(CreateMsg());
+                            await pushSocket.Send(factory.CreateMsg());
                             await Task.Delay(15);
                         }
                     }
@@ -102,7 +98,7 @@ namespace nng.Tests
             for (var i = 0; i < numPullers; ++i)
             {
                 var task = Task.Run(async () => {
-                    using (var pullSocket = PullSocket.CreateAsyncContext(outUrl, false) as ResvAsyncCtx)
+                    using (var pullSocket = factory.CreatePuller(outUrl, false))
                     {
                         await clientsReady.SignalAndWait(); // This client ready, wait for rest
                         while (!cts.IsCancellationRequested)

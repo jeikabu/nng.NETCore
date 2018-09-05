@@ -61,12 +61,33 @@ namespace nng
         int error = 0;
     }
 
-    public interface IAsyncContext
+    public interface IAsyncContext : IDisposable
     {
         ISocket Socket { get; }
     }
 
-    public abstract class AsyncBase : IAsyncContext, IDisposable
+    public interface IReceiveAsyncContext<T> : IAsyncContext
+    {
+        Task<T> Receive(CancellationToken token);
+    }
+
+    public interface ISendAsyncContext<T> : IAsyncContext
+    {
+        Task<bool> Send(T message);
+    }
+
+    public interface IReqRepAsyncContext<T> : IAsyncContext
+    {
+        Task<T> Send(T message);
+    }
+
+    public interface IRepReqAsyncContext<T> : IAsyncContext
+    {
+        Task<T> Receive();
+        Task<bool> Reply(T message);
+    }
+
+    public abstract class AsyncBase : IAsyncContext
     {
         public ISocket Socket { get; private set; }
         protected nng_aio aioHandle = nng_aio.Null;

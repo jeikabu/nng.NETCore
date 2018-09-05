@@ -10,7 +10,7 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class PushSocket : IPushSocket
+    public class PushSocket<T> : IPushSocket
     {
         public static ISocket Create(string url, bool isListener)
         {
@@ -24,23 +24,23 @@ namespace nng
             {
                 return null;
             }
-            return new PushSocket { Socket = socket };
+            return new PushSocket<T> { Socket = socket };
         }
 
-        public static IAsyncContext CreateAsyncContext(string url, bool isListener)
+        public static ISendAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url, bool isListener)
         {
-            var pushSocket = PushSocket.Create(url, isListener) as PushSocket;
+            var pushSocket = PushSocket<T>.Create(url, isListener);
             if (pushSocket == null)
             {
                 return null;
             }
-            return SendAsyncCtx.Create(pushSocket);
+            return SendAsyncCtx<T>.Create(pushSocket, factory);
         }
 
         public nng_socket Socket { get; private set; }
     }
 
-    public class PullSocket : IPullSocket
+    public class PullSocket<T> : IPullSocket
     {
         public static ISocket Create(string url, bool isListener)
         {
@@ -54,17 +54,17 @@ namespace nng
             {
                 return null;
             }
-            return new PullSocket { Socket = socket };
+            return new PullSocket<T> { Socket = socket };
         }
 
-        public static IAsyncContext CreateAsyncContext(string url, bool isListener)
+        public static IReceiveAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url, bool isListener)
         {
-            var pullSocket = PullSocket.Create(url, isListener) as PullSocket;
+            var pullSocket = PullSocket<T>.Create(url, isListener);
             if (pullSocket == null)
             {
                 return null;
             }
-            return ResvAsyncCtx.Create(pullSocket);
+            return ResvAsyncCtx<T>.Create(pullSocket, factory);
         }
 
         public nng_socket Socket { get; private set; }

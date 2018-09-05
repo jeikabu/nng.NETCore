@@ -12,36 +12,18 @@ namespace nng.Tests
 
     public class ReqRepTests
     {
-        RepAsyncCtx CreateRepAsyncCtx(string url)
-        {
-            var repAioCtx = RepSocket.CreateAsyncContext(url) as RepAsyncCtx;
-            Assert.NotNull(repAioCtx);
-            return repAioCtx;
-        }
-
-        ReqAsyncCtx CreateReqAsyncCtx(string url)
-        {
-            var reqAioCtx = ReqSocket.CreateAsyncContext(url) as ReqAsyncCtx;
-            Assert.NotNull(reqAioCtx);
-            return reqAioCtx;
-        }
-
-        nng_msg CreateMsg()
-        {
-            Assert.Equal(0, nng_msg_alloc(out var msg, 32));
-            return msg;
-        }
+        TestFactory factory = new TestFactory();
 
         [Fact]
         public async Task ReqRepBasic()
         {
             var url = UrlRandomIpc();
-            var repAioCtx = CreateRepAsyncCtx(url);
-            var reqAioCtx = CreateReqAsyncCtx(url);
+            var repAioCtx = factory.CreateReplier(url);
+            var reqAioCtx = factory.CreateRequester(url);
 
-            var asyncReq = reqAioCtx.Send(CreateMsg());
+            var asyncReq = reqAioCtx.Send(factory.CreateMsg());
             var receivedReq = await repAioCtx.Receive();
-            var asyncRep = repAioCtx.Reply(CreateMsg());
+            var asyncRep = repAioCtx.Reply(factory.CreateMsg());
             var response = await asyncReq;
         }
 
@@ -51,17 +33,17 @@ namespace nng.Tests
             var url = UrlRandomIpc();
             var barrier = new AsyncBarrier(2);
             var rep = Task.Run(async () => {
-                var repAioCtx = CreateRepAsyncCtx(url);
+                var repAioCtx = factory.CreateReplier(url);
 
                 await barrier.SignalAndWait();
 
                 var msg = await repAioCtx.Receive();
-                Assert.True(await repAioCtx.Reply(CreateMsg()));
+                Assert.True(await repAioCtx.Reply(factory.CreateMsg()));
             });
             var req = Task.Run(async () => {
                 await barrier.SignalAndWait();
-                var reqAioCtx = CreateReqAsyncCtx(url);
-                var response = await reqAioCtx.Send(CreateMsg());
+                var reqAioCtx = factory.CreateRequester(url);
+                var response = await reqAioCtx.Send(factory.CreateMsg());
                 //Assert.NotNull(response);
             });
             await AssertWait(1000, rep, req);

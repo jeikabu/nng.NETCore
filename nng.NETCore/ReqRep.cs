@@ -10,7 +10,7 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class ReqSocket : IReqSocket
+    public class ReqSocket<T> : IReqSocket
     {
         public static ISocket Create(string url)
         {
@@ -23,23 +23,23 @@ namespace nng
             {
                 return null;
             }
-            return new ReqSocket { Socket = socket };
+            return new ReqSocket<T> { Socket = socket };
         }
 
-        public static IAsyncContext CreateAsyncContext(string url)
+        public static IReqRepAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
         {
-            var reqSocket = Create(url) as ReqSocket;
-            if (reqSocket == null)
+            var socket = Create(url);
+            if (socket == null)
             {
                 return null;
             }
-            return ReqAsyncCtx.Create(reqSocket);
+            return ReqAsyncCtx<T>.Create(socket, factory);
         }
 
         public nng_socket Socket { get; private set; }
     }
 
-    public class RepSocket : IRepSocket
+    public class RepSocket<T> : IRepSocket
     {
         public static ISocket Create(string url)
         {
@@ -52,17 +52,17 @@ namespace nng
             {
                 return null;
             }
-            return new RepSocket { Socket = socket };
+            return new RepSocket<T> { Socket = socket };
         }
 
-        public static IAsyncContext CreateAsyncContext(string url)
+        public static IRepReqAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
         {
-            var repSocket = RepSocket.Create(url) as RepSocket;
-            if (repSocket == null)
+            var socket = RepSocket<T>.Create(url);
+            if (socket == null)
             {
                 return null;
             }
-            return RepAsyncCtx.Create(repSocket);
+            return RepAsyncCtx<T>.Create(socket, factory);
         }
 
         public nng_socket Socket { get; private set; }

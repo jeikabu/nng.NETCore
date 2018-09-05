@@ -1,8 +1,16 @@
+using nng.Native;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace nng
 {
+    public interface IMessageFactory<T>
+    {
+        T CreateMessage(nng_msg message);
+        nng_msg Borrow(T message);
+        void Destroy(ref T message);
+    }
+
     public static class Extensions
     {
         public static void SetNngError<T>(this TaskCompletionSource<T> self, int error)

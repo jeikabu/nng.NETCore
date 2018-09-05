@@ -1,3 +1,4 @@
+using nng.Native;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -5,6 +6,13 @@ using Xunit;
 
 namespace nng.Tests
 {
+    using static nng.Native.Msg.UnsafeNativeMethods;
+
+    class NngMessage
+    {
+        public nng_msg message;
+    }
+
     static class Util
     {
         public static string UrlRandomIpc() => "ipc://" + Guid.NewGuid().ToString();

@@ -10,14 +10,14 @@ namespace nng
     using static nng.Native.Ctx.UnsafeNativeMethods;
     using static nng.Native.Msg.UnsafeNativeMethods;
 
-    struct AsyncSendMsg
+    struct AsyncSendMsg<T>
     {
-        public AsyncSendMsg(nng_msg message)
+        public AsyncSendMsg(T message)
         {
             this.message = message;
             tcs = new TaskCompletionSource<bool>();
         }
-        internal nng_msg message;
+        internal T message;
         internal TaskCompletionSource<bool> tcs;
     }
 
@@ -30,11 +30,11 @@ namespace nng
         public CancellationTokenTaskSource<T> Source;
     }
 
-    public class SendAsyncCtx : AsyncBase
+    public class SendAsyncCtx<T> : AsyncBase, ISendAsyncContext<T>
     {
-        public static IAsyncContext Create(ISocket socket)
+        public static SendAsyncCtx<T> Create(ISocket socket, IMessageFactory<T> msgFactory)
         {
-            var ctx = new SendAsyncCtx();
+            var ctx = new SendAsyncCtx<T> { factory = msgFactory };
             var res = ctx.Init(socket, ctx.callback);
             if (res != 0)
             {
@@ -43,10 +43,10 @@ namespace nng
             return ctx;
         }
 
-        public Task<bool> Send(nng_msg message)
+        public Task<bool> Send(T message)
         {
             System.Diagnostics.Debug.Assert(state == State.Init);
-            asyncMessage = new AsyncSendMsg(message);
+            asyncMessage = new AsyncSendMsg<T>(message);
             callback(IntPtr.Zero);
             return asyncMessage.tcs.Task;
         }
@@ -58,7 +58,7 @@ namespace nng
             {
                 case State.Init:
                     state = State.Send;
-                    nng_aio_set_msg(aioHandle, asyncMessage.message);
+                    nng_aio_set_msg(aioHandle, factory.Borrow(asyncMessage.message));
                     res = nng_send_aio(Socket.Socket, aioHandle);
                     if (res != 0)
                     {
@@ -73,7 +73,7 @@ namespace nng
                     if (res != 0)
                     {
                         state = State.Init;
-                        nng_msg_free(asyncMessage.message);
+                        factory.Destroy(ref asyncMessage.message);
                         asyncMessage.tcs.SetNngError(res);
                         return;
                     }
@@ -86,15 +86,16 @@ namespace nng
             }
         }
 
-        AsyncSendMsg asyncMessage;
+        IMessageFactory<T> factory;
+        AsyncSendMsg<T> asyncMessage;
     }
 
 
-    public class ResvAsyncCtx : AsyncBase
+    public class ResvAsyncCtx<T> : AsyncBase, IReceiveAsyncContext<T>
     {
-        public static IAsyncContext Create(ISocket socket)
+        public static IReceiveAsyncContext<T> Create(ISocket socket, IMessageFactory<T> msgFactory)
         {
-            var res = new ResvAsyncCtx();
+            var res = new ResvAsyncCtx<T>{ factory = msgFactory };
             if (res.Init(socket, res.callback) != 0)
             {
                 return null;
@@ -102,14 +103,14 @@ namespace nng
             return res;
         }
 
-        public async Task<nng_msg> Receive(CancellationToken token)
+        public async Task<T> Receive(CancellationToken token)
         {
             System.Diagnostics.Debug.Assert(state == State.Init);
             if (state != State.Init)
             {
                 await asyncMessage.Source.Task;
             }
-            asyncMessage = new AsyncResvMsg<nng_msg>(token);
+            asyncMessage = new AsyncResvMsg<T>(token);
             // Trigger the async read
             callback(IntPtr.Zero);
             return await asyncMessage.Source.Task;
@@ -140,7 +141,8 @@ namespace nng
                     }
                     state = State.Init;
                     nng_msg msg = nng_aio_get_msg(aioHandle);
-                    asyncMessage.Source.Tcs.SetResult(msg);
+                    var message = factory.CreateMessage(msg);
+                    asyncMessage.Source.Tcs.SetResult(message);
                     break;
 
                 default:
@@ -149,6 +151,7 @@ namespace nng
             }
         }
 
-        AsyncResvMsg<nng_msg> asyncMessage;
+        IMessageFactory<T> factory;
+        AsyncResvMsg<T> asyncMessage;
     }
 }

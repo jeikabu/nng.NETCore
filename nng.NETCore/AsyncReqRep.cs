@@ -10,22 +10,22 @@ namespace nng
     using static nng.Native.Ctx.UnsafeNativeMethods;
     using static nng.Native.Msg.UnsafeNativeMethods;
 
-    struct AsyncReqRespMsg
+    struct AsyncReqRespMsg<T>
     {
-        public AsyncReqRespMsg(nng_msg message)
+        public AsyncReqRespMsg(T message)
         {
             this.message = message;
-            tcs = new TaskCompletionSource<nng_msg>();
+            tcs = new TaskCompletionSource<T>();
         }
-        internal nng_msg message;
-        internal TaskCompletionSource<nng_msg> tcs;
+        internal T message;
+        internal TaskCompletionSource<T> tcs;
     }
 
-    public class ReqAsyncCtx : AsyncCtx
+    public class ReqAsyncCtx<T> : AsyncCtx, IReqRepAsyncContext<T>
     {
-        public static IAsyncContext Create(IReqSocket socket)
+        public static IReqRepAsyncContext<T> Create(ISocket socket, IMessageFactory<T> msgFactory)
         {
-            var res = new ReqAsyncCtx();
+            var res = new ReqAsyncCtx<T>{ factory = msgFactory };
             if (res.Init(socket, res.callback) != 0)
             {
                 return null;
@@ -33,14 +33,14 @@ namespace nng
             return res;
         }
 
-        public async Task<nng_msg> Send(nng_msg message)
+        public async Task<T> Send(T message)
         {
             System.Diagnostics.Debug.Assert(state == State.Init);
             if (state != State.Init)
             {
                 await asyncMessage.tcs.Task;
             }
-            asyncMessage = new AsyncReqRespMsg(message);
+            asyncMessage = new AsyncReqRespMsg<T>(message);
             // Trigger the async send
             callback(IntPtr.Zero);
             return await asyncMessage.tcs.Task;
@@ -53,7 +53,7 @@ namespace nng
             {
                 case State.Init:
                     state = State.Send;
-                    nng_aio_set_msg(aioHandle, asyncMessage.message);
+                    nng_aio_set_msg(aioHandle, factory.Borrow(asyncMessage.message));
                     nng_ctx_send(ctxHandle, aioHandle);
                     break;
                 
@@ -61,7 +61,7 @@ namespace nng
                     ret = nng_aio_result(aioHandle);
                     if (ret != 0)
                     {
-                        nng_msg_free(asyncMessage.message);
+                        factory.Destroy(ref asyncMessage.message);
                         asyncMessage.tcs.SetException(new NngException(ret));
                         state = State.Init;
                         return;
@@ -78,27 +78,29 @@ namespace nng
                         return;
                     }
                     nng_msg msg = nng_aio_get_msg(aioHandle);
-                    asyncMessage.tcs.SetResult(msg);
+                    var message = factory.CreateMessage(msg);
+                    asyncMessage.tcs.SetResult(message);
                     state = State.Init;
                     break;
             }
         }
 
-        AsyncReqRespMsg asyncMessage;
+        IMessageFactory<T> factory;
+        AsyncReqRespMsg<T> asyncMessage;
     }
 
-    class Request
+    class Request<T>
     {
-        public nng_msg response;
-        public TaskCompletionSource<nng_msg> requestTcs = new TaskCompletionSource<nng_msg>();
+        public T response;
+        public TaskCompletionSource<T> requestTcs = new TaskCompletionSource<T>();
         public TaskCompletionSource<bool> replyTcs = new TaskCompletionSource<bool>();
     }
 
-    public class RepAsyncCtx : AsyncCtx
+    public class RepAsyncCtx<T> : AsyncCtx, IRepReqAsyncContext<T>
     {
-        public static IAsyncContext Create(IRepSocket socket)
+        public static IRepReqAsyncContext<T> Create(ISocket socket, IMessageFactory<T> msgFactory)
         {
-            var res = new RepAsyncCtx();
+            var res = new RepAsyncCtx<T>{ factory = msgFactory };
             if (res.Init(socket, res.callback) != 0)
             {
                 return null;
@@ -108,18 +110,18 @@ namespace nng
             return res;
         }
 
-        public Task<nng_msg> Receive()
+        public Task<T> Receive()
         {
-            return request.requestTcs.Task;
+            return asyncMessage.requestTcs.Task;
         }
 
-        public Task<bool> Reply(nng_msg message)
+        public Task<bool> Reply(T message)
         {
             System.Diagnostics.Debug.Assert(state == State.Wait);
-            request.response = message;
+            asyncMessage.response = message;
             // Move from wait to send state
             callback(IntPtr.Zero);
-            return request.replyTcs.Task;
+            return asyncMessage.replyTcs.Task;
         }
 
         void callback(IntPtr arg)
@@ -136,16 +138,17 @@ namespace nng
                         res = nng_aio_result(aioHandle);
                         if (res != 0)
                         {
-                            request.requestTcs.SetException(new NngException(res));
+                            asyncMessage.requestTcs.SetException(new NngException(res));
                             state = State.Recv;
                             return;
                         }
                         state = State.Wait;
                         nng_msg msg = nng_aio_get_msg(aioHandle);
-                        request.requestTcs.SetResult(msg);
+                        var message = factory.CreateMessage(msg);
+                        asyncMessage.requestTcs.SetResult(message);
                         break;
                     case State.Wait:
-                        nng_aio_set_msg(aioHandle, request.response);
+                        nng_aio_set_msg(aioHandle, factory.Borrow(asyncMessage.response));
                         state = State.Send;
                         nng_ctx_send(ctxHandle, aioHandle);
                         break;
@@ -153,10 +156,10 @@ namespace nng
                         res = nng_aio_result(aioHandle);
                         if (res != 0)
                         {
-                            nng_msg_free(request.response);
-                            request.replyTcs.SetException(new NngException(res));
+                            factory.Destroy(ref asyncMessage.response);
+                            asyncMessage.replyTcs.SetException(new NngException(res));
                         }
-                        var currentReq = request;
+                        var currentReq = asyncMessage;
                         init();
                         currentReq.replyTcs.SetResult(true);
                         break;
@@ -166,12 +169,13 @@ namespace nng
 
         void init()
         {
-            request = new Request();
+            asyncMessage = new Request<T>();
             state = State.Recv;
             nng_ctx_recv(ctxHandle, aioHandle);
         }
 
-        Request request;
+        IMessageFactory<T> factory;
+        Request<T> asyncMessage;
         object sync = new object();
     }
 
