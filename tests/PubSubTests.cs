@@ -10,6 +10,7 @@ namespace nng.Tests
 {
     using static nng.Native.Aio.UnsafeNativeMethods;
     using static nng.Native.Msg.UnsafeNativeMethods;
+    using static nng.Native.Socket.UnsafeNativeMethods;
     using static nng.Tests.Util;
 
     class TestFactory : IMessageFactory<NngMessage>
@@ -79,26 +80,24 @@ namespace nng.Tests
         }
     }
 
-    class TestMessageFactory : IMessageFactory<NngMessage>
-    {
-        public NngMessage CreateMessage(nng_msg msg)
-        {
-            return new NngMessage { message = msg };
-        }
-        public nng_msg Borrow(NngMessage msg)
-        {
-            return msg.message;
-        }
-        public void Destroy(ref NngMessage msg)
-        {
-            nng_msg_free(msg.message);
-            msg = null;
-        }
-    }
-
     public class PubSubTests
     {
         TestFactory factory = new TestFactory();
+
+        [Fact]
+        public async Task BasicPubSub()
+        {
+            var url = UrlRandomIpc();
+            var pub = PubSocket<NngMessage>.Create(url);
+            await Task.Delay(100);
+            var sub = SubSocket<NngMessage>.Create(url);
+            var topic = System.Text.Encoding.ASCII.GetBytes("topic");
+            Assert.True(sub.Subscribe(topic));
+            var ret = nng_msg_alloc(out var msg, 0);
+            ret = nng_msg_append(msg, topic);
+            ret = nng_sendmsg(pub.NngSocket, msg, 0);
+            ret = nng_recvmsg(sub.NngSocket, out var recv, 0);
+        }
 
         [Fact]
         public async Task PubSub()
@@ -108,7 +107,9 @@ namespace nng.Tests
             var pub = Task.Run(async () => {
                 var pubSocket = factory.CreatePublisher(url);
                 await barrier.SignalAndWait();
+                await Task.Delay(200);
                 Assert.True(await pubSocket.Send(factory.CreateMsg()));
+                //await Task.Delay(100);
             });
             var sub = Task.Run(async () => {
                 await barrier.SignalAndWait();
@@ -116,7 +117,7 @@ namespace nng.Tests
                 await subSocket.Receive(CancellationToken.None);
             });
             
-            await AssertWait(1000, pub, sub);
+            await AssertWait(100000, pub, sub);
         }
 
         [Fact]
@@ -193,32 +194,17 @@ namespace nng.Tests
             return tasks;
         }
 
-        async Task PubSubBroker(int numPushers, int numPullers, int numMessagesPerPusher, int msTimeout = 1000)
+        async Task PubSubBroker(int numPublishers, int numSubscribers, int numMessagesPerSender, int msTimeout = 1000)
         {
-            // In pull/push (pipeline) pattern, each message is sent to one receiver in round-robin fashion
-            int numTotalMessages = numPushers * numMessagesPerPusher;
+            // In pub/sub pattern, each message is sent to every receiver
+            int numTotalMessages = numPublishers * numSubscribers * numMessagesPerSender;
             var counter = new AsyncCountdownEvent(numTotalMessages);
             var cts = new CancellationTokenSource();
 
-            var tasks = await Broker(numPushers, numPullers, numMessagesPerPusher, counter, cts.Token);
+            var tasks = await Broker(numPublishers, numSubscribers, numMessagesPerSender, counter, cts.Token);
 
             await AssertWait(msTimeout, counter.WaitAsync());
-            cts.Cancel();
-            try 
-            {
-                await Task.WhenAll(tasks.ToArray());
-            }
-            catch (Exception ex)
-            {
-                if (ex is TaskCanceledException)
-                {
-                    // ok
-                }
-                else
-                {
-                    throw ex;
-                }
-            }
+            await CancelAndWait(cts, tasks.ToArray());
         }
     }
 }

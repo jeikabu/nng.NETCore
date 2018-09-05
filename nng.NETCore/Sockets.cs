@@ -7,7 +7,7 @@ namespace nng
 {
     public interface ISocket
     {
-        nng_socket Socket { get; }
+        nng_socket NngSocket { get; }
     }
 
     public interface IReqSocket : ISocket

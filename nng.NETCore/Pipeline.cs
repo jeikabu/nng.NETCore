@@ -24,20 +24,28 @@ namespace nng
             {
                 return null;
             }
-            return new PushSocket<T> { Socket = socket };
+            return new PushSocket<T> { NngSocket = socket };
         }
 
         public static ISendAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url, bool isListener)
         {
-            var pushSocket = PushSocket<T>.Create(url, isListener);
-            if (pushSocket == null)
+            var socket = PushSocket<T>.Create(url, isListener);
+            if (socket == null)
             {
                 return null;
             }
-            return SendAsyncCtx<T>.Create(pushSocket, factory);
+            var ctx = new SendAsyncCtx<T>();
+            var res = ctx.Init(factory, socket, ctx.callback);
+            if (res != 0)
+            {
+                return null;
+            }
+            return ctx;
         }
 
-        public nng_socket Socket { get; private set; }
+        public nng_socket NngSocket { get; private set; }
+
+        private PushSocket(){}
     }
 
     public class PullSocket<T> : IPullSocket
@@ -54,19 +62,26 @@ namespace nng
             {
                 return null;
             }
-            return new PullSocket<T> { Socket = socket };
+            return new PullSocket<T> { NngSocket = socket };
         }
 
         public static IReceiveAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url, bool isListener)
         {
-            var pullSocket = PullSocket<T>.Create(url, isListener);
-            if (pullSocket == null)
+            var socket = PullSocket<T>.Create(url, isListener);
+            if (socket == null)
             {
                 return null;
             }
-            return ResvAsyncCtx<T>.Create(pullSocket, factory);
+            var ctx = new ResvAsyncCtx<T>();
+            if (ctx.Init(factory, socket, ctx.callback) != 0)
+            {
+                return null;
+            }
+            return ctx;
         }
 
-        public nng_socket Socket { get; private set; }
+        public nng_socket NngSocket { get; private set; }
+
+        private PullSocket(){}
     }
 }

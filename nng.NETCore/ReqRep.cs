@@ -23,7 +23,7 @@ namespace nng
             {
                 return null;
             }
-            return new ReqSocket<T> { Socket = socket };
+            return new ReqSocket<T> { NngSocket = socket };
         }
 
         public static IReqRepAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
@@ -33,10 +33,15 @@ namespace nng
             {
                 return null;
             }
-            return ReqAsyncCtx<T>.Create(socket, factory);
+            var ctx = new ReqAsyncCtx<T>();
+            if (ctx.Init(factory, socket, ctx.callback) != 0)
+            {
+                return null;
+            }
+            return ctx;
         }
 
-        public nng_socket Socket { get; private set; }
+        public nng_socket NngSocket { get; private set; }
     }
 
     public class RepSocket<T> : IRepSocket
@@ -52,7 +57,7 @@ namespace nng
             {
                 return null;
             }
-            return new RepSocket<T> { Socket = socket };
+            return new RepSocket<T> { NngSocket = socket };
         }
 
         public static IRepReqAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
@@ -65,6 +70,6 @@ namespace nng
             return RepAsyncCtx<T>.Create(socket, factory);
         }
 
-        public nng_socket Socket { get; private set; }
+        public nng_socket NngSocket { get; private set; }
     }
 }

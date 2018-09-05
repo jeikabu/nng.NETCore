@@ -36,7 +36,12 @@ namespace nng.Native.Msg
         public static extern UIntPtr nng_msg_len(nng_msg message);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_msg_append(nng_msg message, IntPtr data, UIntPtr size);
+        static extern Int32 nng_msg_append(nng_msg message, byte[] data, UIntPtr size);
+
+        public static Int32 nng_msg_append(nng_msg message, byte[] data)
+        {
+            return nng_msg_append(message, data, (UIntPtr)data.Length);
+        }
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern Int32 nng_msg_insert(nng_msg message, IntPtr data, UIntPtr size);

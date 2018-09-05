@@ -23,7 +23,7 @@ namespace nng
             {
                 return null;
             }
-            return new PubSocket<T> { Socket = socket };
+            return new PubSocket<T> { NngSocket = socket };
         }
 
         public static ISendAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
@@ -33,15 +33,23 @@ namespace nng
             {
                 return null;
             }
-            return SendAsyncCtx<T>.Create(socket, factory);
+            var ctx = new SendAsyncCtx<T>();
+            var res = ctx.Init(factory, socket, ctx.callback);
+            if (res != 0)
+            {
+                return null;
+            }
+            return ctx;
         }
 
-        public nng_socket Socket { get; private set; }
+        public nng_socket NngSocket { get; private set; }
+
+        private PubSocket(){}
     }
 
-    public class SubSocket<T> : ISubSocket
+    public class SubSocket<T> : ISubSocket, ISubscriber
     {
-        public static ISocket Create(string url)
+        public static SubSocket<T> Create(string url)
         {
             nng_socket socket;
             if (nng_sub0_open(out socket) != 0)
@@ -52,19 +60,46 @@ namespace nng
             {
                 return null;
             }
-            return new SubSocket<T> { Socket = socket };
+            return new SubSocket<T> { NngSocket = socket };
         }
 
-        public static IReceiveAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
+        public static SubAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
         {
             var socket = SubSocket<T>.Create(url);
             if (socket == null)
             {
                 return null;
             }
-            return ResvAsyncCtx<T>.Create(socket, factory);
+            var res = new SubAsyncContext<T>();
+            if (res.Init(factory, socket, res.callback) != 0)
+            {
+                return null;
+            }
+            return res;
         }
 
-        public nng_socket Socket { get; private set; }
+        public nng_socket NngSocket { get; private set; }
+
+        private SubSocket(){}
+    }
+
+    public class SubAsyncContext<T> : ResvAsyncCtx<T>, ISubscriber
+    {}
+
+    public interface ISubscriber : ISubSocket
+    {
+    }
+
+    public static class Subscriber
+    {
+        public static bool Subscribe(this ISubscriber self, byte[] topic)
+        {
+            return nng_setopt(self.NngSocket, Globals.NNG_OPT_SUB_SUBSCRIBE, topic) == 0;
+        }
+
+        public static bool Unsubscribe(this ISubscriber self, byte[] topic)
+        {
+            return nng_setopt(self.NngSocket, Globals.NNG_OPT_SUB_UNSUBSCRIBE, topic) == 0;
+        }
     }
 }

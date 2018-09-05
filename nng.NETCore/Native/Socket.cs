@@ -44,7 +44,12 @@ namespace nng.Native.Socket
         // public static extern Int32 nng_closeall();
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_setopt(nng_socket socket, string name, IntPtr data, UIntPtr size);
+        static extern Int32 nng_setopt(nng_socket socket, string name, byte[] data, UIntPtr size);
+
+        public static Int32 nng_setopt(nng_socket socket, string name, byte[] data)
+        {
+            return nng_setopt(socket, name, data, (UIntPtr)data.Length);
+        }
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern Int32 nng_setopt_bool(nng_socket socket, bool value);

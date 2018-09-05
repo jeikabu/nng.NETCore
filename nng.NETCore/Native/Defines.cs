@@ -8,6 +8,7 @@ namespace nng.Native
     {
         public const string NngDll = "nng";
 
+    #region Get/SetOpt
         public const string NNG_OPT_SOCKNAME = "socket-name";
         public const string NNG_OPT_RAW = "raw";
         public const string NNG_OPT_PROTO = "protocol";
@@ -37,6 +38,16 @@ namespace nng.Native
         public const string NNG_OPT_TLS_VERIFIED = "tls-verified";
         public const string NNG_OPT_TCP_NODELAY = "tcp-nodelay";
         public const string NNG_OPT_TCP_KEEPALIVE = "tcp-keepalive";
+
+        public const string NNG_OPT_REQ_RESENDTIME = "req:resend-time";
+
+        public const string NNG_OPT_SUB_SUBSCRIBE = "sub:subscribe";
+        public const string NNG_OPT_SUB_UNSUBSCRIBE = "sub:unsubscribe";
+
+        public const string NNG_OPT_PAIR1_POLY = "pair1:polyamorous";
+
+        public const string NNG_OPT_SURVEYOR_SURVEYTIME = "surveyor:survey-time";
+    #endregion
     }
 
     enum nng_errno_enum {

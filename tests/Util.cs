@@ -22,5 +22,25 @@ namespace nng.Tests
             var timeout = Task.Delay(timeoutMs);
             Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
         }
+
+        public static async Task CancelAndWait(CancellationTokenSource cts, params Task[] tasks)
+        {
+            cts.Cancel();
+            try 
+            {
+                await Task.WhenAll(tasks);
+            }
+            catch (Exception ex)
+            {
+                if (ex is TaskCanceledException)
+                {
+                    // ok
+                }
+                else
+                {
+                    throw ex;
+                }
+            }
+        }
     }
 }

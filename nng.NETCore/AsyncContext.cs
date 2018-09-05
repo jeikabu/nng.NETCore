@@ -87,9 +87,17 @@ namespace nng
         Task<bool> Reply(T message);
     }
 
-    public abstract class AsyncBase : IAsyncContext
+    public interface ISubAsyncContext<T> : IReceiveAsyncContext<T>, ISubSocket
     {
+
+    }
+
+    public abstract class AsyncBase<T> : IAsyncContext
+    {
+        public IMessageFactory<T> Factory { get; private set; }
         public ISocket Socket { get; private set; }
+        public nng_socket NngSocket => Socket.NngSocket;
+
         protected nng_aio aioHandle = nng_aio.Null;
         protected enum State
         {
@@ -101,8 +109,9 @@ namespace nng
         protected State state = State.Init;
         AioCallback callbackDelegate;
 
-        protected int Init(ISocket socket, AioCallback callback)
+        internal int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)
         {
+            Factory = factory;
             Socket = socket;
             // Make a copy to ensure an auto-matically created delegate doesn't get GC'd while native code 
             // is still using it:
@@ -132,18 +141,18 @@ namespace nng
         #endregion
     }
 
-    public abstract class AsyncCtx : AsyncBase
+    public abstract class AsyncCtx<T> : AsyncBase<T>
     {
         protected nng_ctx ctxHandle;
 
-        protected new int Init(ISocket socket, AioCallback callback)
+        internal new int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)
         {
-            var res = base.Init(socket, callback);
+            var res = base.Init(factory, socket, callback);
             if (res != 0)
             {
                 return res;
             }
-            return nng_ctx_open(ref ctxHandle, socket.Socket);
+            return nng_ctx_open(ref ctxHandle, socket.NngSocket);
         }
 
         protected override void Dispose(bool disposing)
