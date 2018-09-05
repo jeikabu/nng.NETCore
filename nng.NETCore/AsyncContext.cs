@@ -61,7 +61,7 @@ namespace nng
         int error = 0;
     }
 
-    interface IAsyncContext
+    public interface IAsyncContext
     {
         ISocket Socket { get; }
     }

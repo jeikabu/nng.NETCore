@@ -12,7 +12,7 @@ namespace nng
 
     public class PubSocket : IPubSocket
     {
-        public static object Create(string url)
+        public static ISocket Create(string url)
         {
             nng_socket socket;
             if (nng_pub0_open(out socket) != 0)
@@ -26,7 +26,7 @@ namespace nng
             return new PubSocket { Socket = socket };
         }
 
-        public static object CreateAsyncContext(string url)
+        public static IAsyncContext CreateAsyncContext(string url)
         {
             var socket = Create(url) as PubSocket;
             if (socket == null)
@@ -41,7 +41,7 @@ namespace nng
 
     public class SubSocket : ISubSocket
     {
-        public static object Create(string url)
+        public static ISocket Create(string url)
         {
             nng_socket socket;
             if (nng_sub0_open(out socket) != 0)
@@ -55,9 +55,9 @@ namespace nng
             return new SubSocket { Socket = socket };
         }
 
-        public static object CreateAsyncContext(string url)
+        public static IAsyncContext CreateAsyncContext(string url)
         {
-            var socket = SubSocket.Create(url) as SubSocket;
+            var socket = SubSocket.Create(url);
             if (socket == null)
             {
                 return null;

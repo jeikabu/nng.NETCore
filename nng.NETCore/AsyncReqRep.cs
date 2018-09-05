@@ -23,7 +23,7 @@ namespace nng
 
     public class ReqAsyncCtx : AsyncCtx
     {
-        public static object Create(IReqSocket socket)
+        public static IAsyncContext Create(IReqSocket socket)
         {
             var res = new ReqAsyncCtx();
             if (res.Init(socket, res.callback) != 0)
@@ -96,7 +96,7 @@ namespace nng
 
     public class RepAsyncCtx : AsyncCtx
     {
-        public static object Create(IRepSocket socket)
+        public static IAsyncContext Create(IRepSocket socket)
         {
             var res = new RepAsyncCtx();
             if (res.Init(socket, res.callback) != 0)

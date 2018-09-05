@@ -32,7 +32,7 @@ namespace nng
 
     public class SendAsyncCtx : AsyncBase
     {
-        public static object Create(ISocket socket)
+        public static IAsyncContext Create(ISocket socket)
         {
             var ctx = new SendAsyncCtx();
             var res = ctx.Init(socket, ctx.callback);
@@ -92,7 +92,7 @@ namespace nng
 
     public class ResvAsyncCtx : AsyncBase
     {
-        public static object Create(ISocket socket)
+        public static IAsyncContext Create(ISocket socket)
         {
             var res = new ResvAsyncCtx();
             if (res.Init(socket, res.callback) != 0)

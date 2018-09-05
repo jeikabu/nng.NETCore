@@ -12,7 +12,7 @@ namespace nng
 
     public class PushSocket : IPushSocket
     {
-        public static object Create(string url, bool isListener)
+        public static ISocket Create(string url, bool isListener)
         {
             nng_socket socket;
             if (nng_push0_open(out socket) != 0)
@@ -27,7 +27,7 @@ namespace nng
             return new PushSocket { Socket = socket };
         }
 
-        public static object CreateAsyncContext(string url, bool isListener)
+        public static IAsyncContext CreateAsyncContext(string url, bool isListener)
         {
             var pushSocket = PushSocket.Create(url, isListener) as PushSocket;
             if (pushSocket == null)
@@ -42,7 +42,7 @@ namespace nng
 
     public class PullSocket : IPullSocket
     {
-        public static object Create(string url, bool isListener)
+        public static ISocket Create(string url, bool isListener)
         {
             nng_socket socket;
             if (nng_pull0_open(out socket) != 0)
@@ -57,7 +57,7 @@ namespace nng
             return new PullSocket { Socket = socket };
         }
 
-        public static object CreateAsyncContext(string url, bool isListener)
+        public static IAsyncContext CreateAsyncContext(string url, bool isListener)
         {
             var pullSocket = PullSocket.Create(url, isListener) as PullSocket;
             if (pullSocket == null)

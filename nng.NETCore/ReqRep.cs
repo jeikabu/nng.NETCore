@@ -12,7 +12,7 @@ namespace nng
 
     public class ReqSocket : IReqSocket
     {
-        public static object Create(string url)
+        public static ISocket Create(string url)
         {
             nng_socket socket;
             if (nng_req0_open(out socket) != 0)
@@ -26,7 +26,7 @@ namespace nng
             return new ReqSocket { Socket = socket };
         }
 
-        public static object CreateAsyncContext(string url)
+        public static IAsyncContext CreateAsyncContext(string url)
         {
             var reqSocket = Create(url) as ReqSocket;
             if (reqSocket == null)
@@ -41,7 +41,7 @@ namespace nng
 
     public class RepSocket : IRepSocket
     {
-        public static object Create(string url)
+        public static ISocket Create(string url)
         {
             nng_socket socket;
             if (nng_rep0_open(out socket) != 0)
@@ -55,7 +55,7 @@ namespace nng
             return new RepSocket { Socket = socket };
         }
 
-        public static object CreateAsyncContext(string url)
+        public static IAsyncContext CreateAsyncContext(string url)
         {
             var repSocket = RepSocket.Create(url) as RepSocket;
             if (repSocket == null)
