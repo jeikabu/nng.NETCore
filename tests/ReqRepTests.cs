@@ -93,7 +93,7 @@ namespace nng.Tests
             var pull = Task.Run(async () => {
                 await barrier.SignalAndWait();
                 var pullSocket = PullSocket.CreateAsyncContext(url, false) as PullAsyncCtx;
-                await pullSocket.Receive();
+                await pullSocket.Receive(CancellationToken.None);
             });
             
             await AssertWait(10000, pull, push);
@@ -112,7 +112,7 @@ namespace nng.Tests
                 var pushSocket = PushSocket.CreateAsyncContext(outUrl, true) as PushAsyncCtx;
                 await brokerReady.SignalAndWait(); // Broker is ready
                 await clientsReady.SignalAndWait(); // Wait for clients
-                var msg = await pullSocket.Receive();
+                var msg = await pullSocket.Receive(CancellationToken.None);
                 await pushSocket.Send(msg);
             });
             var sender = Task.Run(async () => {
@@ -125,7 +125,7 @@ namespace nng.Tests
                 await brokerReady.SignalAndWait(); // Wait for broker
                 var pullSocket = PullSocket.CreateAsyncContext(outUrl, false) as PullAsyncCtx;
                 await clientsReady.SignalAndWait(); // This client ready, wait for rest
-                var msg = await pullSocket.Receive();
+                var msg = await pullSocket.Receive(CancellationToken.None);
                 Console.WriteLine(msg);
             });
             await AssertWait(4000, broker, sender, receiver);

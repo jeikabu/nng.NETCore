@@ -11,7 +11,7 @@ namespace nng
             {
                 return;
             }
-            self.SetException(new NngException(error));
+            self.TrySetException(new NngException(error));
         }
     }
 }

@@ -21,16 +21,16 @@ namespace nng
         internal TaskCompletionSource<bool> tcs;
     }
 
-    struct AsyncPullMsg
+    struct AsyncPullMsg<T>
     {
-        public AsyncPullMsg(int _)
+        public AsyncPullMsg(CancellationToken token)
         {
-            tcs = new TaskCompletionSource<nng_msg>();
+            Source = new CancellationTokenTaskSource<T>(token);
         }
-        internal TaskCompletionSource<nng_msg> tcs;
+        public CancellationTokenTaskSource<T> Source;
     }
 
-    public class PushAsyncCtx : AsyncNoCtx
+    public class PushAsyncCtx : AsyncBase
     {
         public static object Create(IPushSocket socket)
         {
@@ -64,6 +64,7 @@ namespace nng
                     {
                         state = State.Init;
                         asyncMessage.tcs.SetNngError(res);
+                        return;
                     }
                     break;
 
@@ -71,8 +72,10 @@ namespace nng
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
                     {
+                        state = State.Init;
                         nng_msg_free(asyncMessage.message);
                         asyncMessage.tcs.SetNngError(res);
+                        return;
                     }
                     state = State.Init;
                     asyncMessage.tcs.SetResult(true);
@@ -87,7 +90,7 @@ namespace nng
     }
 
 
-    public class PullAsyncCtx : AsyncNoCtx
+    public class PullAsyncCtx : AsyncBase
     {
         public static object Create(IPullSocket socket)
         {
@@ -99,17 +102,17 @@ namespace nng
             return res;
         }
 
-        public async Task<nng_msg> Receive()
+        public async Task<nng_msg> Receive(CancellationToken token)
         {
             System.Diagnostics.Debug.Assert(state == State.Init);
             if (state != State.Init)
             {
-                await asyncMessage.tcs.Task;
+                await asyncMessage.Source.Task;
             }
-            asyncMessage = new AsyncPullMsg(0);
+            asyncMessage = new AsyncPullMsg<nng_msg>(token);
             // Trigger the async read
             callback(IntPtr.Zero);
-            return await asyncMessage.tcs.Task;
+            return await asyncMessage.Source.Task;
         }
 
         void callback(IntPtr arg)
@@ -123,7 +126,7 @@ namespace nng
                     if (ret != 0)
                     {
                         state = State.Init;
-                        asyncMessage.tcs.SetNngError(ret);
+                        asyncMessage.Source.Tcs.SetNngError(ret);
                     }
                     break;
                 
@@ -131,21 +134,21 @@ namespace nng
                     ret = nng_aio_result(aioHandle);
                     if (ret != 0)
                     {
-                        asyncMessage.tcs.SetNngError(ret);
                         state = State.Init;
+                        asyncMessage.Source.Tcs.SetNngError(ret);
                         return;
                     }
-                    nng_msg msg = nng_aio_get_msg(aioHandle);
-                    asyncMessage.tcs.SetResult(msg);
                     state = State.Init;
+                    nng_msg msg = nng_aio_get_msg(aioHandle);
+                    asyncMessage.Source.Tcs.SetResult(msg);
                     break;
 
                 default:
-                    asyncMessage.tcs.SetException(new Exception(state.ToString()));
+                    asyncMessage.Source.Tcs.SetException(new Exception(state.ToString()));
                     break;
             }
         }
 
-        AsyncPullMsg asyncMessage;
+        AsyncPullMsg<nng_msg> asyncMessage;
     }
 }
