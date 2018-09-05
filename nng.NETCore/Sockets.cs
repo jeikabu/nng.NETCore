@@ -25,4 +25,12 @@ namespace nng
     public interface IPullSocket : ISocket
     {
     }
+
+    public interface IPubSocket : ISocket
+    {
+    }
+
+    public interface ISubSocket : ISocket
+    {
+    }
 }

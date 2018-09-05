@@ -10,9 +10,9 @@ namespace nng
     using static nng.Native.Ctx.UnsafeNativeMethods;
     using static nng.Native.Msg.UnsafeNativeMethods;
 
-    struct AsyncPushMsg
+    struct AsyncSendMsg
     {
-        public AsyncPushMsg(nng_msg message)
+        public AsyncSendMsg(nng_msg message)
         {
             this.message = message;
             tcs = new TaskCompletionSource<bool>();
@@ -21,20 +21,20 @@ namespace nng
         internal TaskCompletionSource<bool> tcs;
     }
 
-    struct AsyncPullMsg<T>
+    struct AsyncResvMsg<T>
     {
-        public AsyncPullMsg(CancellationToken token)
+        public AsyncResvMsg(CancellationToken token)
         {
             Source = new CancellationTokenTaskSource<T>(token);
         }
         public CancellationTokenTaskSource<T> Source;
     }
 
-    public class PushAsyncCtx : AsyncBase
+    public class SendAsyncCtx : AsyncBase
     {
-        public static object Create(IPushSocket socket)
+        public static object Create(ISocket socket)
         {
-            var ctx = new PushAsyncCtx();
+            var ctx = new SendAsyncCtx();
             var res = ctx.Init(socket, ctx.callback);
             if (res != 0)
             {
@@ -46,7 +46,7 @@ namespace nng
         public Task<bool> Send(nng_msg message)
         {
             System.Diagnostics.Debug.Assert(state == State.Init);
-            asyncMessage = new AsyncPushMsg(message);
+            asyncMessage = new AsyncSendMsg(message);
             callback(IntPtr.Zero);
             return asyncMessage.tcs.Task;
         }
@@ -86,15 +86,15 @@ namespace nng
             }
         }
 
-        AsyncPushMsg asyncMessage;
+        AsyncSendMsg asyncMessage;
     }
 
 
-    public class PullAsyncCtx : AsyncBase
+    public class ResvAsyncCtx : AsyncBase
     {
-        public static object Create(IPullSocket socket)
+        public static object Create(ISocket socket)
         {
-            var res = new PullAsyncCtx();
+            var res = new ResvAsyncCtx();
             if (res.Init(socket, res.callback) != 0)
             {
                 return null;
@@ -109,7 +109,7 @@ namespace nng
             {
                 await asyncMessage.Source.Task;
             }
-            asyncMessage = new AsyncPullMsg<nng_msg>(token);
+            asyncMessage = new AsyncResvMsg<nng_msg>(token);
             // Trigger the async read
             callback(IntPtr.Zero);
             return await asyncMessage.Source.Task;
@@ -149,6 +149,6 @@ namespace nng
             }
         }
 
-        AsyncPullMsg<nng_msg> asyncMessage;
+        AsyncResvMsg<nng_msg> asyncMessage;
     }
 }

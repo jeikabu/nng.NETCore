@@ -34,7 +34,7 @@ namespace nng
             {
                 return null;
             }
-            return PushAsyncCtx.Create(pushSocket);
+            return SendAsyncCtx.Create(pushSocket);
         }
 
         public nng_socket Socket { get; private set; }
@@ -64,7 +64,7 @@ namespace nng
             {
                 return null;
             }
-            return PullAsyncCtx.Create(pullSocket);
+            return ResvAsyncCtx.Create(pullSocket);
         }
 
         public nng_socket Socket { get; private set; }

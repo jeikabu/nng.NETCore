@@ -26,13 +26,13 @@ namespace nng.Tests
             var url = UrlRandomIpc();
             var barrier = new AsyncBarrier(2);
             var push = Task.Run(async () => {
-                var pushSocket = PushSocket.CreateAsyncContext(url, true) as PushAsyncCtx;
+                var pushSocket = PushSocket.CreateAsyncContext(url, true) as SendAsyncCtx;
                 await barrier.SignalAndWait();
                 Assert.True(await pushSocket.Send(CreateMsg()));
             });
             var pull = Task.Run(async () => {
                 await barrier.SignalAndWait();
-                var pullSocket = PullSocket.CreateAsyncContext(url, false) as PullAsyncCtx;
+                var pullSocket = PullSocket.CreateAsyncContext(url, false) as ResvAsyncCtx;
                 await pullSocket.Receive(CancellationToken.None);
             });
             
@@ -42,27 +42,30 @@ namespace nng.Tests
         [Fact]
         public async Task Broker()
         {
-            await PushPullBroker(1, 1, 1);
+            //await PushPullBroker(1, 1, 1);
+            await PushPullBroker(2, 3, 2);
         }
 
-        async Task PushPullBroker(int numPushers, int numPullers, int numMessagesPerPusher)
+        async Task PushPullBroker(int numPushers, int numPullers, int numMessagesPerPusher, int msTimeout = 1000)
         {
             var inUrl = UrlRandomIpc();
             var outUrl = UrlRandomIpc();
             const int numBrokers = 1;
-            int numTotalMessages = numPushers * numPullers * numMessagesPerPusher;
+            // In pull/push (pipeline) pattern, each message is sent to one receiver in round-robin fashion
+            int numTotalMessages = numPushers * numMessagesPerPusher;
 
             var cts = new CancellationTokenSource();
             var brokersReady = new AsyncBarrier(numBrokers + 1);
             var clientsReady = new AsyncBarrier(numPushers + numPullers + numBrokers);
             var counter = new AsyncCountdownEvent(numTotalMessages);
 
+            var numForwarded = 0;
             var tasks = new List<Task>();
             for (var i = 0; i < numBrokers; ++i)
             {
                 var task = Task.Run(async () => {
-                    using (var pullSocket = PullSocket.CreateAsyncContext(inUrl, true) as PullAsyncCtx)
-                    using (var pushSocket = PushSocket.CreateAsyncContext(outUrl, true) as PushAsyncCtx)
+                    using (var pullSocket = PullSocket.CreateAsyncContext(inUrl, true) as ResvAsyncCtx)
+                    using (var pushSocket = PushSocket.CreateAsyncContext(outUrl, true) as SendAsyncCtx)
                     {
                         await brokersReady.SignalAndWait(); // Broker is ready
                         await clientsReady.SignalAndWait(); // Wait for clients
@@ -70,6 +73,7 @@ namespace nng.Tests
                         {
                             var msg = await pullSocket.Receive(cts.Token);
                             await pushSocket.Send(msg);
+                            ++numForwarded;
                         }
                     }
                 });
@@ -81,12 +85,14 @@ namespace nng.Tests
             for (var i = 0; i < numPushers; ++i)
             {
                 var task = Task.Run(async () => {
-                    using (var pushSocket = PushSocket.CreateAsyncContext(inUrl, false) as PushAsyncCtx)
+                    using (var pushSocket = PushSocket.CreateAsyncContext(inUrl, false) as SendAsyncCtx)
                     {
                         await clientsReady.SignalAndWait(); // This client ready, wait for rest
                         for (var m = 0; m < numMessagesPerPusher; ++m)
                         {
                             await pushSocket.Send(CreateMsg());
+
+                            await Task.Delay(15);
                         }
                     }
                     
@@ -97,7 +103,7 @@ namespace nng.Tests
             for (var i = 0; i < numPullers; ++i)
             {
                 var task = Task.Run(async () => {
-                    using (var pullSocket = PullSocket.CreateAsyncContext(outUrl, false) as PullAsyncCtx)
+                    using (var pullSocket = PullSocket.CreateAsyncContext(outUrl, false) as ResvAsyncCtx)
                     {
                         await clientsReady.SignalAndWait(); // This client ready, wait for rest
                         while (!cts.IsCancellationRequested)
@@ -110,7 +116,7 @@ namespace nng.Tests
                 tasks.Add(task);
             }
             
-            await AssertWait(4000, counter.WaitAsync());
+            await AssertWait(msTimeout, counter.WaitAsync());
             cts.Cancel();
             try 
             {
