@@ -38,96 +38,44 @@ namespace nng.Tests
         [Fact]
         public async Task Broker()
         {
-            //await PushPullBroker(1, 1, 1);
-            await PushPullBroker(2, 3, 2);
+            await PushPullBrokerAsync(2, 3, 2);
         }
 
-        async Task PushPullBroker(int numPushers, int numPullers, int numMessagesPerPusher, int msTimeout = 1000)
+        async Task PushPullBrokerAsync(int numPushers, int numPullers, int numMessagesPerPusher, int msTimeout = 1000)
         {
-            var inUrl = UrlRandomIpc();
-            var outUrl = UrlRandomIpc();
-            const int numBrokers = 1;
             // In pull/push (pipeline) pattern, each message is sent to one receiver in round-robin fashion
             int numTotalMessages = numPushers * numMessagesPerPusher;
-
-            var cts = new CancellationTokenSource();
-            var brokersReady = new AsyncBarrier(numBrokers + 1);
-            var clientsReady = new AsyncBarrier(numPushers + numPullers + numBrokers);
             var counter = new AsyncCountdownEvent(numTotalMessages);
+            var cts = new CancellationTokenSource();
+            
+            var broker = new Broker(new PushPullBrokerImpl(factory));
+            var tasks = await broker.RunAsync(numPushers, numPullers, numMessagesPerPusher, counter, cts.Token);
 
-            var numForwarded = 0;
-            var tasks = new List<Task>();
-            for (var i = 0; i < numBrokers; ++i)
-            {
-                var task = Task.Run(async () => {
-                    using (var pullSocket = factory.CreatePuller(inUrl, true))
-                    using (var pushSocket = factory.CreatePusher(outUrl, true))
-                    {
-                        await brokersReady.SignalAndWait(); // Broker is ready
-                        await clientsReady.SignalAndWait(); // Wait for clients
-                        while (!cts.IsCancellationRequested)
-                        {
-                            var msg = await pullSocket.Receive(cts.Token);
-                            await pushSocket.Send(msg);
-                            ++numForwarded;
-                        }
-                    }
-                });
-                tasks.Add(task);
-            }
-            
-            await brokersReady.SignalAndWait();
-
-            for (var i = 0; i < numPushers; ++i)
-            {
-                var task = Task.Run(async () => {
-                    using (var pushSocket = factory.CreatePusher(inUrl, false))
-                    {
-                        await clientsReady.SignalAndWait(); // This client ready, wait for rest
-                        for (var m = 0; m < numMessagesPerPusher; ++m)
-                        {
-                            await pushSocket.Send(factory.CreateMsg());
-                            await Task.Delay(15);
-                        }
-                    }
-                    
-                });
-                tasks.Add(task);
-            }
-            
-            for (var i = 0; i < numPullers; ++i)
-            {
-                var task = Task.Run(async () => {
-                    using (var pullSocket = factory.CreatePuller(outUrl, false))
-                    {
-                        await clientsReady.SignalAndWait(); // This client ready, wait for rest
-                        while (!cts.IsCancellationRequested)
-                        {
-                            var _ = await pullSocket.Receive(cts.Token);
-                            counter.Signal();
-                        }
-                    }
-                });
-                tasks.Add(task);
-            }
-            
             await AssertWait(msTimeout, counter.WaitAsync());
-            cts.Cancel();
-            try 
-            {
-                await Task.WhenAll(tasks.ToArray());
-            }
-            catch (Exception ex)
-            {
-                if (ex is TaskCanceledException)
-                {
-                    // ok
-                }
-                else
-                {
-                    throw ex;
-                }
-            }
+            await CancelAndWait(cts, tasks.ToArray());
+        }
+    }
+
+    class PushPullBrokerImpl : IBrokerImpl<NngMessage>
+    {
+        public TestFactory Factory { get; private set; }
+
+        public PushPullBrokerImpl(TestFactory factory)
+        {
+            Factory = factory;
+        }
+
+        public IReceiveAsyncContext<NngMessage> CreateInSocket(string url)
+        {
+            return Factory.CreatePuller(url, true);
+        }
+        public ISendAsyncContext<NngMessage> CreateOutSocket(string url)
+        {
+            return Factory.CreatePusher(url, true);
+        }
+        public IReceiveAsyncContext<NngMessage> CreateClient(string url)
+        {
+            return Factory.CreatePuller(url, false);
         }
     }
 }
