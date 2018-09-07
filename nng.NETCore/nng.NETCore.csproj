@@ -9,10 +9,12 @@
     <Owners>Subor</Owners>
     <PackageProjectUrl>https://github.com/subor/nng.NETCore</PackageProjectUrl>
     <Summary>.NET Core bindings to nng</Summary>
-    <PackageTags>subor nng</PackageTags>
+    <PackageTags>subor nng csnng</PackageTags>
     <Description>.NET Core bindings to nng (https://github.com/nanomsg/nng)</Description>
     <RootNamespace>nng</RootNamespace>
     <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+    <Version>0.0.1</Version>
+    <RepositoryUrl>https://github.com/subor/nng.NETCore</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
