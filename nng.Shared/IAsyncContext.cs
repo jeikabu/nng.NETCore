@@ -40,21 +40,7 @@ namespace nng
     //     }
     // }
 
-    public class NngException : Exception
-    {
-        public NngException(string message)
-        : base(message)
-        {
-        }
-        public NngException(int errorCode)
-        {
-            error = errorCode;
-        }
 
-        public override string Message => string.Empty;//nng_strerror(error);
-
-        int error = 0;
-    }
 
     public interface IAsyncContext : IDisposable
     {

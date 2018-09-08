@@ -38,7 +38,7 @@ namespace nng
 
         internal void callback(IntPtr arg)
         {
-            var ret = 0;
+            var res = 0;
             switch (state)
             {
                 case State.Init:
@@ -48,11 +48,11 @@ namespace nng
                     break;
                 
                 case State.Send:
-                    ret = nng_aio_result(aioHandle);
-                    if (ret != 0)
+                    res = nng_aio_result(aioHandle);
+                    if (res != 0)
                     {
                         Factory.Destroy(ref asyncMessage.message);
-                        asyncMessage.tcs.SetException(new NngException(ret));
+                        asyncMessage.tcs.TrySetNngError(res);
                         state = State.Init;
                         return;
                     }
@@ -60,10 +60,10 @@ namespace nng
                     nng_ctx_recv(ctxHandle, aioHandle);
                     break;
                 case State.Recv:
-                    ret = nng_aio_result(aioHandle);
-                    if (ret != 0)
+                    res = nng_aio_result(aioHandle);
+                    if (res != 0)
                     {
-                        asyncMessage.tcs.SetException(new NngException(ret));
+                        asyncMessage.tcs.TrySetNngError(res);
                         state = State.Init;
                         return;
                     }
@@ -127,7 +127,7 @@ namespace nng
                         res = nng_aio_result(aioHandle);
                         if (res != 0)
                         {
-                            asyncMessage.requestTcs.SetException(new NngException(res));
+                            asyncMessage.requestTcs.TrySetNngError(res);
                             state = State.Recv;
                             return;
                         }
@@ -146,7 +146,7 @@ namespace nng
                         if (res != 0)
                         {
                             Factory.Destroy(ref asyncMessage.response);
-                            asyncMessage.replyTcs.SetException(new NngException(res));
+                            asyncMessage.replyTcs.TrySetNngError(res);
                         }
                         var currentReq = asyncMessage;
                         init();

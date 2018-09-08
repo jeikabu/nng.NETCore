@@ -12,7 +12,7 @@ namespace nng
 
     public class PubSocket<T> : IPubSocket
     {
-        public static ISocket Create(string url)
+        public static PubSocket<T> Create(string url)
         {
             nng_socket socket;
             if (nng_pub0_open(out socket) != 0)

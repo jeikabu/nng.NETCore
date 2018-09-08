@@ -10,17 +10,19 @@ namespace nng.Tests
 {
     using static nng.Tests.Util;
 
+    [Collection("nng")]
     public class PushPullTests
     {
         IFactory<NngMessage> factory;
 
+        public PushPullTests(NngCollectionFixture collectionFixture)
+        {
+            this.factory = collectionFixture.Factory;
+        }
+
         [Fact]
         public async Task PushPull()
         {
-            var alc = new ALC();
-            var assem = alc.LoadFromAssemblyName(new System.Reflection.AssemblyName("nng.NETCore"));
-            var type = assem.GetType("nng.Tests.TestFactory");
-            factory = (IFactory<NngMessage>)Activator.CreateInstance(type);
             var url = UrlRandomIpc();
             var barrier = new AsyncBarrier(2);
             var push = Task.Run(async () => {

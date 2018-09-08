@@ -1,5 +1,15 @@
+using nng.Native;
+
 namespace nng
 {
+    public interface IMessageFactory<T>
+    {
+        T CreateMessage();
+        T CreateMessage(nng_msg message);
+        nng_msg Borrow(T message);
+        void Destroy(ref T message);
+    }
+
     public interface IFactory<T> : IMessageFactory<T>
     {
         ISendAsyncContext<T> CreatePublisher(string url);

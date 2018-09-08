@@ -12,7 +12,7 @@ namespace nng
 
     public class ReqSocket<T> : IReqSocket
     {
-        public static ISocket Create(string url)
+        public static ReqSocket<T> Create(string url)
         {
             nng_socket socket;
             if (nng_req0_open(out socket) != 0)
@@ -42,11 +42,13 @@ namespace nng
         }
 
         public nng_socket NngSocket { get; private set; }
+
+        private ReqSocket(){}
     }
 
     public class RepSocket<T> : IRepSocket
     {
-        public static ISocket Create(string url)
+        public static RepSocket<T> Create(string url)
         {
             nng_socket socket;
             if (nng_rep0_open(out socket) != 0)
@@ -71,5 +73,7 @@ namespace nng
         }
 
         public nng_socket NngSocket { get; private set; }
+
+        private RepSocket(){}
     }
 }

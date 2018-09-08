@@ -8,9 +8,15 @@ namespace nng.Tests
 {
     using static nng.Tests.Util;
 
+    [Collection("nng")]
     public class ReqRepTests
     {
         IFactory<NngMessage> factory;
+
+        public ReqRepTests(NngCollectionFixture collectionFixture)
+        {
+            this.factory = collectionFixture.Factory;
+        }
 
         [Fact]
         public async Task ReqRepBasic()

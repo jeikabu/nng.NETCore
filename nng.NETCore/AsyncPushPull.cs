@@ -52,7 +52,7 @@ namespace nng
                     if (res != 0)
                     {
                         state = State.Init;
-                        asyncMessage.tcs.SetNngError(res);
+                        asyncMessage.tcs.TrySetNngError(res);
                         return;
                     }
                     break;
@@ -63,7 +63,7 @@ namespace nng
                     {
                         state = State.Init;
                         Factory.Destroy(ref asyncMessage.message);
-                        asyncMessage.tcs.SetNngError(res);
+                        asyncMessage.tcs.TrySetNngError(res);
                         return;
                     }
                     state = State.Init;
@@ -96,25 +96,25 @@ namespace nng
 
         internal void callback(IntPtr arg)
         {
-            var ret = 0;
+            var res = 0;
             switch (state)
             {
                 case State.Init:
                     state = State.Recv;
-                    ret = nng_recv_aio(Socket.NngSocket, aioHandle);
-                    if (ret != 0)
+                    res = nng_recv_aio(Socket.NngSocket, aioHandle);
+                    if (res != 0)
                     {
                         state = State.Init;
-                        asyncMessage.Source.Tcs.SetNngError(ret);
+                        asyncMessage.Source.Tcs.TrySetNngError(res);
                     }
                     break;
                 
                 case State.Recv:
-                    ret = nng_aio_result(aioHandle);
-                    if (ret != 0)
+                    res = nng_aio_result(aioHandle);
+                    if (res != 0)
                     {
                         state = State.Init;
-                        asyncMessage.Source.Tcs.SetNngError(ret);
+                        asyncMessage.Source.Tcs.TrySetNngError(res);
                         return;
                     }
                     state = State.Init;
