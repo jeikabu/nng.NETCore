@@ -9,7 +9,7 @@ namespace nng.Tests
 
     interface IBrokerImpl<T>
     {
-        TestFactory Factory { get; }
+        IFactory<T> Factory { get; }
         IReceiveAsyncContext<T> CreateInSocket(string url);
         ISendAsyncContext<T> CreateOutSocket(string url);
         IReceiveAsyncContext<T> CreateClient(string url);
@@ -62,7 +62,7 @@ namespace nng.Tests
                         await clientsReady.SignalAndWait(); // This client ready, wait for rest
                         for (var m = 0; m < numMessagesPerPusher; ++m)
                         {
-                            await pushSocket.Send(implementation.Factory.CreateMsg());
+                            await pushSocket.Send(implementation.Factory.CreateMessage());
                             await Task.Delay(15);
                         }
                     }

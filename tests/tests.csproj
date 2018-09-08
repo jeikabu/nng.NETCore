@@ -20,7 +20,7 @@
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\nng.NETCore\nng.NETCore.csproj" />
+    <ProjectReference Include="..\nng.Shared\nng.Shared.csproj" />
   </ItemGroup>
-
+  
 </Project>

@@ -6,13 +6,11 @@ using Xunit;
 
 namespace nng.Tests
 {
-    using static nng.Native.Aio.UnsafeNativeMethods;
-    using static nng.Native.Msg.UnsafeNativeMethods;
     using static nng.Tests.Util;
 
     public class ReqRepTests
     {
-        TestFactory factory = new TestFactory();
+        IFactory<NngMessage> factory;
 
         [Fact]
         public async Task ReqRepBasic()
@@ -21,9 +19,9 @@ namespace nng.Tests
             var repAioCtx = factory.CreateReplier(url);
             var reqAioCtx = factory.CreateRequester(url);
 
-            var asyncReq = reqAioCtx.Send(factory.CreateMsg());
+            var asyncReq = reqAioCtx.Send(factory.CreateMessage());
             var receivedReq = await repAioCtx.Receive();
-            var asyncRep = repAioCtx.Reply(factory.CreateMsg());
+            var asyncRep = repAioCtx.Reply(factory.CreateMessage());
             var response = await asyncReq;
         }
 
@@ -38,12 +36,12 @@ namespace nng.Tests
                 await barrier.SignalAndWait();
 
                 var msg = await repAioCtx.Receive();
-                Assert.True(await repAioCtx.Reply(factory.CreateMsg()));
+                Assert.True(await repAioCtx.Reply(factory.CreateMessage()));
             });
             var req = Task.Run(async () => {
                 await barrier.SignalAndWait();
                 var reqAioCtx = factory.CreateRequester(url);
-                var response = await reqAioCtx.Send(factory.CreateMsg());
+                var response = await reqAioCtx.Send(factory.CreateMessage());
                 //Assert.NotNull(response);
             });
             await AssertWait(1000, rep, req);

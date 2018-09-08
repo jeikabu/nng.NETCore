@@ -1,16 +1,17 @@
 using nng.Native;
-using Xunit;
 
 namespace nng.Tests
 {
     using static nng.Native.Msg.UnsafeNativeMethods;
 
-    class TestFactory : IMessageFactory<NngMessage>
+
+    public class TestFactory : IMessageFactory<NngMessage>, IFactory<NngMessage>
     {
-        public NngMessage CreateMsg()
+        public NngMessage CreateMessage()
         {
-            Assert.Equal(0, nng_msg_alloc(out var msg, 32));
-            return CreateMessage(msg);
+            var msg = new NngMessage();
+            nng_msg_alloc(out msg.message, 0);
+            return msg;
         }
 
         public NngMessage CreateMessage(nng_msg msg)
@@ -32,42 +33,36 @@ namespace nng.Tests
         public ISendAsyncContext<NngMessage> CreatePublisher(string url)
         {
             var context = PubSocket<NngMessage>.CreateAsyncContext(this, url);
-            Assert.NotNull(context);
             return context;
         }
 
         public IReceiveAsyncContext<NngMessage> CreateSubscriber(string url)
         {
             var context = SubSocket<NngMessage>.CreateAsyncContext(this, url);
-            Assert.NotNull(context);
             return context;
         }
 
         public ISendAsyncContext<NngMessage> CreatePusher(string url, bool isListener)
         {
             var context = PushSocket<NngMessage>.CreateAsyncContext(this, url, isListener);
-            Assert.NotNull(context);
             return context;
         }
 
         public IReceiveAsyncContext<NngMessage> CreatePuller(string url, bool isListener)
         {
             var context = PullSocket<NngMessage>.CreateAsyncContext(this, url, isListener);
-            Assert.NotNull(context);
             return context;
         }
 
         public IReqRepAsyncContext<NngMessage> CreateRequester(string url)
         {
             var context = ReqSocket<NngMessage>.CreateAsyncContext(this, url);
-            Assert.NotNull(context);
             return context;
         }
 
         public IRepReqAsyncContext<NngMessage> CreateReplier(string url)
         {
             var context = RepSocket<NngMessage>.CreateAsyncContext(this, url);
-            Assert.NotNull(context);
             return context;
         }
     }

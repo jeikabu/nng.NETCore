@@ -94,12 +94,12 @@ namespace nng
     {
         public static bool Subscribe(this ISubscriber self, byte[] topic)
         {
-            return nng_setopt(self.NngSocket, Globals.NNG_OPT_SUB_SUBSCRIBE, topic) == 0;
+            return nng_setopt(self.NngSocket, Defines.NNG_OPT_SUB_SUBSCRIBE, topic) == 0;
         }
 
         public static bool Unsubscribe(this ISubscriber self, byte[] topic)
         {
-            return nng_setopt(self.NngSocket, Globals.NNG_OPT_SUB_UNSUBSCRIBE, topic) == 0;
+            return nng_setopt(self.NngSocket, Defines.NNG_OPT_SUB_UNSUBSCRIBE, topic) == 0;
         }
     }
 }

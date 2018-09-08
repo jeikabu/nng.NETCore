@@ -8,23 +8,25 @@ using Xunit;
 
 namespace nng.Tests
 {
-    using static nng.Native.Aio.UnsafeNativeMethods;
-    using static nng.Native.Msg.UnsafeNativeMethods;
     using static nng.Tests.Util;
 
     public class PushPullTests
     {
-        TestFactory factory = new TestFactory();
+        IFactory<NngMessage> factory;
 
         [Fact]
         public async Task PushPull()
         {
+            var alc = new ALC();
+            var assem = alc.LoadFromAssemblyName(new System.Reflection.AssemblyName("nng.NETCore"));
+            var type = assem.GetType("nng.Tests.TestFactory");
+            factory = (IFactory<NngMessage>)Activator.CreateInstance(type);
             var url = UrlRandomIpc();
             var barrier = new AsyncBarrier(2);
             var push = Task.Run(async () => {
                 var pushSocket = factory.CreatePusher(url, true);
                 await barrier.SignalAndWait();
-                Assert.True(await pushSocket.Send(factory.CreateMsg()));
+                Assert.True(await pushSocket.Send(factory.CreateMessage()));
             });
             var pull = Task.Run(async () => {
                 await barrier.SignalAndWait();
@@ -58,9 +60,9 @@ namespace nng.Tests
 
     class PushPullBrokerImpl : IBrokerImpl<NngMessage>
     {
-        public TestFactory Factory { get; private set; }
+        public IFactory<NngMessage> Factory { get; private set; }
 
-        public PushPullBrokerImpl(TestFactory factory)
+        public PushPullBrokerImpl(IFactory<NngMessage> factory)
         {
             Factory = factory;
         }
