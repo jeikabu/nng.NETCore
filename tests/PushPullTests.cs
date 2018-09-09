@@ -13,7 +13,7 @@ namespace nng.Tests
     [Collection("nng")]
     public class PushPullTests
     {
-        IFactory<NngMessage> factory;
+        IFactory<IMessage> factory;
 
         public PushPullTests(NngCollectionFixture collectionFixture)
         {
@@ -60,26 +60,31 @@ namespace nng.Tests
         }
     }
 
-    class PushPullBrokerImpl : IBrokerImpl<NngMessage>
+    class PushPullBrokerImpl : IBrokerImpl<IMessage>
     {
-        public IFactory<NngMessage> Factory { get; private set; }
+        public IFactory<IMessage> Factory { get; private set; }
 
-        public PushPullBrokerImpl(IFactory<NngMessage> factory)
+        public PushPullBrokerImpl(IFactory<IMessage> factory)
         {
             Factory = factory;
         }
 
-        public IReceiveAsyncContext<NngMessage> CreateInSocket(string url)
+        public IReceiveAsyncContext<IMessage> CreateInSocket(string url)
         {
             return Factory.CreatePuller(url, true);
         }
-        public ISendAsyncContext<NngMessage> CreateOutSocket(string url)
+        public ISendAsyncContext<IMessage> CreateOutSocket(string url)
         {
             return Factory.CreatePusher(url, true);
         }
-        public IReceiveAsyncContext<NngMessage> CreateClient(string url)
+        public IReceiveAsyncContext<IMessage> CreateClient(string url)
         {
             return Factory.CreatePuller(url, false);
+        }
+
+        public IMessage CreateMessage()
+        {
+            return Factory.CreateMessage();
         }
     }
 }

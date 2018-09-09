@@ -14,7 +14,7 @@ namespace nng
     {
         ISendAsyncContext<T> CreatePublisher(string url);
 
-        IReceiveAsyncContext<T> CreateSubscriber(string url);
+        ISubAsyncContext<T> CreateSubscriber(string url);
 
         ISendAsyncContext<T> CreatePusher(string url, bool isListener);
 

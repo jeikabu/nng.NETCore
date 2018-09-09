@@ -11,7 +11,7 @@ namespace nng.Tests
     [Collection("nng")]
     public class ReqRepTests
     {
-        IFactory<NngMessage> factory;
+        IFactory<IMessage> factory;
 
         public ReqRepTests(NngCollectionFixture collectionFixture)
         {

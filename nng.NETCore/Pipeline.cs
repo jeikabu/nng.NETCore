@@ -10,7 +10,7 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class PushSocket<T> : IPushSocket
+    public class PushSocket<T> : Socket, IPushSocket
     {
         public static ISocket Create(string url, bool isListener)
         {
@@ -34,7 +34,7 @@ namespace nng
             {
                 return null;
             }
-            var ctx = new SendAsyncCtx<T>();
+            var ctx = new SendAsyncContext<T>();
             var res = ctx.Init(factory, socket, ctx.callback);
             if (res != 0)
             {
@@ -43,12 +43,10 @@ namespace nng
             return ctx;
         }
 
-        public nng_socket NngSocket { get; private set; }
-
         private PushSocket(){}
     }
 
-    public class PullSocket<T> : IPullSocket
+    public class PullSocket<T> : Socket, IPullSocket
     {
         public static ISocket Create(string url, bool isListener)
         {
@@ -72,15 +70,13 @@ namespace nng
             {
                 return null;
             }
-            var ctx = new ResvAsyncCtx<T>();
+            var ctx = new ResvAsyncContext<T>();
             if (ctx.Init(factory, socket, ctx.callback) != 0)
             {
                 return null;
             }
             return ctx;
         }
-
-        public nng_socket NngSocket { get; private set; }
 
         private PullSocket(){}
     }

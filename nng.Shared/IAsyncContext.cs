@@ -68,8 +68,14 @@ namespace nng
         Task<bool> Reply(T message);
     }
 
-    public interface ISubAsyncContext<T> : IReceiveAsyncContext<T>, ISubSocket
+    public interface ICtx : IAsyncContext
     {
+        nng_ctx NngCtx { get; }
+        int GetCtxOpt(string name, out int data);
+        int SetCtxOpt(string name, byte[] data);
+    }
 
+    public interface ISubAsyncContext<T> : IReceiveAsyncContext<T>, ISubscribeSocket
+    {
     }
 }

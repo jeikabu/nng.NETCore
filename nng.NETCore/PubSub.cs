@@ -10,7 +10,7 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class PubSocket<T> : IPubSocket
+    public class PubSocket<T> : Socket, IPubSocket
     {
         public static PubSocket<T> Create(string url)
         {
@@ -33,7 +33,7 @@ namespace nng
             {
                 return null;
             }
-            var ctx = new SendAsyncCtx<T>();
+            var ctx = new SendAsyncContext<T>();
             var res = ctx.Init(factory, socket, ctx.callback);
             if (res != 0)
             {
@@ -42,12 +42,10 @@ namespace nng
             return ctx;
         }
 
-        public nng_socket NngSocket { get; private set; }
-
         private PubSocket(){}
     }
 
-    public class SubSocket<T> : ISubSocket, ISubscriber
+    public class SubSocket<T> : Socket, ISubscribeSocket
     {
         public static SubSocket<T> Create(string url)
         {
@@ -63,7 +61,7 @@ namespace nng
             return new SubSocket<T> { NngSocket = socket };
         }
 
-        public static SubAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
+        public static ISubAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
         {
             var socket = SubSocket<T>.Create(url);
             if (socket == null)
@@ -78,28 +76,10 @@ namespace nng
             return res;
         }
 
-        public nng_socket NngSocket { get; private set; }
-
         private SubSocket(){}
     }
 
-    public class SubAsyncContext<T> : ResvAsyncCtx<T>, ISubscriber
-    {}
-
-    public interface ISubscriber : ISubSocket
+    public class SubAsyncContext<T> : ResvAsyncContext<T>, ISubAsyncContext<T>
     {
-    }
-
-    public static class Subscriber
-    {
-        public static bool Subscribe(this ISubscriber self, byte[] topic)
-        {
-            return nng_setopt(self.NngSocket, Defines.NNG_OPT_SUB_SUBSCRIBE, topic) == 0;
-        }
-
-        public static bool Unsubscribe(this ISubscriber self, byte[] topic)
-        {
-            return nng_setopt(self.NngSocket, Defines.NNG_OPT_SUB_UNSUBSCRIBE, topic) == 0;
-        }
     }
 }

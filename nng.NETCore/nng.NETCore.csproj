@@ -25,6 +25,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NuGet.Build.Packaging" Version="0.2.0" />
+    <PackageReference Include="system.memory" Version="4.5.1" />
     <PackageReference Include="system.runtime.loader" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>

@@ -30,7 +30,7 @@ namespace nng
         public CancellationTokenTaskSource<T> Source;
     }
 
-    public class SendAsyncCtx<T> : AsyncBase<T>, ISendAsyncContext<T>
+    public class SendAsyncContext<T> : AsyncBase<T>, ISendAsyncContext<T>
     {
         public Task<bool> Send(T message)
         {
@@ -79,7 +79,7 @@ namespace nng
     }
 
 
-    public class ResvAsyncCtx<T> : AsyncBase<T>, IReceiveAsyncContext<T>
+    public class ResvAsyncContext<T> : AsyncBase<T>, IReceiveAsyncContext<T>
     {
         public async Task<T> Receive(CancellationToken token)
         {

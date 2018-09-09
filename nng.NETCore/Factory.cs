@@ -5,64 +5,62 @@ namespace nng.Tests
     using static nng.Native.Msg.UnsafeNativeMethods;
 
 
-    public class TestFactory : IMessageFactory<NngMessage>, IFactory<NngMessage>
+    public class TestFactory : IMessageFactory<IMessage>, IFactory<IMessage>
     {
-        public NngMessage CreateMessage()
+        public IMessage CreateMessage()
         {
-            var msg = new NngMessage();
-            nng_msg_alloc(out msg.message, 0);
-            return msg;
+            return new Message();
         }
 
-        public NngMessage CreateMessage(nng_msg msg)
+        public IMessage CreateMessage(nng_msg msg)
         {
-            return new NngMessage { message = msg };
+            return new Message(msg);
         }
 
-        public nng_msg Borrow(NngMessage msg)
+        public nng_msg Borrow(IMessage msg)
         {
-            return msg.message;
+            return msg.NngMsg;
         }
 
-        public void Destroy(ref NngMessage msg)
+        public void Destroy(ref IMessage msg)
         {
-            nng_msg_free(msg.message);
+            msg.Dispose();
             msg = null;
         }
 
-        public ISendAsyncContext<NngMessage> CreatePublisher(string url)
+        public ISendAsyncContext<IMessage> CreatePublisher(string url)
         {
-            var context = PubSocket<NngMessage>.CreateAsyncContext(this, url);
+            var context = PubSocket<IMessage>.CreateAsyncContext(this, url);
             return context;
         }
 
-        public IReceiveAsyncContext<NngMessage> CreateSubscriber(string url)
+        public ISubAsyncContext<IMessage> CreateSubscriber(string url)
         {
-            var context = SubSocket<NngMessage>.CreateAsyncContext(this, url);
+            var context = SubSocket<IMessage>.CreateAsyncContext(this, url);
             return context;
         }
 
-        public ISendAsyncContext<NngMessage> CreatePusher(string url, bool isListener)
+        public ISendAsyncContext<IMessage> CreatePusher(string url, bool isListener)
         {
-            var context = PushSocket<NngMessage>.CreateAsyncContext(this, url, isListener);
+            var context = PushSocket<IMessage>.CreateAsyncContext(this, url, isListener);
             return context;
         }
 
-        public IReceiveAsyncContext<NngMessage> CreatePuller(string url, bool isListener)
+        public IReceiveAsyncContext<IMessage> CreatePuller(string url, bool isListener)
         {
-            var context = PullSocket<NngMessage>.CreateAsyncContext(this, url, isListener);
+            var context = PullSocket<IMessage>.CreateAsyncContext(this, url, isListener);
             return context;
         }
 
-        public IReqRepAsyncContext<NngMessage> CreateRequester(string url)
+        public IReqRepAsyncContext<IMessage> CreateRequester(string url)
         {
-            var context = ReqSocket<NngMessage>.CreateAsyncContext(this, url);
+            var context = ReqSocket<IMessage>.CreateAsyncContext(this, url);
             return context;
         }
 
-        public IRepReqAsyncContext<NngMessage> CreateReplier(string url)
+        public IRepReqAsyncContext<IMessage> CreateReplier(string url)
         {
-            var context = RepSocket<NngMessage>.CreateAsyncContext(this, url);
+            var context = RepSocket<IMessage>.CreateAsyncContext(this, url);
             return context;
         }
     }

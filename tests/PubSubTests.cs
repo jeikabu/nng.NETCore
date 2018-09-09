@@ -15,7 +15,7 @@ namespace nng.Tests
     [Collection("nng")]
     public class PubSubTests
     {
-        IFactory<NngMessage> factory;
+        IFactory<IMessage> factory;
 
         public PubSubTests(NngCollectionFixture collectionFixture)
         {
@@ -38,24 +38,40 @@ namespace nng.Tests
         // }
 
         [Fact]
+        public async Task BasicPubSub()
+        {
+            var url = UrlRandomIpc();
+            var pub = factory.CreatePublisher(url);
+            await Task.Delay(100);
+            var sub = factory.CreateSubscriber(url);
+            var topic = TopicRandom();
+            Assert.True(sub.Subscribe(topic));
+            var msg = factory.CreateMessage();
+            msg.Append(topic);
+            var sendTask = pub.Send(msg);
+            var resvTask = sub.Receive(CancellationToken.None);
+            await AssertWait(1000, sendTask, resvTask);
+        }
+
+        [Fact]
         public async Task PubSub()
         {
             var url = UrlRandomIpc();
+            var topic = TopicRandom();
             var barrier = new AsyncBarrier(2);
-            var pub = Task.Run(async () => {
+            var pubTask = Task.Run(async () => {
                 var pubSocket = factory.CreatePublisher(url);
                 await barrier.SignalAndWait();
-                await Task.Delay(200);
-                Assert.True(await pubSocket.Send(factory.CreateMessage()));
-                //await Task.Delay(100);
+                Assert.True(await pubSocket.Send(factory.CreateTopicMessage(topic)));
             });
-            var sub = Task.Run(async () => {
+            var subTask = Task.Run(async () => {
                 await barrier.SignalAndWait();
-                var subSocket = factory.CreateSubscriber(url);
-                await subSocket.Receive(CancellationToken.None);
+                var sub = factory.CreateSubscriber(url);
+                sub.Subscribe(topic);
+                await sub.Receive(CancellationToken.None);
             });
             
-            await AssertWait(1000, pub, sub);
+            await AssertWait(1000, pubTask, subTask);
         }
 
         [Fact]
@@ -80,26 +96,36 @@ namespace nng.Tests
     }
 
     
-    class PubSubBrokerImpl : IBrokerImpl<NngMessage>
+    class PubSubBrokerImpl : IBrokerImpl<IMessage>
     {
-        public IFactory<NngMessage> Factory { get; private set; }
+        public IFactory<IMessage> Factory { get; private set; }
 
-        public PubSubBrokerImpl(IFactory<NngMessage> factory)
+        public PubSubBrokerImpl(IFactory<IMessage> factory)
         {
             Factory = factory;
+            topic = TopicRandom();
         }
 
-        public IReceiveAsyncContext<NngMessage> CreateInSocket(string url)
+        public IReceiveAsyncContext<IMessage> CreateInSocket(string url)
         {
             return Factory.CreatePuller(url, true);
         }
-        public ISendAsyncContext<NngMessage> CreateOutSocket(string url)
+        public ISendAsyncContext<IMessage> CreateOutSocket(string url)
         {
             return Factory.CreatePublisher(url);
         }
-        public IReceiveAsyncContext<NngMessage> CreateClient(string url)
+        public IReceiveAsyncContext<IMessage> CreateClient(string url)
         {
-            return Factory.CreateSubscriber(url);
+            var sub = Factory.CreateSubscriber(url);
+            sub.Subscribe(topic);
+            return sub;
         }
+
+        public IMessage CreateMessage()
+        {
+            return Factory.CreateTopicMessage(topic);
+        }
+
+        byte[] topic;
     }
 }

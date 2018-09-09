@@ -8,6 +8,7 @@ namespace nng
     public interface ISocket
     {
         nng_socket NngSocket { get; }
+        void SetOpt(string name, byte[] data);
     }
 
     public interface IReqSocket : ISocket
@@ -30,7 +31,7 @@ namespace nng
     {
     }
 
-    public interface ISubSocket : ISocket
+    public interface ISubscribeSocket : ISocket
     {
     }
 }

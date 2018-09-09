@@ -40,7 +40,12 @@ namespace nng.Native.Ctx
         public static extern int nng_ctx_getopt_size(nng_ctx ctx, string name, out UIntPtr data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_ctx_setopt(nng_ctx ctx, string name, IntPtr data, UIntPtr size);
+        public static extern int nng_ctx_setopt(nng_ctx ctx, string name, byte[] data, UIntPtr size);
+
+        public static int nng_ctx_setopt(nng_ctx ctx, string name, byte[] data)
+        {
+            return nng_ctx_setopt(ctx, name, data, (UIntPtr)data.Length);
+        }
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_ctx_setopt_bool(nng_ctx ctx, string name, bool value);

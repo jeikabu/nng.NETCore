@@ -9,6 +9,7 @@ namespace nng
     using static nng.Native.Basic.UnsafeNativeMethods;
     using static nng.Native.Ctx.UnsafeNativeMethods;
     using static nng.Native.Msg.UnsafeNativeMethods;
+    using static nng.Native.Socket.UnsafeNativeMethods;
 
     public abstract class AsyncBase<T> : IAsyncContext
     {
@@ -26,6 +27,15 @@ namespace nng
         }
         protected State state = State.Init;
         AioCallback callbackDelegate;
+
+        public void SetOpt(string name, byte[] data)
+        {
+            int res = nng_setopt(NngSocket, name, data);
+            if (res != 0)
+            {
+                throw new NngException(res);
+            }
+        }
 
         internal int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)
         {
@@ -59,9 +69,19 @@ namespace nng
         #endregion
     }
 
-    public abstract class AsyncCtx<T> : AsyncBase<T>
+    public abstract class AsyncCtx<T> : AsyncBase<T>, ICtx
     {
+        public nng_ctx NngCtx { get { return ctxHandle; } }
         protected nng_ctx ctxHandle;
+
+        public int GetCtxOpt(string name, out int data)
+        {
+            return nng_ctx_getopt_int(NngCtx, name, out data);
+        }
+        public int SetCtxOpt(string name, byte[] data)
+        {
+            return nng_ctx_setopt(NngCtx, name, data);
+        }
 
         internal new int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)
         {

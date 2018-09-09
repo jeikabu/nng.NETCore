@@ -17,10 +17,10 @@ namespace nng.Tests
             var alc = new ALC();
             var assem = alc.LoadFromAssemblyName(new System.Reflection.AssemblyName("nng.NETCore"));
             var type = assem.GetType("nng.Tests.TestFactory");
-            Factory = (IFactory<NngMessage>)Activator.CreateInstance(type);
+            Factory = (IFactory<IMessage>)Activator.CreateInstance(type);
         }
 
-        public IFactory<NngMessage> Factory { get; private set; }
+        public IFactory<IMessage> Factory { get; private set; }
     }
 
     [CollectionDefinition("nng")]

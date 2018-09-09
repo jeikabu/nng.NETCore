@@ -5,11 +5,6 @@ using System.Threading.Tasks;
 
 namespace nng
 {
-    public class NngMessage
-    {
-        public nng_msg message;
-    }
-
     public class NngException : Exception
     {
         public NngException(string message)
@@ -24,6 +19,12 @@ namespace nng
         public override string Message => string.Empty;//nng_strerror(error);
 
         int error = 0;
+    }
+
+    public interface IMessage : IDisposable
+    {
+        nng_msg NngMsg { get; }
+        void Append(byte[] data);
     }
 
     public static class Extensions
