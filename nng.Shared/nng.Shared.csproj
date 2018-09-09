@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>nng</RootNamespace>
+    <!--MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors-->
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="nuget.build.packaging" Version="0.2.2" />
+    <PackageReference Include="system.runtime.loader" Version="4.3.0" />
+  </ItemGroup>
 </Project>
