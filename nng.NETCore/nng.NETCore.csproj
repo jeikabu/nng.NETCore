@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -29,6 +29,10 @@
     <ProjectReference Include="..\nng.Shared\nng.Shared.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="runtimes\**" PackagePath="runtimes" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+    <Content Include="runtimes\**">
+      <PackagePath>runtimes\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <Visible>false</Visible>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>
