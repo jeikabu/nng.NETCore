@@ -5,6 +5,7 @@
     <RootNamespace>nng</RootNamespace>
     <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
     <LangVersion>7.3</LangVersion>
+    <DebugType>full</DebugType>
   </PropertyGroup>
 
   <PropertyGroup>
