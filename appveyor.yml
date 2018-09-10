@@ -1,3 +1,14 @@
 image: Visual Studio 2017
 before_build:
-  - cmd: dotnet restore
+  - dotnet restore
+  - choco install opencover.portable
+  - choco install codecov
+
+build:
+  verbosity: minimal
+
+test_script:
+  - OpenCover.Console.exe -register:user -target:dotnet.exe -targetargs:test -output:".\coverage.xml" -oldstyle
+
+after_test:
+  - codecov -f "coverage.xml" -t 2a07cd3d-8620-4495-8c14-3252b10b90bd
