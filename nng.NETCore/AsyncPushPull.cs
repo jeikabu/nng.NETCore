@@ -30,7 +30,7 @@ namespace nng
         public CancellationTokenTaskSource<T> Source;
     }
 
-    public class SendAsyncCtx<T> : AsyncBase<T>, ISendAsyncContext<T>
+    public class SendAsyncContext<T> : AsyncBase<T>, ISendAsyncContext<T>
     {
         public Task<bool> Send(T message)
         {
@@ -48,13 +48,7 @@ namespace nng
                 case State.Init:
                     state = State.Send;
                     nng_aio_set_msg(aioHandle, Factory.Borrow(asyncMessage.message));
-                    res = nng_send_aio(Socket.NngSocket, aioHandle);
-                    if (res != 0)
-                    {
-                        state = State.Init;
-                        asyncMessage.tcs.SetNngError(res);
-                        return;
-                    }
+                    nng_send_aio(Socket.NngSocket, aioHandle);
                     break;
 
                 case State.Send:
@@ -63,7 +57,7 @@ namespace nng
                     {
                         state = State.Init;
                         Factory.Destroy(ref asyncMessage.message);
-                        asyncMessage.tcs.SetNngError(res);
+                        asyncMessage.tcs.TrySetNngError(res);
                         return;
                     }
                     state = State.Init;
@@ -79,7 +73,7 @@ namespace nng
     }
 
 
-    public class ResvAsyncCtx<T> : AsyncBase<T>, IReceiveAsyncContext<T>
+    public class ResvAsyncContext<T> : AsyncBase<T>, IReceiveAsyncContext<T>
     {
         public async Task<T> Receive(CancellationToken token)
         {
@@ -96,25 +90,20 @@ namespace nng
 
         internal void callback(IntPtr arg)
         {
-            var ret = 0;
+            var res = 0;
             switch (state)
             {
                 case State.Init:
                     state = State.Recv;
-                    ret = nng_recv_aio(Socket.NngSocket, aioHandle);
-                    if (ret != 0)
-                    {
-                        state = State.Init;
-                        asyncMessage.Source.Tcs.SetNngError(ret);
-                    }
+                    nng_recv_aio(Socket.NngSocket, aioHandle);
                     break;
                 
                 case State.Recv:
-                    ret = nng_aio_result(aioHandle);
-                    if (ret != 0)
+                    res = nng_aio_result(aioHandle);
+                    if (res != 0)
                     {
                         state = State.Init;
-                        asyncMessage.Source.Tcs.SetNngError(ret);
+                        asyncMessage.Source.Tcs.TrySetNngError(res);
                         return;
                     }
                     state = State.Init;

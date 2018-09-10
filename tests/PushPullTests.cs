@@ -8,13 +8,17 @@ using Xunit;
 
 namespace nng.Tests
 {
-    using static nng.Native.Aio.UnsafeNativeMethods;
-    using static nng.Native.Msg.UnsafeNativeMethods;
     using static nng.Tests.Util;
 
+    [Collection("nng")]
     public class PushPullTests
     {
-        TestFactory factory = new TestFactory();
+        IFactory<IMessage> factory;
+
+        public PushPullTests(NngCollectionFixture collectionFixture)
+        {
+            this.factory = collectionFixture.Factory;
+        }
 
         [Fact]
         public async Task PushPull()
@@ -24,7 +28,7 @@ namespace nng.Tests
             var push = Task.Run(async () => {
                 var pushSocket = factory.CreatePusher(url, true);
                 await barrier.SignalAndWait();
-                Assert.True(await pushSocket.Send(factory.CreateMsg()));
+                Assert.True(await pushSocket.Send(factory.CreateMessage()));
             });
             var pull = Task.Run(async () => {
                 await barrier.SignalAndWait();
@@ -56,26 +60,31 @@ namespace nng.Tests
         }
     }
 
-    class PushPullBrokerImpl : IBrokerImpl<NngMessage>
+    class PushPullBrokerImpl : IBrokerImpl<IMessage>
     {
-        public TestFactory Factory { get; private set; }
+        public IFactory<IMessage> Factory { get; private set; }
 
-        public PushPullBrokerImpl(TestFactory factory)
+        public PushPullBrokerImpl(IFactory<IMessage> factory)
         {
             Factory = factory;
         }
 
-        public IReceiveAsyncContext<NngMessage> CreateInSocket(string url)
+        public IReceiveAsyncContext<IMessage> CreateInSocket(string url)
         {
             return Factory.CreatePuller(url, true);
         }
-        public ISendAsyncContext<NngMessage> CreateOutSocket(string url)
+        public ISendAsyncContext<IMessage> CreateOutSocket(string url)
         {
             return Factory.CreatePusher(url, true);
         }
-        public IReceiveAsyncContext<NngMessage> CreateClient(string url)
+        public IReceiveAsyncContext<IMessage> CreateClient(string url)
         {
             return Factory.CreatePuller(url, false);
+        }
+
+        public IMessage CreateMessage()
+        {
+            return Factory.CreateMessage();
         }
     }
 }

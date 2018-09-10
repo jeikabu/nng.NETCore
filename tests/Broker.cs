@@ -9,15 +9,16 @@ namespace nng.Tests
 
     interface IBrokerImpl<T>
     {
-        TestFactory Factory { get; }
+        IFactory<T> Factory { get; }
         IReceiveAsyncContext<T> CreateInSocket(string url);
         ISendAsyncContext<T> CreateOutSocket(string url);
         IReceiveAsyncContext<T> CreateClient(string url);
+        IMessage CreateMessage();
     }
 
     class Broker
     {
-        public Broker(IBrokerImpl<NngMessage> implementation)
+        public Broker(IBrokerImpl<IMessage> implementation)
         {
             this.implementation = implementation;
         }
@@ -62,7 +63,7 @@ namespace nng.Tests
                         await clientsReady.SignalAndWait(); // This client ready, wait for rest
                         for (var m = 0; m < numMessagesPerPusher; ++m)
                         {
-                            await pushSocket.Send(implementation.Factory.CreateMsg());
+                            await pushSocket.Send(implementation.CreateMessage());
                             await Task.Delay(15);
                         }
                     }
@@ -90,6 +91,6 @@ namespace nng.Tests
             return tasks;
         }
 
-        IBrokerImpl<NngMessage> implementation;
+        IBrokerImpl<IMessage> implementation;
     }
 }

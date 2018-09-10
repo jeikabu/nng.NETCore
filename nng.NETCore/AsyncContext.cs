@@ -9,88 +9,7 @@ namespace nng
     using static nng.Native.Basic.UnsafeNativeMethods;
     using static nng.Native.Ctx.UnsafeNativeMethods;
     using static nng.Native.Msg.UnsafeNativeMethods;
-
-    public class NngContext
-    {
-        public bool NngCheck(int error,
-            [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
-            [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
-        {
-            if (error == 0)
-            {
-                return false;
-            }
-            var str = nng_strerror(error);
-            Console.WriteLine($"{memberName}:{sourceLineNumber} failed: {str}");
-            return true;
-        }
-    }
-
-    // public interface IFactory
-    // {
-    //     IReplySocket CreateRep();
-    //     IRequestSocket CreateReq();
-    // }
-
-    // public class AsyncFactory : IFactory
-    // {
-    //     public IReplySocket CreateRep()
-    //     {
-
-    //     }
-
-    //     public IRequestSocket CreateReq()
-    //     {
-
-    //     }
-    // }
-
-    public class NngException : Exception
-    {
-        public NngException(string message)
-        : base(message)
-        {
-        }
-        public NngException(int errorCode)
-        {
-            error = errorCode;
-        }
-
-        public override string Message => nng_strerror(error);
-
-        int error = 0;
-    }
-
-    public interface IAsyncContext : IDisposable
-    {
-        ISocket Socket { get; }
-    }
-
-    public interface IReceiveAsyncContext<T> : IAsyncContext
-    {
-        Task<T> Receive(CancellationToken token);
-    }
-
-    public interface ISendAsyncContext<T> : IAsyncContext
-    {
-        Task<bool> Send(T message);
-    }
-
-    public interface IReqRepAsyncContext<T> : IAsyncContext
-    {
-        Task<T> Send(T message);
-    }
-
-    public interface IRepReqAsyncContext<T> : IAsyncContext
-    {
-        Task<T> Receive();
-        Task<bool> Reply(T message);
-    }
-
-    public interface ISubAsyncContext<T> : IReceiveAsyncContext<T>, ISubSocket
-    {
-
-    }
+    using static nng.Native.Socket.UnsafeNativeMethods;
 
     public abstract class AsyncBase<T> : IAsyncContext
     {
@@ -108,6 +27,15 @@ namespace nng
         }
         protected State state = State.Init;
         AioCallback callbackDelegate;
+
+        public void SetOpt(string name, byte[] data)
+        {
+            int res = nng_setopt(NngSocket, name, data);
+            if (res != 0)
+            {
+                throw new NngException(res);
+            }
+        }
 
         internal int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)
         {
@@ -141,9 +69,19 @@ namespace nng
         #endregion
     }
 
-    public abstract class AsyncCtx<T> : AsyncBase<T>
+    public abstract class AsyncCtx<T> : AsyncBase<T>, ICtx
     {
+        public nng_ctx NngCtx { get { return ctxHandle; } }
         protected nng_ctx ctxHandle;
+
+        public int GetCtxOpt(string name, out int data)
+        {
+            return nng_ctx_getopt_int(NngCtx, name, out data);
+        }
+        public int SetCtxOpt(string name, byte[] data)
+        {
+            return nng_ctx_setopt(NngCtx, name, data);
+        }
 
         internal new int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)
         {

@@ -13,10 +13,10 @@ namespace nng.Native.Aio
         //public delegate void AioCancelFunction(nng_aio aio, IntPtr ptr, Int32 val);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_send_aio(nng_socket socket, nng_aio aio);
+        public static extern void nng_send_aio(nng_socket socket, nng_aio aio);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_recv_aio(nng_socket socket, nng_aio aio);
+        public static extern void nng_recv_aio(nng_socket socket, nng_aio aio);
 
 
 

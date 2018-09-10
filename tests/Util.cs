@@ -6,16 +6,12 @@ using Xunit;
 
 namespace nng.Tests
 {
-    using static nng.Native.Msg.UnsafeNativeMethods;
-
-    class NngMessage
-    {
-        public nng_msg message;
-    }
-
     static class Util
     {
         public static string UrlRandomIpc() => "ipc://" + Guid.NewGuid().ToString();
+        public static byte[] TopicRandom() => Guid.NewGuid().ToByteArray();
+
+        public static Task WaitReady() => Task.Delay(100);
 
         public static async Task AssertWait(int timeoutMs, params Task[] tasks)
         {
@@ -41,6 +37,16 @@ namespace nng.Tests
                     throw ex;
                 }
             }
+        }
+    }
+
+    static class FactoryExt
+    {
+        public static IMessage CreateTopicMessage(this IFactory<IMessage> self, byte[] topic)
+        {
+            var res = self.CreateMessage();
+            res.Append(topic);
+            return res;
         }
     }
 }

@@ -10,9 +10,9 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class ReqSocket<T> : IReqSocket
+    public class ReqSocket<T> : Socket, IReqSocket
     {
-        public static ISocket Create(string url)
+        public static ReqSocket<T> Create(string url)
         {
             nng_socket socket;
             if (nng_req0_open(out socket) != 0)
@@ -41,12 +41,14 @@ namespace nng
             return ctx;
         }
 
-        public nng_socket NngSocket { get; private set; }
+        
+
+        private ReqSocket(){}
     }
 
-    public class RepSocket<T> : IRepSocket
+    public class RepSocket<T> : Socket, IRepSocket
     {
-        public static ISocket Create(string url)
+        public static RepSocket<T> Create(string url)
         {
             nng_socket socket;
             if (nng_rep0_open(out socket) != 0)
@@ -70,6 +72,6 @@ namespace nng
             return RepAsyncCtx<T>.Create(socket, factory);
         }
 
-        public nng_socket NngSocket { get; private set; }
+        private RepSocket(){}
     }
 }
