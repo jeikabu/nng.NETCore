@@ -11,6 +11,8 @@ namespace nng.Tests
         public static string UrlRandomIpc() => "ipc://" + Guid.NewGuid().ToString();
         public static byte[] TopicRandom() => Guid.NewGuid().ToByteArray();
 
+        public static Task WaitReady() => Task.Delay(100);
+
         public static async Task AssertWait(int timeoutMs, params Task[] tasks)
         {
             var timeout = Task.Delay(timeoutMs);

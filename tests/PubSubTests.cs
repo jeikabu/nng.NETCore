@@ -42,7 +42,7 @@ namespace nng.Tests
         {
             var url = UrlRandomIpc();
             var pub = factory.CreatePublisher(url);
-            await Task.Delay(100);
+            await WaitReady();
             var sub = factory.CreateSubscriber(url);
             var topic = TopicRandom();
             Assert.True(sub.Subscribe(topic));
@@ -58,16 +58,20 @@ namespace nng.Tests
         {
             var url = UrlRandomIpc();
             var topic = TopicRandom();
-            var barrier = new AsyncBarrier(2);
+            var serverReady = new AsyncBarrier(2);
+            var clientReady = new AsyncBarrier(2);
             var pubTask = Task.Run(async () => {
                 var pubSocket = factory.CreatePublisher(url);
-                await barrier.SignalAndWait();
+                await serverReady.SignalAndWait();
+                await clientReady.SignalAndWait();
+                await WaitReady();
                 Assert.True(await pubSocket.Send(factory.CreateTopicMessage(topic)));
             });
             var subTask = Task.Run(async () => {
-                await barrier.SignalAndWait();
+                await serverReady.SignalAndWait();
                 var sub = factory.CreateSubscriber(url);
                 sub.Subscribe(topic);
+                await clientReady.SignalAndWait();
                 await sub.Receive(CancellationToken.None);
             });
             

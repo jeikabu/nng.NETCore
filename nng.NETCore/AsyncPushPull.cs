@@ -48,13 +48,7 @@ namespace nng
                 case State.Init:
                     state = State.Send;
                     nng_aio_set_msg(aioHandle, Factory.Borrow(asyncMessage.message));
-                    res = nng_send_aio(Socket.NngSocket, aioHandle);
-                    if (res != 0)
-                    {
-                        state = State.Init;
-                        asyncMessage.tcs.TrySetNngError(res);
-                        return;
-                    }
+                    nng_send_aio(Socket.NngSocket, aioHandle);
                     break;
 
                 case State.Send:
@@ -101,12 +95,7 @@ namespace nng
             {
                 case State.Init:
                     state = State.Recv;
-                    res = nng_recv_aio(Socket.NngSocket, aioHandle);
-                    if (res != 0)
-                    {
-                        state = State.Init;
-                        asyncMessage.Source.Tcs.TrySetNngError(res);
-                    }
+                    nng_recv_aio(Socket.NngSocket, aioHandle);
                     break;
                 
                 case State.Recv:
