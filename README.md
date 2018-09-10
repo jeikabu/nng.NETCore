@@ -10,6 +10,41 @@ Very pre-alpha.  Using latest [nng release](https://github.com/nanomsg/nng/relea
 [![Build status](https://ci.appveyor.com/api/projects/status/ohpurtgoq42wauan/branch/master?svg=true)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
 [![codecov](https://codecov.io/gh/subor/nng.NETCore/branch/master/graph/badge.svg)](https://codecov.io/gh/subor/nng.NETCore)
 
+Implementation status of various APIs is as follows:
+
+__Core Functionality__
+| Feature | Pinvoke | Wrapper | Tests | Notes
+|-|-|-|-|-
+| aio | 100% | 50% | 50%
+| ctx | 100% | 25% | 25%
+| dialer | 50% | 25% | 25%
+| iov | 0% | 0% | 0%
+| listener | 50% | 25% | 25%
+| msg | 50% | 25% | 25%
+| pipe | 0% | 0% | 0% | Low priority
+| socket | 100% | 25% | 25% | 
+| compat | 0% | 0% | 0% | No plans to implement
+| TLS | 0% | 0% | 0% | Low priority
+| Http | 0% | 0% | 0% | No plans to implement
+| CV/Mtx/thread | 0% | 0% | 0% | No plans to implement
+
+__Protocols and Transports__
+| Feature | Pinvoke | Wrapper | Tests | Notes
+|-|-|-|-|-
+| bus | 0% | 0% | 0% | Low priority
+| inproc | 100% | 0% | 0% |
+| ipc | 100% | 50% | 50% |
+| pair | 0% | 0% | 0% | Low priority
+| pub/sub | 100% | 50% | 50% |
+| push/pull | 100% | 50% | 50% |
+| req/rep | 100% | 50% | 50% |
+| respondent | 0% | 0% | 0% | Low priority
+| surveyor | 0% | 0% | 0% | Low priority
+| tcp | 0% | 0% | 0% |
+| tls | 0% | 0% | 0% | Low priority
+| ws | 0% | 0% | 0%
+| zerotier | 0% | 0% | 0% | Low priority
+
 ## Background
 
 nng.NETCore is meant to be a completely different approach than [zplus/csnng](https://github.com/zplus/csnng) (our fork of [csnng](https://github.com/mwpowellhtx/csnng)).  Namely:
