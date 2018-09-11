@@ -68,11 +68,11 @@ namespace nng.Native.Aio
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_aio_set_iov(nng_aio aio, UInt32 count, nng_iov iov);
 
-        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool nng_aio_begin(nng_aio aio);
+        // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        // public static extern bool nng_aio_begin(nng_aio aio);
 
-        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void nng_aio_finish(nng_aio aio, int error);
+        // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        // public static extern void nng_aio_finish(nng_aio aio, int error);
 
         // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         // public static extern void nng_aio_defer(nng_aio aio, AioCancelFunction function, IntPtr data);

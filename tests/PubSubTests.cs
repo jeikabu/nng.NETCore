@@ -8,8 +8,6 @@ using Xunit;
 
 namespace nng.Tests
 {
-    // using static nng.Native.Msg.UnsafeNativeMethods;
-    // using static nng.Native.Socket.UnsafeNativeMethods;
     using static nng.Tests.Util;
 
     [Collection("nng")]
@@ -45,7 +43,7 @@ namespace nng.Tests
             await WaitReady();
             var sub = factory.CreateSubscriber(url);
             var topic = TopicRandom();
-            Assert.True(sub.Subscribe(topic));
+            Assert.Equal(0, sub.Subscribe(topic));
             var msg = factory.CreateMessage();
             msg.Append(topic);
             var sendTask = pub.Send(msg);

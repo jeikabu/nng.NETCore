@@ -40,11 +40,10 @@ namespace nng
     //     }
     // }
 
-
-
-    public interface IAsyncContext : IDisposable
+    public interface IAsyncContext : IHasSocket, IDisposable
     {
-        ISocket Socket { get; }
+        void SetTimeout(int msTimeout);
+        void Cancel();
     }
 
     public interface IReceiveAsyncContext<T> : IAsyncContext
@@ -71,11 +70,24 @@ namespace nng
     public interface ICtx : IAsyncContext
     {
         nng_ctx NngCtx { get; }
+
+        int GetCtxOpt(string name, out bool data);
         int GetCtxOpt(string name, out int data);
+        int GetCtxOpt(string name, out nng_duration data);
+        int GetCtxOpt(string name, out UIntPtr data);
+        // int GetCtxOpt(string name, out string data);
+        // int GetCtxOpt(string name, out UInt64 data);
+
         int SetCtxOpt(string name, byte[] data);
+        int SetCtxOpt(string name, bool data);
+        int SetCtxOpt(string name, int data);
+        int SetCtxOpt(string name, nng_duration data);
+        int SetCtxOpt(string name, UIntPtr data);
+        // int SetCtxOpt(string name, string data);
+        // int SetCtxOpt(string name, UInt64 data);
     }
 
-    public interface ISubAsyncContext<T> : IReceiveAsyncContext<T>, ISubscribeSocket
+    public interface ISubAsyncContext<T> : IReceiveAsyncContext<T>, ISubscriber
     {
     }
 }

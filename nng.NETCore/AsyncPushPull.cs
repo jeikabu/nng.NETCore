@@ -34,7 +34,7 @@ namespace nng
     {
         public Task<bool> Send(T message)
         {
-            System.Diagnostics.Debug.Assert(state == State.Init);
+            System.Diagnostics.Debug.Assert(State == AsyncState.Init);
             asyncMessage = new AsyncSendMsg<T>(message);
             callback(IntPtr.Zero);
             return asyncMessage.tcs.Task;
@@ -43,28 +43,28 @@ namespace nng
         internal void callback(IntPtr arg)
         {
             var res = 0;
-            switch (state)
+            switch (State)
             {
-                case State.Init:
-                    state = State.Send;
+                case AsyncState.Init:
+                    State = AsyncState.Send;
                     nng_aio_set_msg(aioHandle, Factory.Borrow(asyncMessage.message));
                     nng_send_aio(Socket.NngSocket, aioHandle);
                     break;
 
-                case State.Send:
+                case AsyncState.Send:
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
                     {
-                        state = State.Init;
+                        State = AsyncState.Init;
                         Factory.Destroy(ref asyncMessage.message);
                         asyncMessage.tcs.TrySetNngError(res);
                         return;
                     }
-                    state = State.Init;
+                    State = AsyncState.Init;
                     asyncMessage.tcs.SetResult(true);
                     break;
                 default:
-                    asyncMessage.tcs.SetException(new Exception(state.ToString()));
+                    asyncMessage.tcs.SetException(new Exception(State.ToString()));
                     break;
             }
         }
@@ -77,10 +77,14 @@ namespace nng
     {
         public async Task<T> Receive(CancellationToken token)
         {
-            System.Diagnostics.Debug.Assert(state == State.Init);
-            if (state != State.Init)
+            if (State != AsyncState.Init)
             {
-                await asyncMessage.Source.Task;
+                try
+                {
+                    await asyncMessage.Source.Task;
+                }
+                catch (TaskCanceledException)
+                {}
             }
             asyncMessage = new AsyncResvMsg<T>(token);
             // Trigger the async read
@@ -91,29 +95,29 @@ namespace nng
         internal void callback(IntPtr arg)
         {
             var res = 0;
-            switch (state)
+            switch (State)
             {
-                case State.Init:
-                    state = State.Recv;
+                case AsyncState.Init:
+                    State = AsyncState.Recv;
                     nng_recv_aio(Socket.NngSocket, aioHandle);
                     break;
                 
-                case State.Recv:
+                case AsyncState.Recv:
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
                     {
-                        state = State.Init;
+                        State = AsyncState.Init;
                         asyncMessage.Source.Tcs.TrySetNngError(res);
                         return;
                     }
-                    state = State.Init;
+                    State = AsyncState.Init;
                     nng_msg msg = nng_aio_get_msg(aioHandle);
                     var message = Factory.CreateMessage(msg);
                     asyncMessage.Source.Tcs.SetResult(message);
                     break;
 
                 default:
-                    asyncMessage.Source.Tcs.SetException(new Exception(state.ToString()));
+                    asyncMessage.Source.Tcs.SetException(new Exception(State.ToString()));
                     break;
             }
         }

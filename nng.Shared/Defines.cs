@@ -7,6 +7,10 @@ namespace nng.Native
     public sealed partial class Defines
     {
 
+        public const int NNG_DURATION_INFINITE = -1;
+        public const int NNG_DURATION_DEFAULT = -2;
+        public const int NNG_DURATION_ZERO = 0;
+
     #region Get/SetOpt
         public const string NNG_OPT_SOCKNAME = "socket-name";
         public const string NNG_OPT_RAW = "raw";
@@ -47,43 +51,46 @@ namespace nng.Native
 
         public const string NNG_OPT_SURVEYOR_SURVEYTIME = "surveyor:survey-time";
     #endregion
+
+    #region nng_errno_enum
+        public const int NNG_OK           = 0;
+        public const int NNG_EINTR        = 1;
+        public const int NNG_ENOMEM       = 2;
+        public const int NNG_EINVAL       = 3;
+        public const int NNG_EBUSY        = 4;
+        public const int NNG_ETIMEDOUT    = 5;
+        public const int NNG_ECONNREFUSED = 6;
+        public const int NNG_ECLOSED      = 7;
+        public const int NNG_EAGAIN       = 8;
+        public const int NNG_ENOTSUP      = 9;
+        public const int NNG_EADDRINUSE   = 10;
+        public const int NNG_ESTATE       = 11;
+        public const int NNG_ENOENT       = 12;
+        public const int NNG_EPROTO       = 13;
+        public const int NNG_EUNREACHABLE = 14;
+        public const int NNG_EADDRINVAL   = 15;
+        public const int NNG_EPERM        = 16;
+        public const int NNG_EMSGSIZE     = 17;
+        public const int NNG_ECONNABORTED = 18;
+        public const int NNG_ECONNRESET   = 19;
+        public const int NNG_ECANCELED    = 20;
+        public const int NNG_ENOFILES     = 21;
+        public const int NNG_ENOSPC       = 22;
+        public const int NNG_EEXIST       = 23;
+        public const int NNG_EREADONLY    = 24;
+        public const int NNG_EWRITEONLY   = 25;
+        public const int NNG_ECRYPTO      = 26;
+        public const int NNG_EPEERAUTH    = 27;
+        public const int NNG_ENOARG       = 28;
+        public const int NNG_EAMBIGUOUS   = 29;
+        public const int NNG_EBADTYPE     = 30;
+        public const int NNG_EINTERNAL    = 1000;
+        public const int NNG_ESYSERR      = 0x10000000;
+        public const int NNG_ETRANERR     = 0x20000000;
+    #endregion
     }
 
-    enum nng_errno_enum {
-        NNG_EINTR        = 1,
-        NNG_ENOMEM       = 2,
-        NNG_EINVAL       = 3,
-        NNG_EBUSY        = 4,
-        NNG_ETIMEDOUT    = 5,
-        NNG_ECONNREFUSED = 6,
-        NNG_ECLOSED      = 7,
-        NNG_EAGAIN       = 8,
-        NNG_ENOTSUP      = 9,
-        NNG_EADDRINUSE   = 10,
-        NNG_ESTATE       = 11,
-        NNG_ENOENT       = 12,
-        NNG_EPROTO       = 13,
-        NNG_EUNREACHABLE = 14,
-        NNG_EADDRINVAL   = 15,
-        NNG_EPERM        = 16,
-        NNG_EMSGSIZE     = 17,
-        NNG_ECONNABORTED = 18,
-        NNG_ECONNRESET   = 19,
-        NNG_ECANCELED    = 20,
-        NNG_ENOFILES     = 21,
-        NNG_ENOSPC       = 22,
-        NNG_EEXIST       = 23,
-        NNG_EREADONLY    = 24,
-        NNG_EWRITEONLY   = 25,
-        NNG_ECRYPTO      = 26,
-        NNG_EPEERAUTH    = 27,
-        NNG_ENOARG       = 28,
-        NNG_EAMBIGUOUS   = 29,
-        NNG_EBADTYPE     = 30,
-        NNG_EINTERNAL    = 1000,
-        NNG_ESYSERR      = 0x10000000,
-        NNG_ETRANERR     = 0x20000000
-};
+    
 
     public struct nng_ctx
     {
@@ -114,9 +121,21 @@ namespace nng.Native
     {
         IntPtr ptr;
     }
+    
     public struct nng_duration
     {
-        public UInt32 timeMS;
+        public Int32 TimeMs {get; set;}
+
+        public nng_duration(nng_duration copy)
+        {
+            TimeMs = copy.TimeMs;
+        }
+
+        public static nng_duration operator +(nng_duration lhs, nng_duration rhs) => 
+            new nng_duration { TimeMs = lhs.TimeMs + rhs.TimeMs };
+
+        public static nng_duration operator +(nng_duration lhs, int rhs) => 
+            new nng_duration { TimeMs = lhs.TimeMs + rhs };
     }
     public struct nng_iov
     {

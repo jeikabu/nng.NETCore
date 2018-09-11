@@ -25,8 +25,8 @@ namespace nng
     {
         public async Task<T> Send(T message)
         {
-            System.Diagnostics.Debug.Assert(state == State.Init);
-            if (state != State.Init)
+            System.Diagnostics.Debug.Assert(State == AsyncState.Init);
+            if (State != AsyncState.Init)
             {
                 await asyncMessage.tcs.Task;
             }
@@ -39,38 +39,38 @@ namespace nng
         internal void callback(IntPtr arg)
         {
             var res = 0;
-            switch (state)
+            switch (State)
             {
-                case State.Init:
-                    state = State.Send;
+                case AsyncState.Init:
+                    State = AsyncState.Send;
                     nng_aio_set_msg(aioHandle, Factory.Borrow(asyncMessage.message));
                     nng_ctx_send(ctxHandle, aioHandle);
                     break;
                 
-                case State.Send:
+                case AsyncState.Send:
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
                     {
                         Factory.Destroy(ref asyncMessage.message);
                         asyncMessage.tcs.TrySetNngError(res);
-                        state = State.Init;
+                        State = AsyncState.Init;
                         return;
                     }
-                    state = State.Recv;
+                    State = AsyncState.Recv;
                     nng_ctx_recv(ctxHandle, aioHandle);
                     break;
-                case State.Recv:
+                case AsyncState.Recv:
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
                     {
                         asyncMessage.tcs.TrySetNngError(res);
-                        state = State.Init;
+                        State = AsyncState.Init;
                         return;
                     }
                     nng_msg msg = nng_aio_get_msg(aioHandle);
                     var message = Factory.CreateMessage(msg);
                     asyncMessage.tcs.SetResult(message);
-                    state = State.Init;
+                    State = AsyncState.Init;
                     break;
             }
         }
@@ -106,7 +106,7 @@ namespace nng
 
         public Task<bool> Reply(T message)
         {
-            System.Diagnostics.Debug.Assert(state == State.Wait);
+            System.Diagnostics.Debug.Assert(State == AsyncState.Wait);
             asyncMessage.response = message;
             // Move from wait to send state
             callback(IntPtr.Zero);
@@ -118,30 +118,30 @@ namespace nng
             lock (sync)
             {
                 var res = 0;
-                switch (state)
+                switch (State)
                 {
-                    case State.Init:
+                    case AsyncState.Init:
                         init();
                         break;
-                    case State.Recv:
+                    case AsyncState.Recv:
                         res = nng_aio_result(aioHandle);
                         if (res != 0)
                         {
                             asyncMessage.requestTcs.TrySetNngError(res);
-                            state = State.Recv;
+                            State = AsyncState.Recv;
                             return;
                         }
-                        state = State.Wait;
+                        State = AsyncState.Wait;
                         nng_msg msg = nng_aio_get_msg(aioHandle);
                         var message = Factory.CreateMessage(msg);
                         asyncMessage.requestTcs.SetResult(message);
                         break;
-                    case State.Wait:
+                    case AsyncState.Wait:
                         nng_aio_set_msg(aioHandle, Factory.Borrow(asyncMessage.response));
-                        state = State.Send;
+                        State = AsyncState.Send;
                         nng_ctx_send(ctxHandle, aioHandle);
                         break;
-                    case State.Send:
+                    case AsyncState.Send:
                         res = nng_aio_result(aioHandle);
                         if (res != 0)
                         {
@@ -159,7 +159,7 @@ namespace nng
         void init()
         {
             asyncMessage = new Request<T>();
-            state = State.Recv;
+            State = AsyncState.Recv;
             nng_ctx_recv(ctxHandle, aioHandle);
         }
 

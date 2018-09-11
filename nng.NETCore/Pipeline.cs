@@ -10,7 +10,7 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class PushSocket<T> : Socket, IPushSocket
+    public class PushSocket<T> : Socket
     {
         public static ISocket Create(string url, bool isListener)
         {
@@ -46,7 +46,7 @@ namespace nng
         private PushSocket(){}
     }
 
-    public class PullSocket<T> : Socket, IPullSocket
+    public class PullSocket<T> : Socket
     {
         public static ISocket Create(string url, bool isListener)
         {

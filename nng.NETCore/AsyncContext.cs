@@ -18,14 +18,14 @@ namespace nng
         public nng_socket NngSocket => Socket.NngSocket;
 
         protected nng_aio aioHandle = nng_aio.Null;
-        protected enum State
+        public enum AsyncState
         {
             Init,
             Recv,
             Wait,
             Send,
         }
-        protected State state = State.Init;
+        public AsyncState State { get; protected set; } = AsyncState.Init;
         AioCallback callbackDelegate;
 
         public void SetOpt(string name, byte[] data)
@@ -35,6 +35,14 @@ namespace nng
             {
                 throw new NngException(res);
             }
+        }
+        public void SetTimeout(int msTimeout)
+        {
+            nng_aio_set_timeout(aioHandle, new nng_duration { TimeMs = msTimeout });
+        }
+        public void Cancel()
+        {
+            nng_aio_cancel(aioHandle);
         }
 
         internal int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)
@@ -74,14 +82,63 @@ namespace nng
         public nng_ctx NngCtx { get { return ctxHandle; } }
         protected nng_ctx ctxHandle;
 
+        // public int GetCtxOpt(string name, out Span<byte> data)
+        // {
+        //     return nng_ctx_getopt(NngCtx, name, out data);
+        // }
+        public int GetCtxOpt(string name, out bool data)
+        {
+            return nng_ctx_getopt_bool(NngCtx, name, out data);
+        }
         public int GetCtxOpt(string name, out int data)
         {
             return nng_ctx_getopt_int(NngCtx, name, out data);
         }
+        public int GetCtxOpt(string name, out nng_duration data)
+        {
+            return nng_ctx_getopt_ms(NngCtx, name, out data);
+        }
+        public int GetCtxOpt(string name, out UIntPtr data)
+        {
+            return nng_ctx_getopt_size(NngCtx, name, out data);
+        }
+        // public int GetCtxOpt(string name, out string data)
+        // {
+        //     return nng_ctx_getopt_string(NngCtx, name, out data);
+        // }
+        // public int GetCtxOpt(string name, out UInt64 data)
+        // {
+        //     return nng_ctx_getopt_uint64(NngCtx, name, out data);
+        // }
+        
         public int SetCtxOpt(string name, byte[] data)
         {
             return nng_ctx_setopt(NngCtx, name, data);
         }
+        public int SetCtxOpt(string name, bool data)
+        {
+            return nng_ctx_setopt_bool(NngCtx, name, data);
+        }
+        public int SetCtxOpt(string name, int data)
+        {
+            return nng_ctx_setopt_int(NngCtx, name, data);
+        }
+        public int SetCtxOpt(string name, nng_duration data)
+        {
+            return nng_ctx_setopt_ms(NngCtx, name, data);
+        }
+        public int SetCtxOpt(string name, UIntPtr data)
+        {
+            return nng_ctx_setopt_size(NngCtx, name, data);
+        }
+        // public int SetCtxOpt(string name, string data)
+        // {
+        //     return nng_ctx_setopt_string(NngCtx, name, data);
+        // }
+        // public int SetCtxOpt(string name, UInt64 data)
+        // {
+        //     return nng_ctx_setopt_uint64(NngCtx, name, data);
+        // }
 
         internal new int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)
         {

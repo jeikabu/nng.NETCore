@@ -12,13 +12,66 @@ namespace nng
     {
         public nng_socket NngSocket { get; protected set; }
 
-        public void SetOpt(string name, byte[] data)
+        public int GetOpt(string name, out bool data)
         {
-            var res = nng_setopt(NngSocket, name, data);
-            if (res != 0)
-            {
-                throw new NngException(res);
-            }
+            return nng_getopt_bool(NngSocket, name, out data);
         }
+        public int GetOpt(string name, out int data)
+        {
+            return nng_getopt_int(NngSocket, name, out data);
+        }
+        public int GetOpt(string name, out nng_duration data)
+        {
+            return nng_getopt_ms(NngSocket, name, out data);
+        }
+        public int GetOpt(string name, out UIntPtr data)
+        {
+            return nng_getopt_size(NngSocket, name, out data);
+        }
+        public int GetOpt(string name, out UInt64 data)
+        {
+            return nng_getopt_uint64(NngSocket, name, out data);
+        }
+        // public int GetOpt(string name, out string data)
+        // {
+        //     return nng_getopt_string(NngSocket, name, out data);
+        // }
+        // public int GetOpt(string name, out void* data)
+        // {
+        //     return nng_getopt_ptr(NngSocket, name, out data);
+        // }
+
+        public int SetOpt(string name, byte[] data)
+        {
+            return nng_setopt(NngSocket, name, data);
+        }
+        public int SetOpt(string name, bool data)
+        {
+            return nng_setopt_bool(NngSocket, name, data);
+        }
+        public int SetOpt(string name, int data)
+        {
+            return nng_setopt_int(NngSocket, name, data);
+        }
+        public int SetOpt(string name, nng_duration data)
+        {
+            return nng_setopt_ms(NngSocket, name, data);
+        }
+        public int SetOpt(string name, UIntPtr data)
+        {
+            return nng_setopt_size(NngSocket, name, data);
+        }
+        public int SetOpt(string name, UInt64 data)
+        {
+            return nng_setopt_uint64(NngSocket, name, data);
+        }
+        public int SetOpt(string name, string data)
+        {
+            return nng_setopt_string(NngSocket, name, data);
+        }
+        // public int SetOpt(string name, IntPtr data)
+        // {
+        //     return nng_setopt_ptr(NngSocket, name, data);
+        // }
     }
 }
