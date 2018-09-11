@@ -25,7 +25,7 @@ namespace nng.Native.Ctx
         public static extern void nng_ctx_send(nng_ctx ctx, nng_aio aio);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_ctx_getopt(nng_ctx ctx, string name, IntPtr data, UIntPtr size);
+        public static extern int nng_ctx_getopt(nng_ctx ctx, string name, byte[] data, UIntPtr size);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_ctx_getopt_bool(nng_ctx ctx, string name, out bool data);
@@ -38,6 +38,12 @@ namespace nng.Native.Ctx
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_ctx_getopt_size(nng_ctx ctx, string name, out UIntPtr data);
+
+        // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        // public static extern int nng_ctx_getopt_string(nng_ctx ctx, string name, out string data);
+
+        // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        // public static extern int nng_ctx_getopt_uint64(nng_ctx ctx, string name, out UInt64 data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_ctx_setopt(nng_ctx ctx, string name, byte[] data, UIntPtr size);
@@ -58,5 +64,11 @@ namespace nng.Native.Ctx
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_ctx_setopt_size(nng_ctx ctx, string name, UIntPtr value);
+
+        // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        // public static extern int nng_ctx_setopt_string(nng_ctx ctx, string name, string value);
+
+        // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        // public static extern int nng_ctx_setopt_uint64(nng_ctx ctx, string name, UInt64 value);
     }
 }

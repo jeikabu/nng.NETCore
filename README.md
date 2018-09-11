@@ -16,7 +16,7 @@ __Core Functionality__
 | Feature | Pinvoke | Wrapper | Tests | Notes
 |-|-|-|-|-
 | aio | 100% | 75% | 75% | Missing get/set_input/output/iov
-| ctx | 100% | 25% | 25%
+| ctx | 100% | 50% | 50% | Doesn't seem to be ctx-supported options other than nng_duration
 | dialer | 50% | 25% | 25%
 | iov | 0% | 0% | 0%
 | listener | 50% | 25% | 25%
