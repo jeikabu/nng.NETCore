@@ -10,7 +10,7 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class ReqSocket<T> : Socket, IReqSocket
+    public class ReqSocket<T> : Socket
     {
         public static ReqSocket<T> Create(string url)
         {
@@ -46,7 +46,7 @@ namespace nng
         private ReqSocket(){}
     }
 
-    public class RepSocket<T> : Socket, IRepSocket
+    public class RepSocket<T> : Socket
     {
         public static RepSocket<T> Create(string url)
         {

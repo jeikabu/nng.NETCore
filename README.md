@@ -22,7 +22,7 @@ __Core Functionality__
 | listener | 50% | 25% | 25%
 | msg | 50% | 25% | 25%
 | pipe | 0% | 0% | 0% | Low priority
-| socket | 100% | 25% | 25% | 
+| socket | 100% | 50% | 50% | Missing synchronous methods and nng_getopt_string
 | raw socket | 0% | 0% | 0% | Low priority
 | compat | 0% | 0% | 0% | No plans to implement
 | TLS | 0% | 0% | 0% | Low priority

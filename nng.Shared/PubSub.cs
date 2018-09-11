@@ -2,18 +2,20 @@ namespace nng
 {
     using static nng.Native.Defines;
 
+    public interface ISubscriber : IHasSocket
+    {
+    }
+
     public static class Subscriber
     {
-        public static bool Subscribe(this ISubscribeSocket self, byte[] topic)
+        public static int Subscribe(this ISubscriber self, byte[] topic)
         {
-            self.SetOpt(NNG_OPT_SUB_SUBSCRIBE, topic);
-            return true;
+            return self.Socket.SetOpt(NNG_OPT_SUB_SUBSCRIBE, topic);
         }
 
-        public static bool Unsubscribe(this ISubscribeSocket self, byte[] topic)
+        public static int Unsubscribe(this ISubscriber self, byte[] topic)
         {
-            self.SetOpt(NNG_OPT_SUB_UNSUBSCRIBE, topic);
-            return true;
+            return self.Socket.SetOpt(NNG_OPT_SUB_UNSUBSCRIBE, topic);
         }
     }
 }

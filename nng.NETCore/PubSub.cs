@@ -10,7 +10,7 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class PubSocket<T> : Socket, IPubSocket
+    public class PubSocket<T> : Socket
     {
         public static PubSocket<T> Create(string url)
         {
@@ -45,7 +45,7 @@ namespace nng
         private PubSocket(){}
     }
 
-    public class SubSocket<T> : Socket, ISubscribeSocket
+    public class SubSocket<T> : Socket
     {
         public static SubSocket<T> Create(string url)
         {

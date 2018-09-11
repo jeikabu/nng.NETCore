@@ -121,13 +121,21 @@ namespace nng.Native
     {
         IntPtr ptr;
     }
+    
     public struct nng_duration
     {
+        public Int32 TimeMs {get; set;}
+
         public nng_duration(nng_duration copy)
         {
             TimeMs = copy.TimeMs;
         }
-        public Int32 TimeMs {get; set;}
+
+        public static nng_duration operator +(nng_duration lhs, nng_duration rhs) => 
+            new nng_duration { TimeMs = lhs.TimeMs + rhs.TimeMs };
+
+        public static nng_duration operator +(nng_duration lhs, int rhs) => 
+            new nng_duration { TimeMs = lhs.TimeMs + rhs };
     }
     public struct nng_iov
     {

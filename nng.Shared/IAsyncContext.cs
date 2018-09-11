@@ -40,9 +40,8 @@ namespace nng
     //     }
     // }
 
-    public interface IAsyncContext : IDisposable
+    public interface IAsyncContext : IHasSocket, IDisposable
     {
-        ISocket Socket { get; }
         void SetTimeout(int msTimeout);
         void Cancel();
     }
@@ -88,7 +87,7 @@ namespace nng
         // int SetCtxOpt(string name, UInt64 data);
     }
 
-    public interface ISubAsyncContext<T> : IReceiveAsyncContext<T>, ISubscribeSocket
+    public interface ISubAsyncContext<T> : IReceiveAsyncContext<T>, ISubscriber
     {
     }
 }

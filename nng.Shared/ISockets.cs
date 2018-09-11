@@ -8,30 +8,25 @@ namespace nng
     public interface ISocket
     {
         nng_socket NngSocket { get; }
-        void SetOpt(string name, byte[] data);
+
+        int GetOpt(string name, out bool data);
+        int GetOpt(string name, out int data);
+        int GetOpt(string name, out nng_duration data);
+        int GetOpt(string name, out UIntPtr data);
+        //int GetOpt(string name, out string data);
+        int GetOpt(string name, out UInt64 data);
+
+        int SetOpt(string name, byte[] data);
+        int SetOpt(string name, bool data);
+        int SetOpt(string name, int data);
+        int SetOpt(string name, nng_duration data);
+        int SetOpt(string name, UIntPtr data);
+        int SetOpt(string name, string data);
+        int SetOpt(string name, UInt64 data);
     }
 
-    public interface IReqSocket : ISocket
+    public interface IHasSocket
     {
-    }
-
-    public interface IRepSocket : ISocket
-    {
-    }
-
-    public interface IPushSocket : ISocket
-    {
-    }
-
-    public interface IPullSocket : ISocket
-    {
-    }
-
-    public interface IPubSocket : ISocket
-    {
-    }
-
-    public interface ISubscribeSocket : ISocket
-    {
+        ISocket Socket { get; }
     }
 }
