@@ -15,7 +15,7 @@ Implementation status of various APIs is as follows:
 __Core Functionality__
 | Feature | Pinvoke | Wrapper | Tests | Notes
 |-|-|-|-|-
-| aio | 100% | 50% | 50%
+| aio | 100% | 75% | 75% | Missing get/set_input/output/iov
 | ctx | 100% | 25% | 25%
 | dialer | 50% | 25% | 25%
 | iov | 0% | 0% | 0%
@@ -23,6 +23,7 @@ __Core Functionality__
 | msg | 50% | 25% | 25%
 | pipe | 0% | 0% | 0% | Low priority
 | socket | 100% | 25% | 25% | 
+| raw socket | 0% | 0% | 0% | Low priority
 | compat | 0% | 0% | 0% | No plans to implement
 | TLS | 0% | 0% | 0% | Low priority
 | Http | 0% | 0% | 0% | No plans to implement

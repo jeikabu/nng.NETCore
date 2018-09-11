@@ -18,14 +18,14 @@ namespace nng
         public nng_socket NngSocket => Socket.NngSocket;
 
         protected nng_aio aioHandle = nng_aio.Null;
-        protected enum State
+        public enum AsyncState
         {
             Init,
             Recv,
             Wait,
             Send,
         }
-        protected State state = State.Init;
+        public AsyncState State { get; protected set; } = AsyncState.Init;
         AioCallback callbackDelegate;
 
         public void SetOpt(string name, byte[] data)
@@ -35,6 +35,14 @@ namespace nng
             {
                 throw new NngException(res);
             }
+        }
+        public void SetTimeout(int msTimeout)
+        {
+            nng_aio_set_timeout(aioHandle, new nng_duration(msTimeout));
+        }
+        public void Cancel()
+        {
+            nng_aio_cancel(aioHandle);
         }
 
         internal int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)

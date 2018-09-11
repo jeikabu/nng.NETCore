@@ -13,12 +13,12 @@ namespace nng
         }
         public NngException(int errorCode)
         {
-            error = errorCode;
+            error = (nng_errno_enum)errorCode;
         }
 
         public override string Message => string.Empty;//nng_strerror(error);
 
-        int error = 0;
+        nng_errno_enum error = 0;
     }
 
     public interface IMessage : IDisposable

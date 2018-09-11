@@ -7,6 +7,10 @@ namespace nng.Native
     public sealed partial class Defines
     {
 
+        public const int NNG_DURATION_INFINITE = -1;
+        public const int NNG_DURATION_DEFAULT = -2;
+        public const int NNG_DURATION_ZERO = 0;
+
     #region Get/SetOpt
         public const string NNG_OPT_SOCKNAME = "socket-name";
         public const string NNG_OPT_RAW = "raw";
@@ -116,7 +120,11 @@ namespace nng.Native
     }
     public struct nng_duration
     {
-        public UInt32 timeMS;
+        public nng_duration(int msTime)
+        {
+            timeMS = msTime;
+        }
+        Int32 timeMS;
     }
     public struct nng_iov
     {

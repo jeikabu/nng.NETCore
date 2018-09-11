@@ -40,11 +40,11 @@ namespace nng
     //     }
     // }
 
-
-
     public interface IAsyncContext : IDisposable
     {
         ISocket Socket { get; }
+        void SetTimeout(int msTimeout);
+        void Cancel();
     }
 
     public interface IReceiveAsyncContext<T> : IAsyncContext
