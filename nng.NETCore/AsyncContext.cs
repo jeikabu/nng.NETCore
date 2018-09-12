@@ -15,7 +15,6 @@ namespace nng
     {
         public IMessageFactory<T> Factory { get; private set; }
         public ISocket Socket { get; private set; }
-        public nng_socket NngSocket => Socket.NngSocket;
 
         protected nng_aio aioHandle = nng_aio.Null;
         public enum AsyncState
@@ -28,14 +27,6 @@ namespace nng
         public AsyncState State { get; protected set; } = AsyncState.Init;
         AioCallback callbackDelegate;
 
-        public void SetOpt(string name, byte[] data)
-        {
-            int res = nng_setopt(NngSocket, name, data);
-            if (res != 0)
-            {
-                throw new NngException(res);
-            }
-        }
         public void SetTimeout(int msTimeout)
         {
             nng_aio_set_timeout(aioHandle, new nng_duration { TimeMs = msTimeout });
@@ -69,7 +60,9 @@ namespace nng
                 return;
             if (disposing)
             {
-                var __ = nng_aio_free(aioHandle);
+                nng_aio_cancel(aioHandle);
+                nng_aio_free(aioHandle);
+                Socket.Dispose();
             }
             disposed = true;
         }

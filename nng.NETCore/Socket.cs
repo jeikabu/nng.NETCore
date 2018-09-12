@@ -73,5 +73,25 @@ namespace nng
         // {
         //     return nng_setopt_ptr(NngSocket, name, data);
         // }
+
+        #region IDisposable
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(true);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+            if (disposing)
+            {
+                int _ = nng_close(NngSocket);
+            }
+            disposed = true;
+        }
+        bool disposed = false;
+        #endregion
     }
 }

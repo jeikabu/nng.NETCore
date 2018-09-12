@@ -18,10 +18,10 @@ namespace nng.Tests
             this.factory = collectionFixture.Factory;
         }
 
-        [Fact]
-        public async Task ReqRepBasic()
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public async Task ReqRepBasic(string url)
         {
-            var url = UrlRandomIpc();
             var repAioCtx = factory.CreateReplier(url);
             var reqAioCtx = factory.CreateRequester(url);
 
@@ -31,10 +31,10 @@ namespace nng.Tests
             var response = await asyncReq;
         }
 
-        [Fact]
-        public async Task ReqRepTasks()
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public async Task ReqRepTasks(string url)
         {
-            var url = UrlRandomIpc();
             var barrier = new AsyncBarrier(2);
             var rep = Task.Run(async () => {
                 var repAioCtx = factory.CreateReplier(url);

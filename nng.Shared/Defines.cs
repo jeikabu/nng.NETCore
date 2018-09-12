@@ -32,7 +32,6 @@ namespace nng.Native
         public const string NNG_OPT_RECONNMINT = "reconnect-time-min";
         public const string NNG_OPT_RECONNMAXT = "reconnect-time-max";
 
-
         public const string NNG_OPT_TLS_CONFIG = "tls-config";
         public const string NNG_OPT_TLS_AUTH_MODE = "tls-authmode";
         public const string NNG_OPT_TLS_CERT_KEY_FILE = "tls-cert-key-file";
@@ -50,6 +49,11 @@ namespace nng.Native
         public const string NNG_OPT_PAIR1_POLY = "pair1:polyamorous";
 
         public const string NNG_OPT_SURVEYOR_SURVEYTIME = "surveyor:survey-time";
+
+        public const string NNG_OPT_WS_REQUEST_HEADERS = "ws:request-headers";
+        public const string NNG_OPT_WS_RESPONSE_HEADERS = "ws:response-headers";
+        public const string NNG_OPT_WSS_REQUEST_HEADERS = NNG_OPT_WS_REQUEST_HEADERS;
+        public const string NNG_OPT_WSS_RESPONSE_HEADERS = NNG_OPT_WS_RESPONSE_HEADERS;
     #endregion
 
     #region nng_errno_enum
@@ -121,7 +125,7 @@ namespace nng.Native
     {
         IntPtr ptr;
     }
-    
+
     public struct nng_duration
     {
         public Int32 TimeMs {get; set;}

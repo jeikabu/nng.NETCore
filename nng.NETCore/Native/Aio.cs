@@ -24,10 +24,10 @@ namespace nng.Native.Aio
         public static extern int nng_aio_alloc(out nng_aio aio, AioCallback callback, IntPtr arg);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_aio_free(nng_aio aio);
+        public static extern void nng_aio_free(nng_aio aio);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_aio_stop(nng_aio aio);
+        public static extern void nng_aio_stop(nng_aio aio);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_aio_result(nng_aio aio);

@@ -15,11 +15,13 @@ namespace nng
         public static PubSocket<T> Create(string url)
         {
             nng_socket socket;
-            if (nng_pub0_open(out socket) != 0)
+            int res = nng_pub0_open(out socket);
+            if (res != 0)
             {
                 return null;
             }
-            if (nng_listen(socket, url, 0) != 0)
+            res = nng_listen(socket, url, 0);
+            if (res != 0)
             {
                 return null;
             }

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace nng
 {
-    public interface ISocket
+    public interface ISocket : IDisposable
     {
         nng_socket NngSocket { get; }
 

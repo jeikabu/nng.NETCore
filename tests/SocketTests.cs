@@ -21,10 +21,10 @@ namespace nng.Tests
             this.factory = collectionFixture.Factory;
         }
 
-        [Fact]
-        public async void GetSetOpt()
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public async void GetSetOpt(string url)
         {
-            var url = UrlRandomIpc();
             var rep = factory.CreateReplier(url);
             var req = factory.CreateRequester(url);
 

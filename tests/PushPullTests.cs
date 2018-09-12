@@ -20,10 +20,10 @@ namespace nng.Tests
             this.factory = collectionFixture.Factory;
         }
 
-        [Fact]
-        public async Task PushPull()
+        [Theory]
+        [ClassData(typeof(TransportsNoWsClassData))]
+        public async Task PushPull(string url)
         {
-            var url = UrlRandomIpc();
             var barrier = new AsyncBarrier(2);
             var push = Task.Run(async () => {
                 var pushSocket = factory.CreatePusher(url, true);
