@@ -18,14 +18,14 @@ namespace nng
         public ISocket Socket { get; private set; }
 
         protected nng_aio aioHandle = nng_aio.Null;
-        public enum AsyncState
+        protected enum AsyncState
         {
             Init,
             Recv,
             Wait,
             Send,
         }
-        public AsyncState State { get; protected set; } = AsyncState.Init;
+        protected AsyncState State { get; set; } = AsyncState.Init;
 
         public void SetTimeout(int msTimeout)
         {
@@ -43,21 +43,17 @@ namespace nng
             // Make a copy to ensure an auto-matically created delegate doesn't get GC'd while native code 
             // is still using it:
             // https://stackoverflow.com/questions/6193711/call-has-been-made-on-garbage-collected-delegate-in-c
-            var aioCallback = new AioCallback(callback);
-            callbacks.Add(aioCallback);
+            aioCallback = new AioCallback(callback);
             return nng_aio_alloc(out aioHandle, aioCallback, IntPtr.Zero);
         }
 
-        // FIXME: TODO:
-        // Callbacks passed to nng_aio_alloc() keep getting called even after nng_aio_free() resulting in:
-        // A callback was made on a garbage collected delegate of type 'nng.NETCore!nng.Native.Aio.UnsafeNativeMethods+AioCallback::Invoke'.
-        static ConcurrentBag<AioCallback> callbacks = new ConcurrentBag<AioCallback>();
+        AioCallback aioCallback;
         
         #region IDisposable
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
