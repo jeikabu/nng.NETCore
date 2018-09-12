@@ -22,7 +22,7 @@ __Core Functionality__
 | dialer | 50% | 25% | 25%
 | iov | 0% | 0% | 0%
 | listener | 50% | 25% | 25%
-| msg | 75% | 50% | 50%
+| msg | 75% | 75% | 75%
 | pipe | 0% | 0% | 0% | Low priority
 | socket | 100% | 50% | 50% | Missing synchronous methods and nng_getopt_string
 | raw socket | 0% | 0% | 0% | Low priority

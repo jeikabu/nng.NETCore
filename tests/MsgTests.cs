@@ -138,5 +138,36 @@ namespace nng.Tests
             var headerBytes = Concat(int1, int0).ToArray();
             Assert.True(Util.BytesEqual(headerBytes, msg.Header.Raw));
         }
+
+        void ChopTrimPart(IMessagePart part)
+        {
+            var bytes0 = Guid.NewGuid().ToByteArray();
+            var int0 = (uint)Util.rng.Next(1000, 1000000);
+            var int1 = (uint)Util.rng.Next(1000, 1000000);
+
+            part.Append(bytes0);
+
+            part.Insert(int0);
+            part.Insert(int0);
+            part.Trim((UIntPtr)4);
+            part.Trim(out var trim);
+            Assert.Equal(int0, trim);
+            Assert.True(Util.BytesEqual(bytes0, part.Raw));
+            
+            part.Append(int1);
+            part.Append(int1);
+            part.Chop((UIntPtr)4);
+            part.Chop(out var chop);
+            Assert.Equal(int1, chop);
+            Assert.True(Util.BytesEqual(bytes0, part.Raw));
+        }
+
+        [Fact]
+        public void ChopTrim()
+        {
+            var msg = factory.CreateMessage();
+            ChopTrimPart(msg);
+            ChopTrimPart(msg.Header);
+        }
     }
 }

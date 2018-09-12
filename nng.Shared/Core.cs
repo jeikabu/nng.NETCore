@@ -25,10 +25,14 @@ namespace nng
     {
         int Append(byte[] data);
         int Append(uint data);
+        int Chop(UIntPtr size);
+        int Chop(out uint data);
         void Clear();
         int Insert(byte[] data);
         int Insert(uint data);
         int Length { get; }
+        int Trim(UIntPtr size);
+        int Trim(out uint data);
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
         ReadOnlySpan<byte> Raw { get; }
     }

@@ -18,10 +18,14 @@ namespace nng
 
         public int Append(byte[] data) => nng_msg_header_append(NngMsg, data);
         public int Append(UInt32 data) => nng_msg_header_append_u32(NngMsg, data);
+        public int Chop(UIntPtr size) => nng_msg_header_chop(NngMsg, size);
+        public int Chop(out uint data) => nng_msg_header_chop_u32(NngMsg, out data);
         public void Clear() => nng_msg_header_clear(NngMsg);
         public int Insert(byte[] data) => nng_msg_header_insert(NngMsg, data);
         public int Insert(UInt32 data) => nng_msg_header_insert_u32(NngMsg, data);
         public int Length => (int)nng_msg_header_len(NngMsg);
+        public int Trim(UIntPtr size) => nng_msg_header_trim(NngMsg, size);
+        public int Trim(out uint data) => nng_msg_header_trim_u32(NngMsg, out data);
         public ReadOnlySpan<byte> Raw => nng_msg_header_span(NngMsg);
 
         nng_msg NngMsg => message;
@@ -60,11 +64,14 @@ namespace nng
 
         public int Append(byte[] data) => nng_msg_append(NngMsg, data);
         public int Append(uint data) => nng_msg_append_u32(NngMsg, data);
+        public int Chop(UIntPtr size) => nng_msg_chop(NngMsg, size);
+        public int Chop(out uint data) => nng_msg_chop_u32(NngMsg, out data);
         public void Clear() => nng_msg_clear(NngMsg);
-        
         public int Insert(byte[] data) => nng_msg_insert(NngMsg, data);
         public int Insert(uint data) => nng_msg_insert_u32(NngMsg, data);
         public int Length => (int)nng_msg_len(NngMsg);
+        public int Trim(UIntPtr size) => nng_msg_trim(NngMsg, size);
+        public int Trim(out uint data) => nng_msg_trim_u32(NngMsg, out data);
         public ReadOnlySpan<byte> Raw => nng_msg_body_span(NngMsg);
 
         readonly nng_msg message;
