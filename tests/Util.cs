@@ -44,6 +44,11 @@ namespace nng.Tests
             }
         }
 
+        public static bool BytesEqual(ReadOnlySpan<byte> lhs, ReadOnlySpan<byte> rhs)
+        {
+            return lhs.SequenceEqual(rhs);
+        }
+
         static readonly Random rng = new Random();
     }
 
