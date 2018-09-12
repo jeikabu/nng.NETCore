@@ -49,7 +49,7 @@ namespace nng.Tests
             return lhs.SequenceEqual(rhs);
         }
 
-        static readonly Random rng = new Random();
+        public static readonly Random rng = new Random();
     }
 
     static class FactoryExt

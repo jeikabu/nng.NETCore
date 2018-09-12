@@ -25,10 +25,11 @@ namespace nng
     {
         nng_msg NngMsg { get; }
         IMessage Header { get; }
+        IMessage Clone();
         int Append(byte[] data);
-        int Append(UInt32 data);
+        int Append(uint data);
         int Insert(byte[] data);
-        int Insert(UInt32 data);
+        int Insert(uint data);
         int Length { get; }
         void Clear();
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]

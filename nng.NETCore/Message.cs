@@ -25,6 +25,16 @@ namespace nng
             this.message = message;
         }
 
+        public IMessage Clone()
+        {
+            var res = nng_msg_dup(out var msg, NngMsg);
+            if (res != 0)
+            {
+                throw new NngException(res);
+            }
+            return new Message(msg);
+        }
+
         public nng_msg NngMsg => message;
         public IMessage Header => this;
         public int Append(byte[] data) => nng_msg_header_append(NngMsg, data);
@@ -76,26 +86,17 @@ namespace nng
             _header = new NngMessageHeader(message);
         }
 
-        public IMessage Clone()
-        {
-            var res = nng_msg_dup(out var msg, NngMsg);
-            if (res != 0)
-            {
-                throw new NngException(res);
-            }
-            return new Message(msg);
-        }
-
+        public IMessage Clone() => Header.Clone();
         public nng_msg NngMsg => Header.NngMsg;
         public IMessage Header => _header;
         public int Append(byte[] data) => nng_msg_append(NngMsg, data);
-        public int Append(UInt32 data) => nng_msg_append_u32(NngMsg, data);
+        public int Append(uint data) => nng_msg_append_u32(NngMsg, data);
         public int Insert(byte[] data) => nng_msg_insert(NngMsg, data);
-        public int Insert(UInt32 data) => nng_msg_insert_u32(NngMsg, data);
+        public int Insert(uint data) => nng_msg_insert_u32(NngMsg, data);
         public int Length => (int)nng_msg_len(NngMsg);
         public void Clear() => nng_msg_clear(NngMsg);
-        public ReadOnlySpan<byte> HeaderRaw => nng_msg_header_span(NngMsg);
-        public ReadOnlySpan<byte> BodyRaw => nng_msg_body_span(NngMsg);
+        public ReadOnlySpan<byte> HeaderRaw => Header.HeaderRaw;
+        public ReadOnlySpan<byte> BodyRaw => Header.BodyRaw;
 
         readonly NngMessageHeader _header;
 
