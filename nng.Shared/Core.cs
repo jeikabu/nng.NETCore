@@ -21,21 +21,23 @@ namespace nng
         int error = 0;
     }
 
-    public interface IMessage : IDisposable
+    public interface IMessagePart
     {
-        nng_msg NngMsg { get; }
-        IMessage Header { get; }
-        IMessage Clone();
         int Append(byte[] data);
         int Append(uint data);
+        void Clear();
         int Insert(byte[] data);
         int Insert(uint data);
         int Length { get; }
-        void Clear();
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ReadOnlySpan<byte> HeaderRaw { get; }
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ReadOnlySpan<byte> BodyRaw { get; }
+        ReadOnlySpan<byte> Raw { get; }
+    }
+
+    public interface IMessage : IMessagePart, IDisposable
+    {
+        nng_msg NngMsg { get; }
+        IMessagePart Header { get; }
+        IMessage Dup();
     }
 
     public static class Extensions

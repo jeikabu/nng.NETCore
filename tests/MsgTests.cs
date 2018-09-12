@@ -37,19 +37,9 @@ namespace nng.Tests
         {
             var msg = MsgRandom();
 
-            var clone = msg.Clone();
-            Assert.True(Util.BytesEqual(msg.BodyRaw, clone.BodyRaw));
-            Assert.True(Util.BytesEqual(msg.HeaderRaw, clone.HeaderRaw));
-        }
-
-        [Fact]
-        public void HeaderBody()
-        {
-            var msg = MsgRandom();
-
-            // Message.BodyRaw == Message.Header.BodyRaw and Message.HeaderRaw == Message.Header.HeaderRaw
-            Assert.True(Util.BytesEqual(msg.BodyRaw, msg.Header.BodyRaw));
-            Assert.True(Util.BytesEqual(msg.HeaderRaw, msg.Header.HeaderRaw));
+            var clone = msg.Dup();
+            Assert.True(Util.BytesEqual(msg.Raw, clone.Raw));
+            Assert.True(Util.BytesEqual(msg.Header.Raw, clone.Header.Raw));
         }
 
         [Fact]
@@ -77,10 +67,10 @@ namespace nng.Tests
             // Append appends
             msg.Append(bytes0);
             msg.Append(bytes1);
-            Assert.True(msg.BodyRaw.EndsWith(bytes1));
+            Assert.True(msg.Raw.EndsWith(bytes1));
             msg.Header.Append(bytes1);
             msg.Header.Append(bytes0);
-            Assert.True(msg.HeaderRaw.EndsWith(bytes0));
+            Assert.True(msg.Header.Raw.EndsWith(bytes0));
         }
 
         [Fact]
@@ -106,10 +96,10 @@ namespace nng.Tests
             // Insert prepends
             msg.Append(bytes1);
             msg.Insert(bytes0);
-            Assert.True(msg.BodyRaw.StartsWith(bytes0));
+            Assert.True(msg.Raw.StartsWith(bytes0));
             msg.Header.Append(bytes0);
             msg.Header.Insert(bytes1);
-            Assert.True(msg.HeaderRaw.StartsWith(bytes1));
+            Assert.True(msg.Header.Raw.StartsWith(bytes1));
         }
 
         IEnumerable<byte> Concat(params int[] values)
@@ -142,11 +132,11 @@ namespace nng.Tests
             msg.Append(uint0);
             msg.Append(uint1);
             var bodyBytes = Concat(int0, int1).ToArray();
-            Assert.True(Util.BytesEqual(bodyBytes, msg.BodyRaw));
+            Assert.True(Util.BytesEqual(bodyBytes, msg.Raw));
             msg.Header.Append(uint1);
             msg.Header.Append(uint0);
             var headerBytes = Concat(int1, int0).ToArray();
-            Assert.True(Util.BytesEqual(headerBytes, msg.HeaderRaw));
+            Assert.True(Util.BytesEqual(headerBytes, msg.Header.Raw));
         }
     }
 }
