@@ -24,7 +24,18 @@ namespace nng
     public interface IMessage : IDisposable
     {
         nng_msg NngMsg { get; }
-        void Append(byte[] data);
+        IMessage Header { get; }
+        IMessage Clone();
+        int Append(byte[] data);
+        int Append(uint data);
+        int Insert(byte[] data);
+        int Insert(uint data);
+        int Length { get; }
+        void Clear();
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
+        ReadOnlySpan<byte> HeaderRaw { get; }
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
+        ReadOnlySpan<byte> BodyRaw { get; }
     }
 
     public static class Extensions

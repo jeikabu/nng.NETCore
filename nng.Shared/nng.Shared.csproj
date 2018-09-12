@@ -11,5 +11,6 @@
   <ItemGroup>
     <PackageReference Include="nuget.build.packaging" Version="0.2.2" />
     <PackageReference Include="system.runtime.loader" Version="4.3.0" />
+    <PackageReference Include="system.memory" Version="4.5.1" />
   </ItemGroup>
 </Project>

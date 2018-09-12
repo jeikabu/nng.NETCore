@@ -1,5 +1,6 @@
 using nng.Native;
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,27 +16,17 @@ namespace nng
     {
         public IMessageFactory<T> Factory { get; private set; }
         public ISocket Socket { get; private set; }
-        public nng_socket NngSocket => Socket.NngSocket;
 
         protected nng_aio aioHandle = nng_aio.Null;
-        public enum AsyncState
+        protected enum AsyncState
         {
             Init,
             Recv,
             Wait,
             Send,
         }
-        public AsyncState State { get; protected set; } = AsyncState.Init;
-        AioCallback callbackDelegate;
+        protected AsyncState State { get; set; } = AsyncState.Init;
 
-        public void SetOpt(string name, byte[] data)
-        {
-            int res = nng_setopt(NngSocket, name, data);
-            if (res != 0)
-            {
-                throw new NngException(res);
-            }
-        }
         public void SetTimeout(int msTimeout)
         {
             nng_aio_set_timeout(aioHandle, new nng_duration { TimeMs = msTimeout });
@@ -45,22 +36,24 @@ namespace nng
             nng_aio_cancel(aioHandle);
         }
 
-        internal int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)
+        internal int Init(IMessageFactory<T> factory, ISocket socket, Action<IntPtr> callback)
         {
             Factory = factory;
             Socket = socket;
             // Make a copy to ensure an auto-matically created delegate doesn't get GC'd while native code 
             // is still using it:
             // https://stackoverflow.com/questions/6193711/call-has-been-made-on-garbage-collected-delegate-in-c
-            callbackDelegate = new AioCallback(callback);
-            return nng_aio_alloc(out aioHandle, callbackDelegate, IntPtr.Zero);
+            aioCallback = new AioCallback(callback);
+            return nng_aio_alloc(out aioHandle, aioCallback, IntPtr.Zero);
         }
 
+        AioCallback aioCallback;
+        
         #region IDisposable
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -69,7 +62,9 @@ namespace nng
                 return;
             if (disposing)
             {
-                var __ = nng_aio_free(aioHandle);
+                nng_aio_cancel(aioHandle);
+                nng_aio_free(aioHandle);
+                Socket.Dispose();
             }
             disposed = true;
         }
@@ -140,7 +135,7 @@ namespace nng
         //     return nng_ctx_setopt_uint64(NngCtx, name, data);
         // }
 
-        internal new int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)
+        internal new int Init(IMessageFactory<T> factory, ISocket socket, Action<IntPtr> callback)
         {
             var res = base.Init(factory, socket, callback);
             if (res != 0)

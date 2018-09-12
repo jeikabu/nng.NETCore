@@ -7,7 +7,11 @@
 Very pre-alpha.  Using latest [nng release](https://github.com/nanomsg/nng/releases) (currently v1.0.1).  Once this is a bit farther along will track nng version numbers.
 
 [![NuGet](https://img.shields.io/nuget/v/Subor.nng.NETCore.svg?colorB=brightgreen)](https://www.nuget.org/packages/Subor.nng.NETCore)
+
 [![Build status](https://ci.appveyor.com/api/projects/status/ohpurtgoq42wauan/branch/master?svg=true)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
+
+[![Build status](https://img.shields.io/appveyor/tests/jake-ruyi/nng-netcore/master.svg)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
+
 [![codecov](https://codecov.io/gh/subor/nng.NETCore/branch/master/graph/badge.svg)](https://codecov.io/gh/subor/nng.NETCore)
 
 Implementation status of various APIs is as follows:
@@ -33,7 +37,7 @@ __Protocols and Transports__
 | Feature | Pinvoke | Wrapper | Tests | Notes
 |-|-|-|-|-
 | bus | 0% | 0% | 0% | Low priority
-| inproc | 100% | 0% | 0% |
+| inproc | 100% | 50% | 50% |
 | ipc | 100% | 50% | 50% |
 | pair | 0% | 0% | 0% | Low priority
 | pub/sub | 100% | 50% | 50% |
@@ -41,9 +45,9 @@ __Protocols and Transports__
 | req/rep | 100% | 50% | 50% |
 | respondent | 0% | 0% | 0% | Low priority
 | surveyor | 0% | 0% | 0% | Low priority
-| tcp | 0% | 0% | 0% |
+| tcp | 100% | 50% | 50% |
 | tls | 0% | 0% | 0% | Low priority
-| ws | 0% | 0% | 0%
+| ws | 50% | 25% | 25%
 | zerotier | 0% | 0% | 0% | Low priority
 
 ## Background

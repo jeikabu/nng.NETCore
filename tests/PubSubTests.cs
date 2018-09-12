@@ -35,10 +35,10 @@ namespace nng.Tests
         //     ret = nng_recvmsg(sub.NngSocket, out var recv, 0);
         // }
 
-        [Fact]
-        public async Task BasicPubSub()
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public async Task BasicPubSub(string url)
         {
-            var url = UrlRandomIpc();
             var pub = factory.CreatePublisher(url);
             await WaitReady();
             var sub = factory.CreateSubscriber(url);
@@ -51,33 +51,41 @@ namespace nng.Tests
             await AssertWait(1000, sendTask, resvTask);
         }
 
-        [Fact]
-        public async Task PubSub()
+        [Theory]
+        [ClassData(typeof(IpcTransportClassData))]
+        public async Task PubSub(string url)
         {
-            var url = UrlRandomIpc();
             var topic = TopicRandom();
             var serverReady = new AsyncBarrier(2);
             var clientReady = new AsyncBarrier(2);
-            var pubTask = Task.Run(async () => {
-                var pubSocket = factory.CreatePublisher(url);
-                await serverReady.SignalAndWait();
-                await clientReady.SignalAndWait();
-                await WaitReady();
-                Assert.True(await pubSocket.Send(factory.CreateTopicMessage(topic)));
+            var pubTask = Task.Run(async () =>
+            {
+                using (var pubSocket = factory.CreatePublisher(url))
+                {
+                    await serverReady.SignalAndWait();
+                    await clientReady.SignalAndWait();
+                    await WaitReady();
+                    Assert.True(await pubSocket.Send(factory.CreateTopicMessage(topic)));
+                    await Task.Delay(10);
+                }
             });
-            var subTask = Task.Run(async () => {
+            var subTask = Task.Run(async () =>
+            {
                 await serverReady.SignalAndWait();
-                var sub = factory.CreateSubscriber(url);
-                sub.Subscribe(topic);
-                await clientReady.SignalAndWait();
-                await sub.Receive(CancellationToken.None);
+                using (var sub = factory.CreateSubscriber(url))
+                {
+                    sub.Subscribe(topic);
+                    await clientReady.SignalAndWait();
+                    await sub.Receive(CancellationToken.None);
+                    await Task.Delay(10);
+                }
             });
-            
-            await AssertWait(1000, pubTask, subTask);
+            await AssertWait(1000, subTask, subTask);
         }
 
-        [Fact]
-        public async Task BrokerTest()
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public async Task BrokerTest(string url)
         {
             await PubSubBrokerAsync(1, 1, 1);
         }
