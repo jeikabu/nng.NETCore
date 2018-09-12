@@ -1,5 +1,6 @@
 using nng.Native;
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,7 +26,6 @@ namespace nng
             Send,
         }
         public AsyncState State { get; protected set; } = AsyncState.Init;
-        AioCallback callbackDelegate;
 
         public void SetTimeout(int msTimeout)
         {
@@ -36,17 +36,23 @@ namespace nng
             nng_aio_cancel(aioHandle);
         }
 
-        internal int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)
+        internal int Init(IMessageFactory<T> factory, ISocket socket, Action<IntPtr> callback)
         {
             Factory = factory;
             Socket = socket;
             // Make a copy to ensure an auto-matically created delegate doesn't get GC'd while native code 
             // is still using it:
             // https://stackoverflow.com/questions/6193711/call-has-been-made-on-garbage-collected-delegate-in-c
-            callbackDelegate = new AioCallback(callback);
-            return nng_aio_alloc(out aioHandle, callbackDelegate, IntPtr.Zero);
+            var aioCallback = new AioCallback(callback);
+            callbacks.Add(aioCallback);
+            return nng_aio_alloc(out aioHandle, aioCallback, IntPtr.Zero);
         }
 
+        // FIXME: TODO:
+        // Callbacks passed to nng_aio_alloc() keep getting called even after nng_aio_free() resulting in:
+        // A callback was made on a garbage collected delegate of type 'nng.NETCore!nng.Native.Aio.UnsafeNativeMethods+AioCallback::Invoke'.
+        static ConcurrentBag<AioCallback> callbacks = new ConcurrentBag<AioCallback>();
+        
         #region IDisposable
         public void Dispose()
         {
@@ -133,7 +139,7 @@ namespace nng
         //     return nng_ctx_setopt_uint64(NngCtx, name, data);
         // }
 
-        internal new int Init(IMessageFactory<T> factory, ISocket socket, AioCallback callback)
+        internal new int Init(IMessageFactory<T> factory, ISocket socket, Action<IntPtr> callback)
         {
             var res = base.Init(factory, socket, callback);
             if (res != 0)

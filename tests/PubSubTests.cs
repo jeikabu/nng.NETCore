@@ -51,39 +51,37 @@ namespace nng.Tests
             await AssertWait(1000, sendTask, resvTask);
         }
 
-        // [Theory]
-        // [ClassData(typeof(IpcTransportClassData))]
-        // public async Task PubSub(string url)
-        // {
-        //     var topic = TopicRandom();
-        //     for (int i = 0; i < 10; ++i)
-        //     {
-        //     await Task.Delay(50);
-        //     var serverReady = new AsyncBarrier(2);
-        //     var clientReady = new AsyncBarrier(2);
-        //     var pubTask = Task.Run(async () => {
-        //         using (var pubSocket = factory.CreatePublisher(url))
-        //         {
-        //             await serverReady.SignalAndWait();
-        //             await clientReady.SignalAndWait();
-        //             await WaitReady();
-        //             Assert.True(await pubSocket.Send(factory.CreateTopicMessage(topic)));
-        //             await Task.Delay(10);
-        //         }
-        //     });
-        //     var subTask = Task.Run(async () => {
-        //         await serverReady.SignalAndWait();
-        //         using (var sub = factory.CreateSubscriber(url))
-        //         {
-        //             sub.Subscribe(topic);
-        //             await clientReady.SignalAndWait();
-        //             await sub.Receive(CancellationToken.None);
-        //             await Task.Delay(10);
-        //         }
-        //     });
-        //     await AssertWait(100000, subTask, subTask);
-        //     }
-        // }
+        [Theory]
+        [ClassData(typeof(IpcTransportClassData))]
+        public async Task PubSub(string url)
+        {
+            var topic = TopicRandom();
+            var serverReady = new AsyncBarrier(2);
+            var clientReady = new AsyncBarrier(2);
+            var pubTask = Task.Run(async () =>
+            {
+                using (var pubSocket = factory.CreatePublisher(url))
+                {
+                    await serverReady.SignalAndWait();
+                    await clientReady.SignalAndWait();
+                    await WaitReady();
+                    Assert.True(await pubSocket.Send(factory.CreateTopicMessage(topic)));
+                    await Task.Delay(10);
+                }
+            });
+            var subTask = Task.Run(async () =>
+            {
+                await serverReady.SignalAndWait();
+                using (var sub = factory.CreateSubscriber(url))
+                {
+                    sub.Subscribe(topic);
+                    await clientReady.SignalAndWait();
+                    await sub.Receive(CancellationToken.None);
+                    await Task.Delay(10);
+                }
+            });
+            await AssertWait(1000, subTask, subTask);
+        }
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
