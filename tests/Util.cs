@@ -62,7 +62,23 @@ namespace nng.Tests
         }
     }
 
-    public class TransportsClassData : IEnumerable<object[]>
+    class BadTransportsClassData : IEnumerable<object[]>
+    {
+        public IEnumerator<object[]> GetEnumerator()
+        {
+            yield return new object[] { string.Empty };
+            //yield return new object[] { null };
+            yield return new object[] { "badproto://localhost" };
+            yield return new object[] { "inproc//missingcolon:9000" };
+            yield return new object[] { "inproc:/missingslash:9000" };
+            yield return new object[] { "tcp://badport:70000" };
+            yield return new object[] { "tcp://192.168.1.300:10000" }; // Bad IP
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    class TransportsClassData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
@@ -75,7 +91,7 @@ namespace nng.Tests
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    public class IpcTransportClassData : IEnumerable<object[]>
+    class IpcTransportClassData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
@@ -86,7 +102,7 @@ namespace nng.Tests
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    public class TransportsNoWsClassData : IEnumerable<object[]>
+    class TransportsNoWsClassData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
