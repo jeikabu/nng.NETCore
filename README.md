@@ -7,16 +7,14 @@
 Very pre-alpha.  Using latest [nng release](https://github.com/nanomsg/nng/releases) (currently v1.0.1).  Once this is a bit farther along will track nng version numbers.
 
 [![NuGet](https://img.shields.io/nuget/v/Subor.nng.NETCore.svg?colorB=brightgreen)](https://www.nuget.org/packages/Subor.nng.NETCore)
-
 [![Build status](https://ci.appveyor.com/api/projects/status/ohpurtgoq42wauan/branch/master?svg=true)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
-
 [![Build status](https://img.shields.io/appveyor/tests/jake-ruyi/nng-netcore/master.svg)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
-
 [![codecov](https://codecov.io/gh/subor/nng.NETCore/branch/master/graph/badge.svg)](https://codecov.io/gh/subor/nng.NETCore)
 
 Implementation status of various APIs is as follows:
 
 __Core Functionality__
+
 | Feature | Pinvoke | Wrapper | Tests | Notes
 |-|-|-|-|-
 | aio | 100% | 75% | 75% | Missing get/set_input/output/iov
@@ -24,7 +22,7 @@ __Core Functionality__
 | dialer | 50% | 25% | 25%
 | iov | 0% | 0% | 0%
 | listener | 50% | 25% | 25%
-| msg | 50% | 25% | 25%
+| msg | 75% | 50% | 50%
 | pipe | 0% | 0% | 0% | Low priority
 | socket | 100% | 50% | 50% | Missing synchronous methods and nng_getopt_string
 | raw socket | 0% | 0% | 0% | Low priority
@@ -34,6 +32,7 @@ __Core Functionality__
 | CV/Mtx/thread | 0% | 0% | 0% | No plans to implement
 
 __Protocols and Transports__
+
 | Feature | Pinvoke | Wrapper | Tests | Notes
 |-|-|-|-|-
 | bus | 0% | 0% | 0% | Low priority
