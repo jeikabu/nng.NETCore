@@ -8,11 +8,11 @@ namespace nng
 {
     public class NngLoadContext : AssemblyLoadContext
     {
-        public static IFactory<IMessage> Init(AssemblyLoadContext loadContext)
+        public static IAPIFactory<IMessage> Init(AssemblyLoadContext loadContext)
         {
             var assem = loadContext.LoadFromAssemblyName(new System.Reflection.AssemblyName(managedAssemblyName));
             var type = assem.GetType("nng.Tests.TestFactory");
-            return (IFactory<IMessage>)Activator.CreateInstance(type);
+            return (IAPIFactory<IMessage>)Activator.CreateInstance(type);
         }
 
         public NngLoadContext(string path)

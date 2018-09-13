@@ -10,17 +10,11 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class PubSocket<T> : Socket
+    public class PubSocket<T> : Socket, IPubSocket
     {
-        public static PubSocket<T> Create(string url)
+        public static PubSocket<T> Open()
         {
-            nng_socket socket;
-            int res = nng_pub0_open(out socket);
-            if (res != 0)
-            {
-                return null;
-            }
-            res = nng_listen(socket, url, 0);
+            int res = nng_pub0_open(out var socket);
             if (res != 0)
             {
                 return null;
@@ -28,54 +22,49 @@ namespace nng
             return new PubSocket<T> { NngSocket = socket };
         }
 
-        public static ISendAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
+        public static PubSocket<T> Create(string url)
         {
-            var socket = Create(url);
+            var socket = Open();
             if (socket == null)
             {
                 return null;
             }
-            var ctx = new SendAsyncContext<T>();
-            var res = ctx.Init(factory, socket, ctx.callback);
+            var res = nng_listen(socket.NngSocket, url, 0);
             if (res != 0)
             {
+                socket.Dispose();
                 return null;
             }
-            return ctx;
+            return socket;
         }
 
         private PubSocket(){}
     }
 
-    public class SubSocket<T> : Socket
+    public class SubSocket<T> : Socket, ISubSocket
     {
-        public static SubSocket<T> Create(string url)
+        public static SubSocket<T> Open()
         {
-            nng_socket socket;
-            if (nng_sub0_open(out socket) != 0)
-            {
-                return null;
-            }
-            if (nng_dial(socket, url, 0) != 0)
+            if (nng_sub0_open(out var socket) != 0)
             {
                 return null;
             }
             return new SubSocket<T> { NngSocket = socket };
         }
 
-        public static ISubAsyncContext<T> CreateAsyncContext(IMessageFactory<T> factory, string url)
+        public static SubSocket<T> Create(string url)
         {
-            var socket = SubSocket<T>.Create(url);
+            var socket = Open();
             if (socket == null)
             {
                 return null;
             }
-            var res = new SubAsyncContext<T>();
-            if (res.Init(factory, socket, res.callback) != 0)
+            if (nng_dial(socket.NngSocket, url, 0) != 0)
             {
+                socket.Dispose();
                 return null;
             }
-            return res;
+            return socket;
         }
 
         private SubSocket(){}

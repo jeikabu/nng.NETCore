@@ -14,7 +14,7 @@ namespace nng.Tests
     [Collection("nng")]
     public class CtxTests
     {
-        IFactory<IMessage> factory;
+        IAPIFactory<IMessage> factory;
 
         public CtxTests(NngCollectionFixture collectionFixture)
         {

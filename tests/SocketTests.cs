@@ -14,7 +14,7 @@ namespace nng.Tests
     [Collection("nng")]
     public class SocketTests
     {
-        IFactory<IMessage> factory;
+        IAPIFactory<IMessage> factory;
 
         public SocketTests(NngCollectionFixture collectionFixture)
         {

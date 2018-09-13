@@ -10,18 +10,33 @@ namespace nng
         void Destroy(ref T message);
     }
 
-    public interface IFactory<T> : IMessageFactory<T>
+    public interface ISocketFactory
     {
-        ISendAsyncContext<T> CreatePublisher(string url);
-
-        ISubAsyncContext<T> CreateSubscriber(string url);
-
-        ISendAsyncContext<T> CreatePusher(string url, bool isListener);
-
-        IReceiveAsyncContext<T> CreatePuller(string url, bool isListener);
-
-        IReqRepAsyncContext<T> CreateRequester(string url);
-
-        IRepReqAsyncContext<T> CreateReplier(string url);
+        IPubSocket PublisherOpen();
+        IPubSocket PublisherCreate(string url);
+        ISubSocket SubscriberOpen();
+        ISubSocket SubscriberCreate(string url);
+        IPushSocket PusherOpen();
+        IPushSocket PusherCreate(string url, bool isListener);
+        IPullSocket PullerOpen();
+        IPullSocket PullerCreate(string url, bool isListener);
+        IReqSocket RequesterOpen();
+        IReqSocket RequesterCreate(string url);
+        IRepSocket ReplierOpen();
+        IRepSocket ReplierCreate(string url);
+        IListener ListenerCreate(ISocket socket, string url);
     }
+
+    public interface IAsyncContextFactory<T>
+    {
+        ISendAsyncContext<T> CreateSendAsyncContext(ISocket socket);
+        ISubAsyncContext<T> CreateSubAsyncContext(ISocket socket);
+        IReceiveAsyncContext<T> CreateReceiveAsyncContext(ISocket socket);
+        IReqRepAsyncContext<T> CreateReqRepAsyncContext(ISocket socket);
+        IRepReqAsyncContext<T> CreateRepReqAsyncContext(ISocket socket);
+    }
+
+    public interface IAPIFactory<T> : IMessageFactory<T>, ISocketFactory, IAsyncContextFactory<T>
+    {}
+
 }

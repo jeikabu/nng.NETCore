@@ -13,7 +13,7 @@ namespace nng.Native.Listener
         public static extern int nng_listener_create(out nng_listener listener, nng_socket socket, string url);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_listener_start(nng_listener listener, Int32 flags);
+        public static extern int nng_listener_start(nng_listener listener, Defines.NngFlag flags);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_listener_close(nng_listener listener);
@@ -23,7 +23,7 @@ namespace nng.Native.Listener
 
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_listener_getopt(nng_listener listener, string name, IntPtr data, UIntPtr size);
+        public static extern int nng_listener_getopt(nng_listener listener, string name, byte[] data, UIntPtr size);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_listener_getopt_bool(nng_listener listener, string name, out bool data);
@@ -38,7 +38,22 @@ namespace nng.Native.Listener
         public static extern int nng_listener_getopt_size(nng_listener listener, string name, out UIntPtr data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_listener_setopt(nng_listener listener, string name, IntPtr data, UIntPtr size);
+        public static extern int nng_listener_getopt_uint64(nng_listener listener, string name, out UInt64 data);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_listener_getopt_ptr(nng_listener listener, string name, out IntPtr data);
+
+        // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        // public static extern int nng_listener_getopt_string(nng_listener listener, string name, out string data);
+
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_listener_setopt(nng_listener listener, string name, byte[] data, UIntPtr size);
+
+        public static int nng_listener_setopt(nng_listener listener, string name, byte[] data)
+        {
+            return nng_listener_setopt(listener, name, data, (UIntPtr)data.Length);
+        }
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_listener_setopt_bool(nng_listener listener, string name, bool value);
@@ -51,5 +66,14 @@ namespace nng.Native.Listener
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_listener_setopt_size(nng_listener listener, string name, UIntPtr value);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_listener_setopt_uint64(nng_listener listener, string name, UInt64 value);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_listener_setopt_ptr(nng_listener listener, string name, IntPtr value);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_listener_setopt_string(nng_listener listener, string name, string value);
     }
 }

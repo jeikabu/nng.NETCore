@@ -14,7 +14,7 @@ namespace nng.Tests
     [Collection("nng")]
     public class AioTests
     {
-        IFactory<IMessage> factory;
+        IAPIFactory<IMessage> factory;
 
         public AioTests(NngCollectionFixture collectionFixture)
         {

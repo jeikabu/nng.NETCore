@@ -11,6 +11,15 @@ namespace nng.Native
         public const int NNG_DURATION_DEFAULT = -2;
         public const int NNG_DURATION_ZERO = 0;
 
+    #region Flags/nng_flag_enum
+    [Flags]
+    public enum NngFlag : Int32
+    {
+        NNG_FLAG_ALLOC = 1,
+        NNG_FLAG_NONBLOCK = 2,
+    }
+    #endregion
+
     #region Get/SetOpt
         public const string NNG_OPT_SOCKNAME = "socket-name";
         public const string NNG_OPT_RAW = "raw";
@@ -49,6 +58,13 @@ namespace nng.Native
         public const string NNG_OPT_PAIR1_POLY = "pair1:polyamorous";
 
         public const string NNG_OPT_SURVEYOR_SURVEYTIME = "surveyor:survey-time";
+
+        public const string NNG_OPT_IPC_SECURITY_DESCRIPTOR = "ipc:security-descriptor";
+        public const string NNG_OPT_IPC_PERMISSIONS = "ipc:permissions";
+        public const string NNG_OPT_IPC_PEER_UID = "ipc:peer-uid";
+        public const string NNG_OPT_IPC_PEER_GID = "ipc:peer-gid";
+        public const string NNG_OPT_IPC_PEER_PID = "ipc:peer-pid";
+        public const string NNG_OPT_IPC_PEER_ZONEID = "ipc:peer-zoneid";
 
         public const string NNG_OPT_WS_REQUEST_HEADERS = "ws:request-headers";
         public const string NNG_OPT_WS_RESPONSE_HEADERS = "ws:response-headers";

@@ -9,7 +9,7 @@ namespace nng.Tests
 
     interface IBrokerImpl<T>
     {
-        IFactory<T> Factory { get; }
+        IAPIFactory<T> Factory { get; }
         IReceiveAsyncContext<T> CreateInSocket(string url);
         ISendAsyncContext<T> CreateOutSocket(string url);
         IReceiveAsyncContext<T> CreateClient(string url);
