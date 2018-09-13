@@ -67,6 +67,9 @@ namespace nng.Tests
         public IListener ListenerCreate(ISocket socket, string url)
             => Listener.Create(socket, url);
 
+        public IDialer DialerCreate(ISocket socket, string url)
+            => Dialer.Create(socket, url);
+
 
         #region IAsyncContextFactory
         public ISendAsyncContext<IMessage> CreateSendAsyncContext(ISocket socket)

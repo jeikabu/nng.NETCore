@@ -25,6 +25,7 @@ namespace nng
         IRepSocket ReplierOpen();
         IRepSocket ReplierCreate(string url);
         IListener ListenerCreate(ISocket socket, string url);
+        IDialer DialerCreate(ISocket socket, string url);
     }
 
     public interface IAsyncContextFactory<T>

@@ -55,10 +55,16 @@ namespace nng
         ISocket Socket { get; }
     }
 
-    public interface IListener : IHasOpts, IDisposable
+    public interface IStart : IDisposable
     {
         int Start(Defines.NngFlag flags = 0);
     }
+
+    public interface IListener : IStart, IHasOpts
+    {}
+
+    public interface IDialer : IStart, IHasOpts
+    {}
     
     public interface IPubSocket : ISocket {}
     public interface ISubSocket : ISocket {}
