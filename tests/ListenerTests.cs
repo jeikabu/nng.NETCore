@@ -22,13 +22,29 @@ namespace nng.Tests
         }
 
         [Fact]
-        public async Task Test()
+        public async Task Basic()
         {
             var url = UrlRandomIpc();
             var socket = factory.PublisherOpen();
-            var listener = factory.ListenerCreate(socket, url);
+            using (var listener = factory.ListenerCreate(socket, url))
+            {
+                Assert.NotNull(listener);
+                Assert.Equal(0, listener.Start());
+                await WaitReady();
+                Assert.NotNull(factory.SubscriberCreate(url));
+            }
+        }
 
-            listener.Start();
+        [Fact]
+        public async Task GetSetOptions()
+        {
+            var url = UrlRandomIpc();
+            var socket = factory.PublisherOpen();
+            using (var listener = factory.ListenerCreate(socket, url))
+            {
+                //AssertGetSetOpts(listener, NNG_OPT_RECVBUF, (int data) => data + 16);
+                AssertGetSetOpts(listener, NNG_OPT_RECVMAXSZ, (UIntPtr data) => data + 16);
+            }
         }
     }
 }

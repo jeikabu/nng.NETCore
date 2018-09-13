@@ -49,6 +49,41 @@ namespace nng.Tests
             return lhs.SequenceEqual(rhs);
         }
 
+        public static void AssertGetSetOpts(IHasOpts options, string name)
+        {
+            Assert.Equal(0, options.GetOpt(name, out bool isSet));
+            Assert.Equal(0, options.SetOpt(name, !isSet));
+            options.GetOpt(name, out bool isSetNow);
+            Assert.NotEqual(isSet, isSetNow);
+        }
+
+        public static void AssertGetSetOpts(IHasOpts options, string name, Func<int, int> newValueFunc)
+        {
+            Assert.Equal(0, options.GetOpt(name, out int data));
+            var newData = newValueFunc(data);
+            Assert.Equal(0, options.SetOpt(name, newData));
+            options.GetOpt(name, out int nextData);
+            Assert.Equal(newData, nextData);
+        }
+
+        public static void AssertGetSetOpts(IHasOpts options, string name, Func<nng_duration, nng_duration> newDataFunc)
+        {
+            Assert.Equal(0, options.GetOpt(name, out nng_duration data));
+            var newData = newDataFunc(data);
+            Assert.Equal(0, options.SetOpt(name, newData));
+            options.GetOpt(name, out nng_duration nextData);
+            Assert.Equal(newData, nextData);
+        }
+
+        public static void AssertGetSetOpts(IHasOpts options, string name, Func<UIntPtr, UIntPtr> newDataFunc)
+        {
+            Assert.Equal(0, options.GetOpt(name, out UIntPtr size));
+            var newSize = newDataFunc(size);
+            Assert.Equal(0, options.SetOpt(name, newSize));
+            options.GetOpt(name, out UIntPtr nextSize);
+            Assert.Equal(newSize, nextSize);
+        }
+
         public static readonly Random rng = new Random();
     }
 

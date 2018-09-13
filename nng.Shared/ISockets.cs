@@ -28,6 +28,26 @@ namespace nng
         int SetOpt(string name, bool data);
         int SetOpt(string name, int data);
         int SetOpt(string name, nng_duration data);
+        int SetOpt(string name, UIntPtr data);
+    }
+
+    public static class OptionsExt
+    {
+        public static int SetOpt<T>(this IHasOpts self, string name, T data)
+        {
+            switch (data)
+            {
+                case bool boolVal:
+                    return self.SetOpt(name, boolVal);
+                case int intVal:
+                    return self.SetOpt(name, intVal);
+                case nng_duration durVal:
+                    return self.SetOpt(name, durVal);
+                case UIntPtr sizeVal:
+                    return self.SetOpt(name, sizeVal);
+            }
+            return Defines.NNG_EINVAL;
+        }
     }
 
     public interface IHasSocket
