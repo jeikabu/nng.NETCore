@@ -31,7 +31,7 @@ namespace nng.Tests
             Factory = NngLoadContext.Init(alc);
         }
 
-        public IFactory<IMessage> Factory { get; private set; }
+        public IAPIFactory<IMessage> Factory { get; private set; }
     }
 
     [CollectionDefinition("nng")]

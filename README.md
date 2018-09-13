@@ -19,11 +19,11 @@ __Core Functionality__
 |-|-|-|-|-
 | aio | 100% | 75% | 75% | Missing get/set_input/output/iov
 | ctx | 100% | 50% | 50% | Doesn't seem to be ctx-supported options other than nng_duration
-| dialer | 50% | 25% | 25%
+| dialer | 75% | 50% | 50%
 | iov | 0% | 0% | 0%
-| listener | 50% | 25% | 25%
-| msg | 75% | 50% | 50%
-| pipe | 0% | 0% | 0% | Low priority
+| listener | 75% | 50% | 50%
+| msg | 75% | 75% | 75%
+| pipe | 0% | 0% | 0% | 
 | socket | 100% | 50% | 50% | Missing synchronous methods and nng_getopt_string
 | raw socket | 0% | 0% | 0% | Low priority
 | compat | 0% | 0% | 0% | No plans to implement

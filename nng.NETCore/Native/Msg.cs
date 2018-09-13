@@ -100,10 +100,10 @@ namespace nng.Native.Msg
         public static extern Int32 nng_msg_header_insert_u32(nng_msg message, UInt32 data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_msg_header_chop_u32(nng_msg message, ref UInt32 data);
+        public static extern Int32 nng_msg_header_chop_u32(nng_msg message, out UInt32 data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_msg_header_trim_u32(nng_msg message, ref UInt32 data);
+        public static extern Int32 nng_msg_header_trim_u32(nng_msg message, out UInt32 data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern Int32 nng_msg_append_u32(nng_msg message, UInt32 data);
@@ -112,10 +112,10 @@ namespace nng.Native.Msg
         public static extern Int32 nng_msg_insert_u32(nng_msg message, UInt32 data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_msg_chop_u32(nng_msg message, ref UInt32 data);
+        public static extern Int32 nng_msg_chop_u32(nng_msg message, out UInt32 data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_msg_trim_u32(nng_msg message, ref UInt32 data);
+        public static extern Int32 nng_msg_trim_u32(nng_msg message, out UInt32 data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern Int32 nng_msg_dup(out nng_msg dest, nng_msg source);

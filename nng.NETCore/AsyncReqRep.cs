@@ -87,7 +87,7 @@ namespace nng
 
     public class RepAsyncCtx<T> : AsyncCtx<T>, IRepReqAsyncContext<T>
     {
-        public static IRepReqAsyncContext<T> Create(ISocket socket, IMessageFactory<T> factory)
+        public static IRepReqAsyncContext<T> Create(IMessageFactory<T> factory, ISocket socket)
         {
             var res = new RepAsyncCtx<T>();
             if (res.Init(factory, socket, res.callback) != 0)
@@ -113,7 +113,7 @@ namespace nng
             return asyncMessage.replyTcs.Task;
         }
 
-        void callback(IntPtr arg)
+        internal void callback(IntPtr arg)
         {
             lock (sync)
             {

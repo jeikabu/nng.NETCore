@@ -5,7 +5,7 @@ namespace nng.Tests
     using static nng.Native.Msg.UnsafeNativeMethods;
 
 
-    public class TestFactory : IMessageFactory<IMessage>, IFactory<IMessage>
+    public class TestFactory : IAPIFactory<IMessage>
     {
         public IMessage CreateMessage()
         {
@@ -28,41 +28,79 @@ namespace nng.Tests
             msg = null;
         }
 
-        public ISendAsyncContext<IMessage> CreatePublisher(string url)
-        {
-            var context = PubSocket<IMessage>.CreateAsyncContext(this, url);
-            return context;
-        }
+        public IPubSocket PublisherOpen()
+            => PubSocket<IMessage>.Open();
 
-        public ISubAsyncContext<IMessage> CreateSubscriber(string url)
-        {
-            var context = SubSocket<IMessage>.CreateAsyncContext(this, url);
-            return context;
-        }
+        public IPubSocket PublisherCreate(string url)
+            => PubSocket<IMessage>.Create(url);
 
-        public ISendAsyncContext<IMessage> CreatePusher(string url, bool isListener)
-        {
-            var context = PushSocket<IMessage>.CreateAsyncContext(this, url, isListener);
-            return context;
-        }
+        public ISubSocket SubscriberOpen()
+            => SubSocket<IMessage>.Open();
 
-        public IReceiveAsyncContext<IMessage> CreatePuller(string url, bool isListener)
-        {
-            var context = PullSocket<IMessage>.CreateAsyncContext(this, url, isListener);
-            return context;
-        }
+        public ISubSocket SubscriberCreate(string url)
+            => SubSocket<IMessage>.Create(url);
 
-        public IReqRepAsyncContext<IMessage> CreateRequester(string url)
-        {
-            var context = ReqSocket<IMessage>.CreateAsyncContext(this, url);
-            return context;
-        }
+        public IPushSocket PusherOpen()
+            => PushSocket<IMessage>.Open();
 
-        public IRepReqAsyncContext<IMessage> CreateReplier(string url)
+        public IPushSocket PusherCreate(string url, bool isListener)
+            => PushSocket<IMessage>.Create(url, isListener);
+            
+        public IPullSocket PullerOpen()
+            => PullSocket<IMessage>.Open();
+
+        public IPullSocket PullerCreate(string url, bool isListener)
+            => PullSocket<IMessage>.Create(url, isListener);
+
+        public IReqSocket RequesterOpen()
+            => ReqSocket<IMessage>.Open();
+
+        public IReqSocket RequesterCreate(string url)
+            => ReqSocket<IMessage>.Create(url);
+
+        public IRepSocket ReplierOpen()
+            => RepSocket<IMessage>.Open();
+        
+        public IRepSocket ReplierCreate(string url)
+            => RepSocket<IMessage>.Create(url);
+
+        public IListener ListenerCreate(ISocket socket, string url)
+            => Listener.Create(socket, url);
+
+        public IDialer DialerCreate(ISocket socket, string url)
+            => Dialer.Create(socket, url);
+
+
+        #region IAsyncContextFactory
+        public ISendAsyncContext<IMessage> CreateSendAsyncContext(ISocket socket)
         {
-            var context = RepSocket<IMessage>.CreateAsyncContext(this, url);
-            return context;
+            var ctx = new SendAsyncContext<IMessage>();
+            ctx.Init(this, socket, ctx.callback);
+            return ctx;
         }
+        public ISubAsyncContext<IMessage> CreateSubAsyncContext(ISocket socket)
+        {
+            var ctx = new SubAsyncContext<IMessage>();
+            ctx.Init(this, socket, ctx.callback);
+            return ctx;
+        }
+        public IReceiveAsyncContext<IMessage> CreateReceiveAsyncContext(ISocket socket)
+        {
+            var ctx = new ResvAsyncContext<IMessage>();
+            ctx.Init(this, socket, ctx.callback);
+            return ctx;
+        }
+        public IReqRepAsyncContext<IMessage> CreateReqRepAsyncContext(ISocket socket)
+        {
+            var ctx = new ReqAsyncCtx<IMessage>();
+            ctx.Init(this, socket, ctx.callback);
+            return ctx;
+        }
+        public IRepReqAsyncContext<IMessage> CreateRepReqAsyncContext(ISocket socket)
+        {
+            return RepAsyncCtx<IMessage>.Create(this, socket);
+        }
+        #endregion
     }
 
 }

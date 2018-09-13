@@ -13,7 +13,7 @@ namespace nng.Tests
     [Collection("nng")]
     public class PubSubTests
     {
-        IFactory<IMessage> factory;
+        IAPIFactory<IMessage> factory;
 
         public PubSubTests(NngCollectionFixture collectionFixture)
         {
@@ -108,9 +108,9 @@ namespace nng.Tests
     
     class PubSubBrokerImpl : IBrokerImpl<IMessage>
     {
-        public IFactory<IMessage> Factory { get; private set; }
+        public IAPIFactory<IMessage> Factory { get; private set; }
 
-        public PubSubBrokerImpl(IFactory<IMessage> factory)
+        public PubSubBrokerImpl(IAPIFactory<IMessage>  factory)
         {
             Factory = factory;
             topic = TopicRandom();

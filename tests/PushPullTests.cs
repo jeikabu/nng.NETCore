@@ -13,7 +13,7 @@ namespace nng.Tests
     [Collection("nng")]
     public class PushPullTests
     {
-        IFactory<IMessage> factory;
+        IAPIFactory<IMessage> factory;
 
         public PushPullTests(NngCollectionFixture collectionFixture)
         {
@@ -62,9 +62,9 @@ namespace nng.Tests
 
     class PushPullBrokerImpl : IBrokerImpl<IMessage>
     {
-        public IFactory<IMessage> Factory { get; private set; }
+        public IAPIFactory<IMessage>  Factory { get; private set; }
 
-        public PushPullBrokerImpl(IFactory<IMessage> factory)
+        public PushPullBrokerImpl(IAPIFactory<IMessage>  factory)
         {
             Factory = factory;
         }
