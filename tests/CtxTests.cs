@@ -22,7 +22,7 @@ namespace nng.Tests
         }
 
         [Fact]
-        public async void GetSetOpt()
+        public void GetSetOpt()
         {
             var url = UrlRandomIpc();
             var rep = factory.CreateReplier(url) as ICtx;

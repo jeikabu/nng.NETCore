@@ -33,18 +33,18 @@ namespace nng
 
     public static class OptionsExt
     {
-        public static int SetOpt<T>(this IHasOpts self, string name, T data)
+        public static int SetOpt<T>(this IHasOpts socket, string name, T data)
         {
             switch (data)
             {
                 case bool boolVal:
-                    return self.SetOpt(name, boolVal);
+                    return socket.SetOpt(name, boolVal);
                 case int intVal:
-                    return self.SetOpt(name, intVal);
+                    return socket.SetOpt(name, intVal);
                 case nng_duration durVal:
-                    return self.SetOpt(name, durVal);
+                    return socket.SetOpt(name, durVal);
                 case UIntPtr sizeVal:
-                    return self.SetOpt(name, sizeVal);
+                    return socket.SetOpt(name, sizeVal);
             }
             return Defines.NNG_EINVAL;
         }
@@ -65,11 +65,12 @@ namespace nng
 
     public interface IDialer : IStart, IHasOpts
     {}
-    
+
     public interface IPubSocket : ISocket {}
     public interface ISubSocket : ISocket {}
     public interface IPushSocket : ISocket {}
     public interface IPullSocket : ISocket {}
     public interface IReqSocket : ISocket {}
     public interface IRepSocket : ISocket {}
+    public interface IBusSocket : ISocket {}
 }

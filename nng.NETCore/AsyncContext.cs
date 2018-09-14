@@ -47,6 +47,14 @@ namespace nng
             return nng_aio_alloc(out aioHandle, aioCallback, IntPtr.Zero);
         }
 
+        protected void CheckState()
+        {
+            if (State != AsyncState.Init)
+            {
+                throw new InvalidOperationException();
+            }
+        }
+
         AioCallback aioCallback;
         
         #region IDisposable

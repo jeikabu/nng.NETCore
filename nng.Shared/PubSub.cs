@@ -8,14 +8,14 @@ namespace nng
 
     public static class Subscriber
     {
-        public static int Subscribe(this ISubscriber self, byte[] topic)
+        public static int Subscribe(this ISubscriber socket, byte[] topic)
         {
-            return self.Socket.SetOpt(NNG_OPT_SUB_SUBSCRIBE, topic);
+            return socket.Socket.SetOpt(NNG_OPT_SUB_SUBSCRIBE, topic);
         }
 
-        public static int Unsubscribe(this ISubscriber self, byte[] topic)
+        public static int Unsubscribe(this ISubscriber socket, byte[] topic)
         {
-            return self.Socket.SetOpt(NNG_OPT_SUB_UNSUBSCRIBE, topic);
+            return socket.Socket.SetOpt(NNG_OPT_SUB_UNSUBSCRIBE, topic);
         }
     }
 }

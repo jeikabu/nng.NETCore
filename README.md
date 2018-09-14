@@ -35,7 +35,7 @@ __Protocols and Transports__
 
 | Feature | Pinvoke | Wrapper | Tests | Notes
 |-|-|-|-|-
-| bus | 0% | 0% | 0% | Low priority
+| bus | 75% | 50% | 25% | 
 | inproc | 100% | 50% | 50% |
 | ipc | 100% | 50% | 50% |
 | pair | 0% | 0% | 0% | Low priority
