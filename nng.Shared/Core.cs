@@ -46,13 +46,13 @@ namespace nng
 
     public static class Extensions
     {
-        public static void TrySetNngError<T>(this TaskCompletionSource<T> self, int error)
+        public static void TrySetNngError<T>(this TaskCompletionSource<T> socket, int error)
         {
             if (error == 0)
             {
                 return;
             }
-            self.TrySetException(new NngException(error));
+            socket.TrySetException(new NngException(error));
         }
     }
 }

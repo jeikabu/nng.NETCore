@@ -46,14 +46,18 @@ namespace nng
         void Cancel();
     }
 
+    public interface ISendAsyncContext<T> : IAsyncContext
+    {
+        Task<bool> Send(T message);
+    }
+
     public interface IReceiveAsyncContext<T> : IAsyncContext
     {
         Task<T> Receive(CancellationToken token);
     }
 
-    public interface ISendAsyncContext<T> : IAsyncContext
+    public interface ISendReceiveAsyncContext<T> : ISendAsyncContext<T>, IReceiveAsyncContext<T>
     {
-        Task<bool> Send(T message);
     }
 
     public interface IReqRepAsyncContext<T> : IAsyncContext
@@ -93,44 +97,99 @@ namespace nng
 
     public static class AsyncContextExt
     {
-        #region CreateAsyncContext
-        public static ISendAsyncContext<T> CreateAsyncContext<T>(this IPushSocket self, IAPIFactory<T> factory)
+        #region ISocket.CreateAsyncContext
+        public static ISendAsyncContext<T> CreateAsyncContext<T>(this IPushSocket socket, IAPIFactory<T> factory)
         {
-            if (self == null)
+            if (socket == null)
                 return null;
-            return factory.CreateSendAsyncContext(self);
+            return factory.CreateSendAsyncContext(socket);
         }
-        public static IReceiveAsyncContext<T> CreateAsyncContext<T>(this IPullSocket self, IAPIFactory<T> factory)
+        public static IReceiveAsyncContext<T> CreateAsyncContext<T>(this IPullSocket socket, IAPIFactory<T> factory)
         {
-            if (self == null)
+            if (socket == null)
                 return null;
-            return factory.CreateReceiveAsyncContext(self);
-        }
-
-        public static ISendAsyncContext<T> CreateAsyncContext<T>(this IPubSocket self, IAPIFactory<T> factory)
-        {
-            if (self == null)
-                return null;
-            return factory.CreateSendAsyncContext(self);
-        }
-        public static ISubAsyncContext<T> CreateAsyncContext<T>(this ISubSocket self, IAPIFactory<T> factory)
-        {
-            if (self == null)
-                return null;
-            return factory.CreateSubAsyncContext(self);
+            return factory.CreateReceiveAsyncContext(socket);
         }
 
-        public static IReqRepAsyncContext<T> CreateAsyncContext<T>(this IReqSocket self, IAPIFactory<T> factory)
+        public static ISendReceiveAsyncContext<T> CreateAsyncContext<T>(this IBusSocket socket, IAPIFactory<T> factory)
         {
-            if (self == null)
+            if (socket == null)
                 return null;
-            return factory.CreateReqRepAsyncContext(self);
+            return factory.CreateSendReceiveAsyncContext(socket);
         }
-        public static IRepReqAsyncContext<T> CreateAsyncContext<T>(this IRepSocket self, IAPIFactory<T> factory)
+
+        public static ISendAsyncContext<T> CreateAsyncContext<T>(this IPubSocket socket, IAPIFactory<T> factory)
         {
-            if (self == null)
+            if (socket == null)
                 return null;
-            return factory.CreateRepReqAsyncContext(self);
+            return factory.CreateSendAsyncContext(socket);
+        }
+        public static ISubAsyncContext<T> CreateAsyncContext<T>(this ISubSocket socket, IAPIFactory<T> factory)
+        {
+            if (socket == null)
+                return null;
+            return factory.CreateSubAsyncContext(socket);
+        }
+
+        public static IReqRepAsyncContext<T> CreateAsyncContext<T>(this IReqSocket socket, IAPIFactory<T> factory)
+        {
+            if (socket == null)
+                return null;
+            return factory.CreateReqRepAsyncContext(socket);
+        }
+        public static IRepReqAsyncContext<T> CreateAsyncContext<T>(this IRepSocket socket, IAPIFactory<T> factory)
+        {
+            if (socket == null)
+                return null;
+            return factory.CreateRepReqAsyncContext(socket);
+        }
+        #endregion
+
+        #region IFactory.CreateAsyncContext
+        public static ISendAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, IPushSocket socket)
+        {
+            if (socket == null)
+                return null;
+            return factory.CreateSendAsyncContext(socket);
+        }
+        public static IReceiveAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, IPullSocket socket)
+        {
+            if (socket == null)
+                return null;
+            return factory.CreateReceiveAsyncContext(socket);
+        }
+
+        public static ISendReceiveAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, IBusSocket socket)
+        {
+            if (socket == null)
+                return null;
+            return factory.CreateSendReceiveAsyncContext(socket);
+        }
+
+        public static ISendAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, IPubSocket socket)
+        {
+            if (socket == null)
+                return null;
+            return factory.CreateSendAsyncContext(socket);
+        }
+        public static ISubAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, ISubSocket socket)
+        {
+            if (socket == null)
+                return null;
+            return factory.CreateSubAsyncContext(socket);
+        }
+
+        public static IReqRepAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, IReqSocket socket)
+        {
+            if (socket == null)
+                return null;
+            return factory.CreateReqRepAsyncContext(socket);
+        }
+        public static IRepReqAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, IRepSocket socket)
+        {
+            if (socket == null)
+                return null;
+            return factory.CreateRepReqAsyncContext(socket);
         }
         #endregion
 

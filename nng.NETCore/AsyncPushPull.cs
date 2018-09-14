@@ -34,7 +34,8 @@ namespace nng
     {
         public Task<bool> Send(T message)
         {
-            System.Diagnostics.Debug.Assert(State == AsyncState.Init);
+            CheckState();
+
             asyncMessage = new AsyncSendMsg<T>(message);
             callback(IntPtr.Zero);
             return asyncMessage.tcs.Task;
@@ -77,15 +78,8 @@ namespace nng
     {
         public async Task<T> Receive(CancellationToken token)
         {
-            if (State != AsyncState.Init)
-            {
-                try
-                {
-                    await asyncMessage.Source.Task;
-                }
-                catch (TaskCanceledException)
-                {}
-            }
+            CheckState();
+            
             asyncMessage = new AsyncResvMsg<T>(token);
             // Trigger the async read
             callback(IntPtr.Zero);

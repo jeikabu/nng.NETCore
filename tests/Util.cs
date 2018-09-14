@@ -89,9 +89,9 @@ namespace nng.Tests
 
     static class FactoryExt
     {
-        public static IMessage CreateTopicMessage(this IMessageFactory<IMessage> self, byte[] topic)
+        public static IMessage CreateTopicMessage(this IMessageFactory<IMessage> socket, byte[] topic)
         {
-            var res = self.CreateMessage();
+            var res = socket.CreateMessage();
             res.Append(topic);
             return res;
         }
