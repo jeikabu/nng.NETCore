@@ -12,7 +12,6 @@ namespace nng
         //int GetOpt(string name, out string data);
         int GetOpt(string name, out UInt64 data);
 
-        int SetOpt(string name, UIntPtr data);
         int SetOpt(string name, string data);
         int SetOpt(string name, UInt64 data);
     }

@@ -25,9 +25,9 @@ namespace nng.Tests
         public async Task Basic()
         {
             var url = UrlRandomIpc();
-            using (var pub = factory.CreatePublisher(url))
+            using (var pub = factory.CreatePublisher(url).Unwrap())
             {
-                var socket = factory.SubscriberOpen();
+                var socket = factory.SubscriberOpen().Unwrap();
                 await WaitReady();
                 using (var dialer = factory.DialerCreate(socket, url))
                 {

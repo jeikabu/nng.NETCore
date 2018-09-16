@@ -39,9 +39,9 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task BasicPubSub(string url)
         {
-            var pub = factory.CreatePublisher(url);
+            var pub = factory.CreatePublisher(url).Unwrap();
             await WaitReady();
-            var sub = factory.CreateSubscriber(url);
+            var sub = factory.CreateSubscriber(url).Unwrap();
             var topic = TopicRandom();
             Assert.Equal(0, sub.Subscribe(topic));
             var msg = factory.CreateMessage();
@@ -60,7 +60,7 @@ namespace nng.Tests
             var clientReady = new AsyncBarrier(2);
             var pubTask = Task.Run(async () =>
             {
-                using (var pubSocket = factory.CreatePublisher(url))
+                using (var pubSocket = factory.CreatePublisher(url).Unwrap())
                 {
                     await serverReady.SignalAndWait();
                     await clientReady.SignalAndWait();
@@ -72,7 +72,7 @@ namespace nng.Tests
             var subTask = Task.Run(async () =>
             {
                 await serverReady.SignalAndWait();
-                using (var sub = factory.CreateSubscriber(url))
+                using (var sub = factory.CreateSubscriber(url).Unwrap())
                 {
                     sub.Subscribe(topic);
                     await clientReady.SignalAndWait();
@@ -118,15 +118,15 @@ namespace nng.Tests
 
         public IReceiveAsyncContext<IMessage> CreateInSocket(string url)
         {
-            return Factory.CreatePuller(url, true);
+            return Factory.CreatePuller(url, true).Unwrap();
         }
         public ISendAsyncContext<IMessage> CreateOutSocket(string url)
         {
-            return Factory.CreatePublisher(url);
+            return Factory.CreatePublisher(url).Unwrap();
         }
         public IReceiveAsyncContext<IMessage> CreateClient(string url)
         {
-            var sub = Factory.CreateSubscriber(url);
+            var sub = Factory.CreateSubscriber(url).Unwrap();
             sub.Subscribe(topic);
             return sub;
         }

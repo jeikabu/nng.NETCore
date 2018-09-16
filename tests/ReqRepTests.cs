@@ -22,8 +22,8 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task ReqRepBasic(string url)
         {
-            var repAioCtx = factory.CreateReplier(url);
-            var reqAioCtx = factory.CreateRequester(url);
+            var repAioCtx = factory.CreateReplier(url).Unwrap();
+            var reqAioCtx = factory.CreateRequester(url).Unwrap();
 
             var asyncReq = reqAioCtx.Send(factory.CreateMessage());
             var receivedReq = await repAioCtx.Receive();
@@ -37,7 +37,7 @@ namespace nng.Tests
         {
             var barrier = new AsyncBarrier(2);
             var rep = Task.Run(async () => {
-                var repAioCtx = factory.CreateReplier(url);
+                var repAioCtx = factory.CreateReplier(url).Unwrap();
 
                 await barrier.SignalAndWait();
 
@@ -46,7 +46,7 @@ namespace nng.Tests
             });
             var req = Task.Run(async () => {
                 await barrier.SignalAndWait();
-                var reqAioCtx = factory.CreateRequester(url);
+                var reqAioCtx = factory.CreateRequester(url).Unwrap();
                 var response = await reqAioCtx.Send(factory.CreateMessage());
                 //Assert.NotNull(response);
             });

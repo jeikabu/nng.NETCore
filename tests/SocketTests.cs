@@ -25,14 +25,14 @@ namespace nng.Tests
         [ClassData(typeof(BadTransportsClassData))]
         public void BadTransports(string url)
         {
-            Assert.Null(factory.CreatePublisher(url));
-            Assert.Null(factory.CreatePuller(url, true));
-            Assert.Null(factory.CreatePuller(url, false));
-            Assert.Null(factory.CreatePusher(url, true));
-            Assert.Null(factory.CreatePusher(url, false));
-            Assert.Null(factory.CreateReplier(url));
-            Assert.Null(factory.CreateRequester(url));
-            Assert.Null(factory.CreateSubscriber(url));
+            Assert.True(factory.CreatePublisher(url).IsErr());
+            Assert.True(factory.CreatePuller(url, true).IsErr());
+            Assert.True(factory.CreatePuller(url, false).IsErr());
+            Assert.True(factory.CreatePusher(url, true).IsErr());
+            Assert.True(factory.CreatePusher(url, false).IsErr());
+            Assert.True(factory.CreateReplier(url).IsErr());
+            Assert.True(factory.CreateRequester(url).IsErr());
+            Assert.True(factory.CreateSubscriber(url).IsErr());
         }
 
         // Test to verify result of constructing two of the same socket:
@@ -61,35 +61,35 @@ namespace nng.Tests
             var tests = new DupeUrlTest[] {
                 new DupeUrlTest (
                     null,
-                    () => factory.CreatePublisher(url), 
+                    () => factory.CreatePublisher(url).Unwrap(),
                     false),
                 new DupeUrlTest (
                     null,
-                    () => factory.CreatePuller(url, true), 
+                    () => factory.CreatePuller(url, true).Unwrap(), 
                     false),
                 new DupeUrlTest (
-                    () => factory.CreatePusher(url, true),
-                    () => factory.CreatePuller(url, false), 
+                    () => factory.CreatePusher(url, true).Unwrap(),
+                    () => factory.CreatePuller(url, false).Unwrap(), 
                     true),
                 new DupeUrlTest (
                     null,
-                    () => factory.CreatePusher(url, true), 
+                    () => factory.CreatePusher(url, true).Unwrap(), 
                     false),
                 new DupeUrlTest (
-                    () => factory.CreatePuller(url, true),
-                    () => factory.CreatePusher(url, false), 
+                    () => factory.CreatePuller(url, true).Unwrap(),
+                    () => factory.CreatePusher(url, false).Unwrap(), 
                     true),
                 new DupeUrlTest (
                     null,
-                    () => factory.CreateReplier(url), 
+                    () => factory.CreateReplier(url).Unwrap(), 
                     false),
                 new DupeUrlTest (
-                    () => factory.CreateReplier(url),
-                    () => factory.CreateRequester(url), 
+                    () => factory.CreateReplier(url).Unwrap(),
+                    () => factory.CreateRequester(url).Unwrap(), 
                     true),
                 new DupeUrlTest (
-                    () => factory.CreatePublisher(url),
-                    () => factory.CreateSubscriber(url), 
+                    () => factory.CreatePublisher(url).Unwrap(),
+                    () => factory.CreateSubscriber(url).Unwrap(), 
                     true),
             };
             for (int i = 0; i < tests.Length; ++i)
@@ -107,14 +107,14 @@ namespace nng.Tests
                     }
                     
                     obj0 = test.func();
-                    obj1 = test.func();
                     if (test.isOk)
                     {
+                        obj1 = test.func();
                         Assert.NotNull(obj1);
                     }
                     else
                     {
-                        Assert.Null(obj1);
+                        Assert.Throws<InvalidOperationException>(() => obj1 = test.func());
                     }
                 }
                 finally
@@ -130,8 +130,8 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async void GetSetOpt(string url)
         {
-            var rep = factory.CreateReplier(url);
-            var req = factory.CreateRequester(url);
+            var rep = factory.CreateReplier(url).Unwrap();
+            var req = factory.CreateRequester(url).Unwrap();
 
             // bool
             AssertGetSetOpts(req.Socket, NNG_OPT_TCP_NODELAY);

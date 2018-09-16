@@ -12,36 +12,29 @@ namespace nng
 
     public interface ISocketFactory
     {
-        IBusSocket BusOpen();
-        IBusSocket BusCreate(string url, bool isListener);
-
-        IReqSocket RequesterOpen();
-        IReqSocket RequesterCreate(string url);
-        IRepSocket ReplierOpen();
-        IRepSocket ReplierCreate(string url);
-
-        IPubSocket PublisherOpen();
-        IPubSocket PublisherCreate(string url);
-        ISubSocket SubscriberOpen();
-        ISubSocket SubscriberCreate(string url);
-
-        IPushSocket PusherOpen();
-        IPushSocket PusherCreate(string url, bool isListener);
-        IPullSocket PullerOpen();
-        IPullSocket PullerCreate(string url, bool isListener);
+        INngResult<IBusSocket> BusOpen();
+        INngResult<IReqSocket> RequesterOpen();
+        INngResult<IRepSocket> ReplierOpen();
+        INngResult<IPubSocket> PublisherOpen();
+        INngResult<ISubSocket> SubscriberOpen();
+        INngResult<IPushSocket> PusherOpen();
+        INngResult<IPullSocket> PullerOpen();
         
         IListener ListenerCreate(ISocket socket, string url);
         IDialer DialerCreate(ISocket socket, string url);
+
+        INngResult<TSocket> Dial<TSocket>(INngResult<TSocket> socketRes, string url) where TSocket : ISocket;
+        INngResult<TSocket> Listen<TSocket>(INngResult<TSocket> socketRes, string url) where TSocket : ISocket;
     }
 
     public interface IAsyncContextFactory<T>
     {
-        ISendAsyncContext<T> CreateSendAsyncContext(ISocket socket);
-        IReceiveAsyncContext<T> CreateReceiveAsyncContext(ISocket socket);
-        ISendReceiveAsyncContext<T> CreateSendReceiveAsyncContext(ISocket socket);
-        ISubAsyncContext<T> CreateSubAsyncContext(ISocket socket);
-        IReqRepAsyncContext<T> CreateReqRepAsyncContext(ISocket socket);
-        IRepReqAsyncContext<T> CreateRepReqAsyncContext(ISocket socket);
+        INngResult<ISendAsyncContext<T>> CreateSendAsyncContext(ISocket socket);
+        INngResult<IReceiveAsyncContext<T>> CreateReceiveAsyncContext(ISocket socket);
+        INngResult<ISendReceiveAsyncContext<T>> CreateSendReceiveAsyncContext(ISocket socket);
+        INngResult<ISubAsyncContext<T>> CreateSubAsyncContext(ISocket socket);
+        INngResult<IReqRepAsyncContext<T>> CreateReqRepAsyncContext(ISocket socket);
+        INngResult<IRepReqAsyncContext<T>> CreateRepReqAsyncContext(ISocket socket);
     }
 
     public interface IAPIFactory<T> : IMessageFactory<T>, ISocketFactory, IAsyncContextFactory<T>

@@ -24,21 +24,21 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task Basic(string url)
         {
-            using (var bus0 = factory.BusCreate(url, true))
+            using (var bus0 = factory.BusCreate(url, true).Unwrap())
             {
                 await WaitReady();
-                using (var bus1 = factory.BusCreate(url, false))
+                using (var bus1 = factory.BusCreate(url, false).Unwrap())
                 {
 
                 }
             }
 
             // Manually create listener/dialer
-            using (var bus0 = factory.BusOpen())
+            using (var bus0 = factory.BusOpen().Unwrap())
             using (var listener0 = factory.ListenerCreate(bus0, url))
             {
                 await WaitReady();
-                using (var bus1 = factory.BusOpen())
+                using (var bus1 = factory.BusOpen().Unwrap())
                 using (var dialer1 = factory.DialerCreate(bus1, url))
                 {
 
@@ -54,8 +54,7 @@ namespace nng.Tests
             var readyToSend = new AsyncBarrier(3);
             var messageReceipt = new AsyncCountdownEvent(2);
             var bus0Task = Task.Run(async () => {
-                using (var bus = factory.BusCreate(url, true))
-                using (var ctx = bus.CreateAsyncContext(factory))
+                using (var ctx = factory.BusCreate(url, true).CreateAsyncContext(factory).Unwrap())
                 {
                     await readyToDial.SignalAndWait();
                     await readyToSend.SignalAndWait();
@@ -64,8 +63,7 @@ namespace nng.Tests
             });
             var bus1Task = Task.Run(async () => {
                 await readyToDial.SignalAndWait();
-                using (var bus = factory.BusCreate(url, false))
-                using (var ctx = bus.CreateAsyncContext(factory))
+                using (var ctx = factory.BusCreate(url, false).CreateAsyncContext(factory).Unwrap())
                 {
                     await readyToSend.SignalAndWait();
                     var _ = await ctx.Receive(CancellationToken.None);
@@ -74,8 +72,7 @@ namespace nng.Tests
             });
             var bus2Task = Task.Run(async () => {
                 await readyToDial.SignalAndWait();
-                using (var bus = factory.BusCreate(url, false))
-                using (var ctx = bus.CreateAsyncContext(factory))
+                using (var ctx = factory.BusCreate(url, false).CreateAsyncContext(factory).Unwrap())
                 {
                     await readyToSend.SignalAndWait();
                     var _ = await ctx.Receive(CancellationToken.None);

@@ -58,7 +58,7 @@ namespace nng.Tests
             for (var i = 0; i < numPushers; ++i)
             {
                 var task = Task.Run(async () => {
-                    using (var pushSocket = implementation.Factory.CreatePusher(inUrl, false))
+                    using (var pushSocket = implementation.Factory.CreatePusher(inUrl, false).Unwrap())
                     {
                         await clientsReady.SignalAndWait(); // This client ready, wait for rest
                         for (var m = 0; m < numMessagesPerPusher; ++m)

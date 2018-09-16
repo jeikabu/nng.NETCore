@@ -25,7 +25,7 @@ namespace nng.Tests
         public async Task Basic()
         {
             var url = UrlRandomIpc();
-            var socket = factory.PublisherOpen();
+            using (var socket = factory.PublisherOpen().Unwrap())
             using (var listener = factory.ListenerCreate(socket, url))
             {
                 Assert.NotNull(listener);
@@ -39,7 +39,7 @@ namespace nng.Tests
         public async Task GetSetOptions()
         {
             var url = UrlRandomIpc();
-            var socket = factory.PublisherOpen();
+            using (var socket = factory.PublisherOpen().Unwrap())
             using (var listener = factory.ListenerCreate(socket, url))
             {
                 //AssertGetSetOpts(listener, NNG_OPT_RECVBUF, (int data) => data + 16);

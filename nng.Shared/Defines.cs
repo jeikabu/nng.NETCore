@@ -107,6 +107,43 @@ namespace nng.Native
         public const int NNG_EINTERNAL    = 1000;
         public const int NNG_ESYSERR      = 0x10000000;
         public const int NNG_ETRANERR     = 0x20000000;
+
+        public enum NngErrno
+        {
+            EINTR        = NNG_EINTR,
+            ENOMEM       = NNG_ENOMEM,
+            EINVAL       = NNG_EINVAL,
+            EBUSY        = NNG_EBUSY,
+            ETIMEDOUT    = NNG_ETIMEDOUT,
+            ECONNREFUSED = NNG_ECONNREFUSED,
+            ECLOSED      = NNG_ECLOSED,
+            EAGAIN       = NNG_EAGAIN,
+            ENOTSUP      = NNG_ENOTSUP,
+            EADDRINUSE   = NNG_EADDRINUSE,
+            ESTATE       = NNG_ESTATE,
+            ENOENT       = NNG_ENOENT,
+            EPROTO       = NNG_EPROTO,
+            EUNREACHABLE = NNG_EUNREACHABLE,
+            EADDRINVAL   = NNG_EADDRINVAL,
+            EPERM        = NNG_EPERM,
+            EMSGSIZE     = NNG_EMSGSIZE,
+            ECONNABORTED = NNG_ECONNABORTED,
+            ECONNRESET   = NNG_ECONNRESET,
+            ECANCELED    = NNG_ECANCELED,
+            ENOFILES     = NNG_ENOFILES,
+            ENOSPC       = NNG_ENOSPC,
+            EEXIST       = NNG_EEXIST,
+            EREADONLY    = NNG_EREADONLY,
+            EWRITEONLY   = NNG_EWRITEONLY,
+            ECRYPTO      = NNG_ECRYPTO,
+            EPEERAUTH    = NNG_EPEERAUTH,
+            ENOARG       = NNG_ENOARG,
+            EAMBIGUOUS   = NNG_EAMBIGUOUS,
+            EBADTYPE     = NNG_EBADTYPE,
+            EINTERNAL    = NNG_EINTERNAL,
+            ESYSERR      = NNG_ESYSERR,
+            ETRANERR     = NNG_ETRANERR,
+        }
     #endregion
     }
 

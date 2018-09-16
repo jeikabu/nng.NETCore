@@ -86,9 +86,9 @@ namespace nng.Tests
         async Task<(ISendAsyncContext<IMessage>, IReceiveAsyncContext<IMessage>)> CreatePusherAndPuller()
         {
             var url = UrlRandomIpc();
-            var push = factory.CreatePusher(url, true);
+            var push = factory.CreatePusher(url, true).Unwrap();
             await WaitReady();
-            var pull = factory.CreatePuller(url, false);
+            var pull = factory.CreatePuller(url, false).Unwrap();
             return (push, pull);
         }
     }
