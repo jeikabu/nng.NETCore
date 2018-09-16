@@ -54,7 +54,7 @@ namespace nng.Tests
             var readyToSend = new AsyncBarrier(3);
             var messageReceipt = new AsyncCountdownEvent(2);
             var bus0Task = Task.Run(async () => {
-                using (var ctx = factory.BusCreate(url, true).CreateAsyncContext(factory).Unwrap())
+                using (var ctx = factory.BusCreate(url, true).Unwrap().CreateAsyncContext(factory).Unwrap())
                 {
                     await readyToDial.SignalAndWait();
                     await readyToSend.SignalAndWait();
@@ -63,7 +63,7 @@ namespace nng.Tests
             });
             var bus1Task = Task.Run(async () => {
                 await readyToDial.SignalAndWait();
-                using (var ctx = factory.BusCreate(url, false).CreateAsyncContext(factory).Unwrap())
+                using (var ctx = factory.BusCreate(url, false).Unwrap().CreateAsyncContext(factory).Unwrap())
                 {
                     await readyToSend.SignalAndWait();
                     var _ = await ctx.Receive(CancellationToken.None);
@@ -72,7 +72,7 @@ namespace nng.Tests
             });
             var bus2Task = Task.Run(async () => {
                 await readyToDial.SignalAndWait();
-                using (var ctx = factory.BusCreate(url, false).CreateAsyncContext(factory).Unwrap())
+                using (var ctx = factory.BusCreate(url, false).Unwrap().CreateAsyncContext(factory).Unwrap())
                 {
                     await readyToSend.SignalAndWait();
                     var _ = await ctx.Receive(CancellationToken.None);

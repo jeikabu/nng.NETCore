@@ -25,14 +25,14 @@ namespace nng.Tests
         [ClassData(typeof(BadTransportsClassData))]
         public void BadTransports(string url)
         {
-            Assert.True(factory.CreatePublisher(url).IsErr());
-            Assert.True(factory.CreatePuller(url, true).IsErr());
-            Assert.True(factory.CreatePuller(url, false).IsErr());
-            Assert.True(factory.CreatePusher(url, true).IsErr());
-            Assert.True(factory.CreatePusher(url, false).IsErr());
-            Assert.True(factory.CreateReplier(url).IsErr());
-            Assert.True(factory.CreateRequester(url).IsErr());
-            Assert.True(factory.CreateSubscriber(url).IsErr());
+            Assert.True(factory.PublisherCreate(url).IsErr());
+            Assert.True(factory.PullerCreate(url, true).IsErr());
+            Assert.True(factory.PullerCreate(url, false).IsErr());
+            Assert.True(factory.PusherCreate(url, true).IsErr());
+            Assert.True(factory.PusherCreate(url, false).IsErr());
+            Assert.True(factory.ReplierCreate(url).IsErr());
+            Assert.True(factory.RequesterCreate(url).IsErr());
+            Assert.True(factory.SubscriberCreate(url).IsErr());
         }
 
         // Test to verify result of constructing two of the same socket:
@@ -61,35 +61,35 @@ namespace nng.Tests
             var tests = new DupeUrlTest[] {
                 new DupeUrlTest (
                     null,
-                    () => factory.CreatePublisher(url).Unwrap(),
+                    () => factory.PublisherCreate(url).Unwrap(),
                     false),
                 new DupeUrlTest (
                     null,
-                    () => factory.CreatePuller(url, true).Unwrap(), 
+                    () => factory.PullerCreate(url, true).Unwrap(), 
                     false),
                 new DupeUrlTest (
-                    () => factory.CreatePusher(url, true).Unwrap(),
-                    () => factory.CreatePuller(url, false).Unwrap(), 
+                    () => factory.PusherCreate(url, true).Unwrap(),
+                    () => factory.PullerCreate(url, false).Unwrap(), 
                     true),
                 new DupeUrlTest (
                     null,
-                    () => factory.CreatePusher(url, true).Unwrap(), 
+                    () => factory.PusherCreate(url, true).Unwrap(), 
                     false),
                 new DupeUrlTest (
-                    () => factory.CreatePuller(url, true).Unwrap(),
-                    () => factory.CreatePusher(url, false).Unwrap(), 
+                    () => factory.PullerCreate(url, true).Unwrap(),
+                    () => factory.PusherCreate(url, false).Unwrap(), 
                     true),
                 new DupeUrlTest (
                     null,
-                    () => factory.CreateReplier(url).Unwrap(), 
+                    () => factory.ReplierCreate(url).Unwrap(), 
                     false),
                 new DupeUrlTest (
-                    () => factory.CreateReplier(url).Unwrap(),
-                    () => factory.CreateRequester(url).Unwrap(), 
+                    () => factory.ReplierCreate(url).Unwrap(),
+                    () => factory.RequesterCreate(url).Unwrap(), 
                     true),
                 new DupeUrlTest (
-                    () => factory.CreatePublisher(url).Unwrap(),
-                    () => factory.CreateSubscriber(url).Unwrap(), 
+                    () => factory.PublisherCreate(url).Unwrap(),
+                    () => factory.SubscriberCreate(url).Unwrap(), 
                     true),
             };
             for (int i = 0; i < tests.Length; ++i)
@@ -130,20 +130,20 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async void GetSetOpt(string url)
         {
-            var rep = factory.CreateReplier(url).Unwrap();
-            var req = factory.CreateRequester(url).Unwrap();
+            var rep = factory.ReplierCreate(url).Unwrap();
+            var req = factory.RequesterCreate(url).Unwrap();
 
             // bool
-            AssertGetSetOpts(req.Socket, NNG_OPT_TCP_NODELAY);
+            AssertGetSetOpts(req, NNG_OPT_TCP_NODELAY);
 
             // int
-            AssertGetSetOpts(req.Socket, NNG_OPT_RECVBUF, (int data) => data + 1);
+            AssertGetSetOpts(req, NNG_OPT_RECVBUF, (int data) => data + 1);
             
             // nng_duration
-            AssertGetSetOpts(req.Socket, NNG_OPT_RECONNMINT, (nng_duration data) => data + 100);
+            AssertGetSetOpts(req, NNG_OPT_RECONNMINT, (nng_duration data) => data + 100);
 
             // size_t
-            AssertGetSetOpts(req.Socket, NNG_OPT_RECVMAXSZ, (UIntPtr data) => data + 128);
+            AssertGetSetOpts(req, NNG_OPT_RECVMAXSZ, (UIntPtr data) => data + 128);
 
             // uint64_t
             

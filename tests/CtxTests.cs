@@ -25,7 +25,7 @@ namespace nng.Tests
         public void GetSetOpt()
         {
             var url = UrlRandomIpc();
-            var rep = factory.CreateReplier(url).Unwrap() as ICtx;
+            var rep = factory.ReplierCreate(url).Unwrap() as ICtx;
             
             // Get a value, set a new value, get back the new value
             Assert.Equal(0, rep.GetCtxOpt(NNG_OPT_RECVTIMEO, out nng_duration recvTimeout));

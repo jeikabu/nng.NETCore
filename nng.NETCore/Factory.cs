@@ -93,12 +93,10 @@ namespace nng.Tests
             ctx.Init(this, socket, ctx.callback);
             return NngResult.Ok<IReqRepAsyncContext<IMessage>>(ctx);
         }
-        
+
         public INngResult<IRepReqAsyncContext<IMessage>> CreateRepReqAsyncContext(ISocket socket)
         {
-            var ctx = new RepAsyncCtx<IMessage>();
-            ctx.Init(this, socket, ctx.callback);
-            return NngResult.Ok<IRepReqAsyncContext<IMessage>>(ctx);
+            return RepAsyncCtx<IMessage>.Create(this, socket);
         }
         #endregion
     }

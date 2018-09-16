@@ -87,16 +87,20 @@ namespace nng
 
     public class RepAsyncCtx<T> : AsyncCtx<T>, IRepReqAsyncContext<T>
     {
-        public static IRepReqAsyncContext<T> Create(IMessageFactory<T> factory, ISocket socket)
+        public static INngResult<IRepReqAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
         {
-            var res = new RepAsyncCtx<T>();
-            if (res.Init(factory, socket, res.callback) != 0)
+            var ctx = new RepAsyncCtx<T>();
+            var res = ctx.Init(factory, socket, ctx.callback);
+            if (res == 0)
             {
-                return null;
+                // Start receive loop
+                ctx.callback(IntPtr.Zero);
+                return NngResult.Ok<IRepReqAsyncContext<T>>(ctx);
             }
-            // Start receive loop
-            res.callback(IntPtr.Zero);
-            return res;
+            else
+            {
+                return NngResult.Fail<IRepReqAsyncContext<T>>(res);
+            }
         }
 
         public Task<T> Receive()
@@ -162,6 +166,8 @@ namespace nng
             State = AsyncState.Recv;
             nng_ctx_recv(ctxHandle, aioHandle);
         }
+
+        private RepAsyncCtx(){}
 
         Request<T> asyncMessage;
         object sync = new object();

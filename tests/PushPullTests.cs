@@ -26,13 +26,13 @@ namespace nng.Tests
         {
             var barrier = new AsyncBarrier(2);
             var push = Task.Run(async () => {
-                var pushSocket = factory.CreatePusher(url, true).Unwrap();
+                var pushSocket = factory.PusherCreate(url, true).Unwrap().CreateAsyncContext(factory).Unwrap();
                 await barrier.SignalAndWait();
                 Assert.True(await pushSocket.Send(factory.CreateMessage()));
             });
             var pull = Task.Run(async () => {
                 await barrier.SignalAndWait();
-                var pullSocket = factory.CreatePuller(url, false).Unwrap();
+                var pullSocket = factory.PullerCreate(url, false).Unwrap().CreateAsyncContext(factory).Unwrap();
                 await pullSocket.Receive(CancellationToken.None);
             });
             
@@ -71,15 +71,15 @@ namespace nng.Tests
 
         public IReceiveAsyncContext<IMessage> CreateInSocket(string url)
         {
-            return Factory.CreatePuller(url, true).Unwrap();
+            return Factory.PullerCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap();
         }
         public ISendAsyncContext<IMessage> CreateOutSocket(string url)
         {
-            return Factory.CreatePusher(url, true).Unwrap();
+            return Factory.PusherCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap();
         }
         public IReceiveAsyncContext<IMessage> CreateClient(string url)
         {
-            return Factory.CreatePuller(url, false).Unwrap();
+            return Factory.PullerCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap();
         }
 
         public IMessage CreateMessage()
