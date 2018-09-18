@@ -32,6 +32,9 @@ namespace nng
         readonly nng_msg message;
     }
 
+    /// <summary>
+    /// Message to send/receive with nng
+    /// </summary>
     public class Message : IMessage
     {
         public Message(uint messageBytes = 0)

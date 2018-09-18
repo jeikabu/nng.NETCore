@@ -40,37 +40,63 @@ namespace nng
     //     }
     // }
 
+    /// <summary>
+    /// Context for asynchronous nng operations.  Most likely involves nng_aio, only involves nng_ctx if supported by protocol.
+    /// </summary>
     public interface IAsyncContext : IHasSocket, IDisposable
     {
         void SetTimeout(int msTimeout);
         void Cancel();
     }
 
+    /// <summary>
+    /// Context supporting asynchronously sending messages.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface ISendAsyncContext<T> : IAsyncContext
     {
         Task<bool> Send(T message);
     }
 
+    /// <summary>
+    /// Context supporting asynchronously receiving messages.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IReceiveAsyncContext<T> : IAsyncContext
     {
         Task<T> Receive(CancellationToken token);
     }
 
+    /// <summary>
+    /// Context supporting both asynchronously sending and receiving messages.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface ISendReceiveAsyncContext<T> : ISendAsyncContext<T>, IReceiveAsyncContext<T>
     {
     }
 
+    /// <summary>
+    /// Context with asynchronous request half of request/reply protocol
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IReqRepAsyncContext<T> : IAsyncContext
     {
         Task<T> Send(T message);
     }
 
+    /// <summary>
+    /// Context with asynchronous reply half of request/reply protocol
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IRepReqAsyncContext<T> : IAsyncContext
     {
         Task<T> Receive();
         Task<bool> Reply(T message);
     }
 
+    /// <summary>
+    /// Context supporting nng_ctx
+    /// </summary>
     public interface ICtx : IAsyncContext
     {
         nng_ctx NngCtx { get; }
@@ -91,6 +117,13 @@ namespace nng
         // int SetCtxOpt(string name, UInt64 data);
     }
 
+    /// <summary>
+    /// Context with subscribe half of publish/subscribe
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <remarks>
+    /// For publish half see <see cref="ISendAsyncContext{T}"/>
+    /// </remarks>
     public interface ISubAsyncContext<T> : IReceiveAsyncContext<T>, ISubscriber
     {
     }

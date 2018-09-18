@@ -9,6 +9,9 @@ namespace nng
     using static nng.Native.Defines;
     using static nng.Native.Dialer.UnsafeNativeMethods;
 
+    /// <summary>
+    /// Used to initiate a connection to a <see cref="IListener"/>
+    /// </summary>
     public class Dialer : IDialer
     {
         public nng_dialer NngDialer { get; protected set; }

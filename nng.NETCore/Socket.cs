@@ -8,6 +8,9 @@ namespace nng
     using static nng.Native.Basic.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
+    /// <summary>
+    /// Implementation common to all nng socket types
+    /// </summary>
     public abstract class Socket : ISocket
     {
         public nng_socket NngSocket { get; protected set; }

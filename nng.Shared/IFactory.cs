@@ -2,6 +2,9 @@ using nng.Native;
 
 namespace nng
 {
+    /// <summary>
+    /// Create nng messages
+    /// </summary>
     public interface IMessageFactory<T>
     {
         T CreateMessage();
@@ -10,6 +13,9 @@ namespace nng
         void Destroy(ref T message);
     }
 
+    /// <summary>
+    /// Create nng protocol sockets and dialer/listener
+    /// </summary>
     public interface ISocketFactory
     {
         INngResult<IBusSocket> BusOpen();
@@ -27,6 +33,9 @@ namespace nng
         INngResult<TSocket> Listen<TSocket>(INngResult<TSocket> socketRes, string url) where TSocket : ISocket;
     }
 
+    /// <summary>
+    /// Create contexts for asynchronous IO (nng_aio and nng_ctx)
+    /// </summary>
     public interface IAsyncContextFactory<T>
     {
         INngResult<ISendAsyncContext<T>> CreateSendAsyncContext(ISocket socket);

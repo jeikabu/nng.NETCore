@@ -23,6 +23,11 @@ namespace nng
 
     public class ReqAsyncCtx<T> : AsyncCtx<T>, IReqRepAsyncContext<T>
     {
+        /// <summary>
+        /// Send the specified message.
+        /// </summary>
+        /// <returns>The send.</returns>
+        /// <param name="message">Message.</param>
         public async Task<T> Send(T message)
         {
             System.Diagnostics.Debug.Assert(State == AsyncState.Init);
@@ -103,11 +108,20 @@ namespace nng
             }
         }
 
+        /// <summary>
+        /// Receive a message.
+        /// </summary>
+        /// <returns>The receive.</returns>
         public Task<T> Receive()
         {
             return asyncMessage.requestTcs.Task;
         }
 
+        /// <summary>
+        /// Reply with the specified message.
+        /// </summary>
+        /// <returns>The reply.</returns>
+        /// <param name="message">Message.</param>
         public Task<bool> Reply(T message)
         {
             System.Diagnostics.Debug.Assert(State == AsyncState.Wait);

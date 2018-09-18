@@ -10,8 +10,15 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
+    /// <summary>
+    /// Bus version 0 socket for bus protocol
+    /// </summary>
     public class BusSocket : Socket, IBusSocket
     {
+        /// <summary>
+        /// Create a bus socket
+        /// </summary>
+        /// <returns>The open.</returns>
         public static INngResult<IBusSocket> Open()
         {
             var res = nng_bus0_open(out var socket);
