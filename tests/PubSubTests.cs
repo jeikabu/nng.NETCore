@@ -101,7 +101,7 @@ namespace nng.Tests
             var tasks = await broker.RunAsync(numPublishers, numSubscribers, numMessagesPerSender, counter, cts.Token);
 
             await AssertWait(msTimeout, counter.WaitAsync());
-            await CancelAndWait(cts, tasks.ToArray());
+            await CancelAndWait(cts, msTimeout, tasks.ToArray());
         }
     }
 

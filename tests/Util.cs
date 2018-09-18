@@ -10,9 +10,9 @@ namespace nng.Tests
 {
     static class Traits
     {
-        public const string PlatformName = "Platform";
-        public const string PlatformWindows = "Windows";
-        public const string PlatformPosix = "Posix";
+        public const string PlatformName = "platform";
+        public const string PlatformWindows = "windows";
+        public const string PlatformPosix = "posix";
     }
     static class Util
     {
@@ -30,12 +30,12 @@ namespace nng.Tests
             Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
         }
 
-        public static async Task CancelAndWait(CancellationTokenSource cts, params Task[] tasks)
+        public static async Task CancelAndWait(CancellationTokenSource cts, int timeoutMs, params Task[] tasks)
         {
             cts.Cancel();
             try 
             {
-                await Task.WhenAll(tasks);
+                await Task.WhenAny(Task.Delay(timeoutMs), Task.WhenAll(tasks));
             }
             catch (Exception ex)
             {

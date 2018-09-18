@@ -56,7 +56,7 @@ namespace nng.Tests
             var tasks = await broker.RunAsync(numPushers, numPullers, numMessagesPerPusher, counter, cts.Token);
 
             await AssertWait(msTimeout, counter.WaitAsync());
-            await CancelAndWait(cts, tasks.ToArray());
+            await CancelAndWait(cts, msTimeout, tasks.ToArray());
         }
     }
 
