@@ -8,6 +8,12 @@ using Xunit;
 
 namespace nng.Tests
 {
+    static class Traits
+    {
+        public const string PlatformName = "Platform";
+        public const string PlatformWindows = "Windows";
+        public const string PlatformPosix = "Posix";
+    }
     static class Util
     {
         public static string UrlRandomIpc() => "ipc://" + Guid.NewGuid().ToString();
