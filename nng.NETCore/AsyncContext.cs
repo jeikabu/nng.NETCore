@@ -1,6 +1,7 @@
 using nng.Native;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -44,6 +45,8 @@ namespace nng
             // is still using it:
             // https://stackoverflow.com/questions/6193711/call-has-been-made-on-garbage-collected-delegate-in-c
             aioCallback = new AioCallback(callback);
+            // FIXME: TODO: callbacks still getting GC'd.  Maybe I need to move nng_aio_free() out of Dispose()?
+            callbacks.Add(aioCallback);
             return nng_aio_alloc(out aioHandle, aioCallback, IntPtr.Zero);
         }
 
@@ -56,6 +59,8 @@ namespace nng
         }
 
         AioCallback aioCallback;
+        // FIXME: TODO: callbacks still getting GC'd
+        static List<AioCallback> callbacks = new List<AioCallback>();
         
         #region IDisposable
         public void Dispose()
