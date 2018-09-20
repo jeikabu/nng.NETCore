@@ -10,31 +10,23 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
+    /// <summary>
+    /// Bus version 0 socket for bus protocol
+    /// </summary>
     public class BusSocket : Socket, IBusSocket
     {
-        public static BusSocket Open()
+        /// <summary>
+        /// Create a bus socket
+        /// </summary>
+        /// <returns>The open.</returns>
+        public static INngResult<IBusSocket> Open()
         {
-            if (nng_bus0_open(out var socket) != 0)
+            var res = nng_bus0_open(out var socket);
+            if (res != 0)
             {
-                return null;
+                return NngResult.Fail<IBusSocket>(res);
             }
-            return new BusSocket { NngSocket = socket };
-        }
-        
-        public static BusSocket Create(string url, bool isListener)
-        {
-            var socket = Open();
-            if (socket != null)
-            {
-                var res = isListener ? nng_listen(socket.NngSocket, url, 0) : nng_dial(socket.NngSocket, url, 0);
-                if (res != 0)
-                {
-                    socket.Dispose();
-                    socket = null;
-                }
-            }
-
-            return socket;
+            return NngResult.Ok<IBusSocket>(new BusSocket { NngSocket = socket });
         }
     }
 }

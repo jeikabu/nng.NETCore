@@ -4,12 +4,17 @@ using System.Threading.Tasks;
 namespace nng
 {
     ///<summary>
+    /// Synchronization barrier where participants can signify they reach the barrier and wait for the other participants.
     ///</summary>
     ///<remarks>
     /// https://blogs.msdn.microsoft.com/pfxteam/2012/02/11/building-async-coordination-primitives-part-4-asyncbarrier/
     ///</remarks>
     public class AsyncBarrier
     {
+        /// <summary>
+        /// Create new instance for specified number of participants.
+        /// </summary>
+        /// <param name="participantCount">Number of participants</param>
         public AsyncBarrier(int participantCount)
         {
             if (participantCount <= 0)
@@ -19,6 +24,10 @@ namespace nng
             m_remainingParticipants = m_participantCount = participantCount;
         }
 
+        /// <summary>
+        /// Signal a participant has reached the barrier and return a task to await the remaining participants.
+        /// </summary>
+        /// <returns>Task to await all participants have signalled barrier.</returns>
         public Task SignalAndWait()
         {
             var tcs = m_tcs;

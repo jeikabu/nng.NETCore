@@ -39,48 +39,72 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task BasicPubSub(string url)
         {
-            var pub = factory.CreatePublisher(url);
-            await WaitReady();
-            var sub = factory.CreateSubscriber(url);
-            var topic = TopicRandom();
-            Assert.Equal(0, sub.Subscribe(topic));
-            var msg = factory.CreateMessage();
-            msg.Append(topic);
-            var sendTask = pub.Send(msg);
-            var resvTask = sub.Receive(CancellationToken.None);
-            await AssertWait(1000, sendTask, resvTask);
+            ISendAsyncContext<IMessage> pub = null;
+            ISubAsyncContext<IMessage> sub = null;
+            try
+            {
+                pub = factory.PublisherCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap();
+                await WaitReady();
+                sub = factory.SubscriberCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap();
+                var topic = TopicRandom();
+                Assert.Equal(0, sub.Subscribe(topic));
+                var msg = factory.CreateMessage();
+                msg.Append(topic);
+                var sendTask = pub.Send(msg);
+                var resvTask = sub.Receive(CancellationToken.None);
+                await AssertWait(DefaultTimeoutMs, sendTask, resvTask);
+            }
+            finally
+            {
+                sub?.Dispose();
+                pub?.Dispose();
+            }
         }
 
         [Theory]
-        [ClassData(typeof(IpcTransportClassData))]
+        [ClassData(typeof(TransportsClassData))]
         public async Task PubSub(string url)
+        {
+            const int numIterations = 10;
+            int numOk = 0;
+            for (int i = 0; i < numIterations; ++i)
+            {
+                if (await DoPubSub(url))
+                {
+                    ++numOk;
+                }
+            }
+            Assert.InRange((float)numOk/numIterations, 0.7, 1.0);
+        }
+
+        async Task<bool> DoPubSub(string url)
         {
             var topic = TopicRandom();
             var serverReady = new AsyncBarrier(2);
             var clientReady = new AsyncBarrier(2);
+            var cts = new CancellationTokenSource();
             var pubTask = Task.Run(async () =>
             {
-                using (var pubSocket = factory.CreatePublisher(url))
+                using (var pubSocket = factory.PublisherCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap())
                 {
                     await serverReady.SignalAndWait();
                     await clientReady.SignalAndWait();
                     await WaitReady();
                     Assert.True(await pubSocket.Send(factory.CreateTopicMessage(topic)));
-                    await Task.Delay(10);
                 }
             });
             var subTask = Task.Run(async () =>
             {
                 await serverReady.SignalAndWait();
-                using (var sub = factory.CreateSubscriber(url))
+                using (var sub = factory.SubscriberCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap())
                 {
                     sub.Subscribe(topic);
                     await clientReady.SignalAndWait();
-                    await sub.Receive(CancellationToken.None);
-                    await Task.Delay(10);
+                    await sub.Receive(cts.Token);
                 }
             });
-            await AssertWait(1000, subTask, subTask);
+            cts.CancelAfter(DefaultTimeoutMs);
+            return await Util.WhenAll(DefaultTimeoutMs, pubTask, subTask);
         }
 
         [Theory]
@@ -90,7 +114,7 @@ namespace nng.Tests
             await PubSubBrokerAsync(1, 1, 1);
         }
 
-        async Task PubSubBrokerAsync(int numPublishers, int numSubscribers, int numMessagesPerSender, int msTimeout = 1000)
+        async Task PubSubBrokerAsync(int numPublishers, int numSubscribers, int numMessagesPerSender, int msTimeout = DefaultTimeoutMs)
         {
             // In pub/sub pattern, each message is sent to every receiver
             int numTotalMessages = numPublishers * numSubscribers * numMessagesPerSender;
@@ -101,7 +125,7 @@ namespace nng.Tests
             var tasks = await broker.RunAsync(numPublishers, numSubscribers, numMessagesPerSender, counter, cts.Token);
 
             await AssertWait(msTimeout, counter.WaitAsync());
-            await CancelAndWait(cts, tasks.ToArray());
+            await CancelAndWait(cts, msTimeout, tasks.ToArray());
         }
     }
 
@@ -118,15 +142,15 @@ namespace nng.Tests
 
         public IReceiveAsyncContext<IMessage> CreateInSocket(string url)
         {
-            return Factory.CreatePuller(url, true);
+            return Factory.PullerCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap();
         }
         public ISendAsyncContext<IMessage> CreateOutSocket(string url)
         {
-            return Factory.CreatePublisher(url);
+            return Factory.PublisherCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap();
         }
         public IReceiveAsyncContext<IMessage> CreateClient(string url)
         {
-            var sub = Factory.CreateSubscriber(url);
+            var sub = Factory.SubscriberCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap();
             sub.Subscribe(topic);
             return sub;
         }

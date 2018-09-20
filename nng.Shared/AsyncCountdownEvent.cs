@@ -12,6 +12,10 @@ namespace nng
     /// </remarks>
     public class AsyncCountdownEvent
     {
+        /// <summary>
+        /// Create event that counts down from some initial value and signals an event when it reaches zero.
+        /// </summary>
+        /// <param name="initialCount">Initial count value</param>
         public AsyncCountdownEvent(int initialCount)
         {
             if (initialCount <= 0)
@@ -19,8 +23,16 @@ namespace nng
             m_count = initialCount;
         }
 
+        /// <summary>
+        /// Get task to await count reaching zero
+        /// </summary>
+        /// <returns>Task that completes when count reaches 0</returns>
         public Task WaitAsync() => m_amre.WaitAsync();
 
+        /// <summary>
+        /// Atomically decrement the count, and signal the event if the count reaches zero.
+        /// </summary>
+        /// <returns>The new count value after being decremented</returns>
         public int Signal()
         {
             if (m_count <= 0)

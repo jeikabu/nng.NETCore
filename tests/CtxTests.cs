@@ -24,16 +24,17 @@ namespace nng.Tests
         [Fact]
         public void GetSetOpt()
         {
-            var url = UrlRandomIpc();
-            var rep = factory.CreateReplier(url) as ICtx;
-            
-            // Get a value, set a new value, get back the new value
-            Assert.Equal(0, rep.GetCtxOpt(NNG_OPT_RECVTIMEO, out nng_duration recvTimeout));
-            var newResvTimeout = new nng_duration(recvTimeout);
-            ++newResvTimeout.TimeMs;
-            Assert.Equal(0, rep.SetCtxOpt(NNG_OPT_RECVTIMEO, newResvTimeout));
-            rep.GetCtxOpt(NNG_OPT_RECVTIMEO, out nng_duration nextRecvTimeout);
-            Assert.Equal(newResvTimeout.TimeMs, nextRecvTimeout.TimeMs);
+            var url = UrlIpc();
+            using (var rep = factory.ReplierCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap() as ICtx)
+            {
+                // Get a value, set a new value, get back the new value
+                Assert.Equal(0, rep.GetCtxOpt(NNG_OPT_RECVTIMEO, out nng_duration recvTimeout));
+                var newResvTimeout = new nng_duration(recvTimeout);
+                ++newResvTimeout.TimeMs;
+                Assert.Equal(0, rep.SetCtxOpt(NNG_OPT_RECVTIMEO, newResvTimeout));
+                rep.GetCtxOpt(NNG_OPT_RECVTIMEO, out nng_duration nextRecvTimeout);
+                Assert.Equal(newResvTimeout.TimeMs, nextRecvTimeout.TimeMs);
+            }
         }
     }
 }

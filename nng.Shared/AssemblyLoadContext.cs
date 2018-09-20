@@ -6,8 +6,16 @@ using System.Runtime.Loader;
 
 namespace nng
 {
+    /// <summary>
+    /// Custom load context to load the platform-specific nng native library
+    /// </summary>
     public class NngLoadContext : AssemblyLoadContext
     {
+        /// <summary>
+        /// Loads nng native library using specified load context and returns factory instance to create nng objects.
+        /// </summary>
+        /// <param name="loadContext">Load context into which native library is loaded</param>
+        /// <returns></returns>
         public static IAPIFactory<IMessage> Init(AssemblyLoadContext loadContext)
         {
             var assem = loadContext.LoadFromAssemblyName(new System.Reflection.AssemblyName(managedAssemblyName));
@@ -15,6 +23,10 @@ namespace nng
             return (IAPIFactory<IMessage>)Activator.CreateInstance(type);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path">Absolute path to assemblies</param>
         public NngLoadContext(string path)
         {
             assemblyPath = path;

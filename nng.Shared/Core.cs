@@ -21,6 +21,9 @@ namespace nng
         int error = 0;
     }
 
+    /// <summary>
+    /// Operations on part of a message; either the header or body
+    /// </summary>
     public interface IMessagePart
     {
         int Append(byte[] data);
@@ -37,10 +40,25 @@ namespace nng
         ReadOnlySpan<byte> Raw { get; }
     }
 
+    /// <summary>
+    /// Message sent/received via nng
+    /// </summary>
     public interface IMessage : IMessagePart, IDisposable
     {
+        /// <summary>
+        /// Get the underlying nng_msg
+        /// </summary>
+        /// <value></value>
         nng_msg NngMsg { get; }
+        /// <summary>
+        /// Get the header portion of the message
+        /// </summary>
+        /// <value></value>
         IMessagePart Header { get; }
+        /// <summary>
+        /// Duplicates the message creating a new, identical message.
+        /// </summary>
+        /// <returns>The newly created identical message duplicate</returns>
         IMessage Dup();
     }
 

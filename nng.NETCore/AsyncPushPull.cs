@@ -15,10 +15,10 @@ namespace nng
         public AsyncSendMsg(T message)
         {
             this.message = message;
-            tcs = new TaskCompletionSource<bool>();
+            tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         }
         internal T message;
-        internal TaskCompletionSource<bool> tcs;
+        internal readonly TaskCompletionSource<bool> tcs;
     }
 
     struct AsyncResvMsg<T>
@@ -32,6 +32,11 @@ namespace nng
 
     public class SendAsyncContext<T> : AsyncBase<T>, ISendAsyncContext<T>
     {
+        /// <summary>
+        /// Send the specified message.
+        /// </summary>
+        /// <returns>The send.</returns>
+        /// <param name="message">Message.</param>
         public Task<bool> Send(T message)
         {
             CheckState();
@@ -76,6 +81,11 @@ namespace nng
 
     public class ResvAsyncContext<T> : AsyncBase<T>, IReceiveAsyncContext<T>
     {
+        /// <summary>
+        /// Receive a message.
+        /// </summary>
+        /// <returns>The receive.</returns>
+        /// <param name="token">Token.</param>
         public async Task<T> Receive(CancellationToken token)
         {
             CheckState();

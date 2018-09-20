@@ -24,18 +24,19 @@ namespace nng.Tests
         [Fact]
         public async Task Basic()
         {
-            var url = UrlRandomIpc();
-            using (var pub = factory.CreatePublisher(url))
+            for (int i = 0; i < 10; ++i)
             {
-                var socket = factory.SubscriberOpen();
-                await WaitReady();
-                using (var dialer = factory.DialerCreate(socket, url))
+                var url = UrlIpc();
+                using (var pub = factory.PublisherCreate(url).Unwrap())
                 {
-                    Assert.NotNull(dialer);
-                    Assert.Equal(0, dialer.Start());
+                    var socket = factory.SubscriberOpen().Unwrap();
+                    using (var dialer = factory.DialerCreate(socket, url))
+                    {
+                        Assert.NotNull(dialer);
+                        Assert.Equal(0, dialer.Start());
+                    }
                 }
             }
-            
         }
     }
 }

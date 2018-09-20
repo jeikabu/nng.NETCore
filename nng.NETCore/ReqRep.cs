@@ -10,59 +10,45 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class ReqSocket<T> : Socket, IReqSocket
+    /// <summary>
+    /// Request version 0 socket for request/reply protocol
+    /// </summary>
+    public class ReqSocket : Socket, IReqSocket
     {
-        public static ReqSocket<T> Open()
+        /// <summary>
+        /// Create a request socket
+        /// </summary>
+        /// <returns>The open.</returns>
+        public static INngResult<IReqSocket> Open()
         {
-            if (nng_req0_open(out var socket) != 0)
+            var res = nng_req0_open(out var socket);
+            if (res != 0)
             {
-                return null;
+                return NngResult.Fail<IReqSocket>(res);
             }
-            return new ReqSocket<T> { NngSocket = socket };
-        }
-
-        public static ReqSocket<T> Create(string url)
-        {
-            var socket = Open();
-            if (socket == null)
-            {
-                return null;
-            }
-            if (nng_dial(socket.NngSocket, url, 0) != 0)
-            {
-                socket.Dispose();
-                return null;
-            }
-            return socket;
+            return NngResult.Ok<IReqSocket>(new ReqSocket { NngSocket = socket });
         }
 
         private ReqSocket(){}
     }
 
-    public class RepSocket<T> : Socket, IRepSocket
+    /// <summary>
+    /// Reply version 0 socket for request/reply protocol
+    /// </summary>
+    public class RepSocket : Socket, IRepSocket
     {
-        public static RepSocket<T> Open()
+        /// <summary>
+        /// Create a reply socket
+        /// </summary>
+        /// <returns>The open.</returns>
+        public static INngResult<IRepSocket> Open()
         {
-            if (nng_rep0_open(out var socket) != 0)
+            var res = nng_rep0_open(out var socket);
+            if (res != 0)
             {
-                return null;
+                return NngResult.Fail<IRepSocket>(res);
             }
-            return new RepSocket<T> { NngSocket = socket };
-        }
-
-        public static RepSocket<T> Create(string url)
-        {
-            var socket = Open();
-            if (socket == null)
-            {
-                return null;
-            }
-            if (nng_listen(socket.NngSocket, url, 0) != 0)
-            {
-                socket.Dispose();
-                return null;
-            }
-            return socket;
+            return NngResult.Ok<IRepSocket>(new RepSocket { NngSocket = socket });
         }
 
         private RepSocket(){}

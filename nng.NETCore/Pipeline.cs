@@ -10,63 +10,47 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class PushSocket<T> : Socket, IPushSocket
+    /// <summary>
+    /// Push version 0 socket for push/pull protocol
+    /// </summary>
+    public class PushSocket : Socket, IPushSocket
     {
-        public static PushSocket<T> Open()
+        /// <summary>
+        /// Create a push socket
+        /// </summary>
+        /// <returns>The open.</returns>
+        public static INngResult<IPushSocket> Open()
         {
-            if (nng_push0_open(out var socket) != 0)
-            {
-                return null;
-            }
-            return new PushSocket<T> { NngSocket = socket };
-        }
-
-        public static PushSocket<T> Create(string url, bool isListener)
-        {
-            var socket = Open();
-            if (socket == null)
-            {
-                return null;
-            }
-            var res = isListener ? nng_listen(socket.NngSocket, url, 0) : nng_dial(socket.NngSocket, url, 0);
+            var res = nng_push0_open(out var socket);
             if (res != 0)
             {
-                socket.Dispose();
-                return null;
+                return NngResult.Fail<IPushSocket>(res);
             }
-            return socket;
+            return NngResult.Ok<IPushSocket>(new PushSocket { NngSocket = socket });
         }
 
         private PushSocket(){}
     }
 
-    public class PullSocket<T> : Socket, IPullSocket
+    /// <summary>
+    /// Pull version 0 socket for push/pull protocol
+    /// </summary>
+    public class PullSocket : Socket, IPullSocket
     {
-        public static PullSocket<T> Open()
+        /// <summary>
+        /// Create a pull socket
+        /// </summary>
+        /// <returns>The open.</returns>
+        public static INngResult<IPullSocket> Open()
         {
-            if (nng_pull0_open(out var socket) != 0)
-            {
-                return null;
-            }
-            return new PullSocket<T> { NngSocket = socket };
-        }
-
-        public static PullSocket<T> Create(string url, bool isListener)
-        {
-            var socket = Open();
-            if (socket == null)
-            {
-                return null;
-            }
-            var res = isListener ? nng_listen(socket.NngSocket, url, 0) : nng_dial(socket.NngSocket, url, 0);
+            var res = nng_pull0_open(out var socket);
             if (res != 0)
             {
-                socket.Dispose();
-                return null;
+                return NngResult.Fail<IPullSocket>(res);
             }
-            return socket;
+            return NngResult.Ok<IPullSocket>(new PullSocket { NngSocket = socket });
         }
-
+        
         private PullSocket(){}
     }
 }

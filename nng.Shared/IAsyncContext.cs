@@ -40,37 +40,63 @@ namespace nng
     //     }
     // }
 
+    /// <summary>
+    /// Context for asynchronous nng operations.  Most likely involves nng_aio, only involves nng_ctx if supported by protocol.
+    /// </summary>
     public interface IAsyncContext : IHasSocket, IDisposable
     {
         void SetTimeout(int msTimeout);
         void Cancel();
     }
 
+    /// <summary>
+    /// Context supporting asynchronously sending messages.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface ISendAsyncContext<T> : IAsyncContext
     {
         Task<bool> Send(T message);
     }
 
+    /// <summary>
+    /// Context supporting asynchronously receiving messages.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IReceiveAsyncContext<T> : IAsyncContext
     {
         Task<T> Receive(CancellationToken token);
     }
 
+    /// <summary>
+    /// Context supporting both asynchronously sending and receiving messages.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface ISendReceiveAsyncContext<T> : ISendAsyncContext<T>, IReceiveAsyncContext<T>
     {
     }
 
+    /// <summary>
+    /// Context with asynchronous request half of request/reply protocol
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IReqRepAsyncContext<T> : IAsyncContext
     {
         Task<T> Send(T message);
     }
 
+    /// <summary>
+    /// Context with asynchronous reply half of request/reply protocol
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IRepReqAsyncContext<T> : IAsyncContext
     {
         Task<T> Receive();
         Task<bool> Reply(T message);
     }
 
+    /// <summary>
+    /// Context supporting nng_ctx
+    /// </summary>
     public interface ICtx : IAsyncContext
     {
         nng_ctx NngCtx { get; }
@@ -91,6 +117,13 @@ namespace nng
         // int SetCtxOpt(string name, UInt64 data);
     }
 
+    /// <summary>
+    /// Context with subscribe half of publish/subscribe
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <remarks>
+    /// For publish half see <see cref="ISendAsyncContext{T}"/>
+    /// </remarks>
     public interface ISubAsyncContext<T> : IReceiveAsyncContext<T>, ISubscriber
     {
     }
@@ -98,132 +131,13 @@ namespace nng
     public static class AsyncContextExt
     {
         #region ISocket.CreateAsyncContext
-        public static ISendAsyncContext<T> CreateAsyncContext<T>(this IPushSocket socket, IAPIFactory<T> factory)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateSendAsyncContext(socket);
-        }
-        public static IReceiveAsyncContext<T> CreateAsyncContext<T>(this IPullSocket socket, IAPIFactory<T> factory)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateReceiveAsyncContext(socket);
-        }
-
-        public static ISendReceiveAsyncContext<T> CreateAsyncContext<T>(this IBusSocket socket, IAPIFactory<T> factory)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateSendReceiveAsyncContext(socket);
-        }
-
-        public static ISendAsyncContext<T> CreateAsyncContext<T>(this IPubSocket socket, IAPIFactory<T> factory)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateSendAsyncContext(socket);
-        }
-        public static ISubAsyncContext<T> CreateAsyncContext<T>(this ISubSocket socket, IAPIFactory<T> factory)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateSubAsyncContext(socket);
-        }
-
-        public static IReqRepAsyncContext<T> CreateAsyncContext<T>(this IReqSocket socket, IAPIFactory<T> factory)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateReqRepAsyncContext(socket);
-        }
-        public static IRepReqAsyncContext<T> CreateAsyncContext<T>(this IRepSocket socket, IAPIFactory<T> factory)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateRepReqAsyncContext(socket);
-        }
+        public static INngResult<ISendAsyncContext<T>> CreateAsyncContext<T>(this IPushSocket socket, IAPIFactory<T> factory) => factory.CreateSendAsyncContext(socket);
+        public static INngResult<IReceiveAsyncContext<T>> CreateAsyncContext<T>(this IPullSocket socket, IAPIFactory<T> factory) => factory.CreateReceiveAsyncContext(socket);
+        public static INngResult<ISendReceiveAsyncContext<T>> CreateAsyncContext<T>(this IBusSocket socket, IAPIFactory<T> factory) => factory.CreateSendReceiveAsyncContext(socket);
+        public static INngResult<ISendAsyncContext<T>> CreateAsyncContext<T>(this IPubSocket socket, IAPIFactory<T> factory) => factory.CreateSendAsyncContext(socket);
+        public static INngResult<ISubAsyncContext<T>> CreateAsyncContext<T>(this ISubSocket socket, IAPIFactory<T> factory) => factory.CreateSubAsyncContext(socket);
+        public static INngResult<IReqRepAsyncContext<T>> CreateAsyncContext<T>(this IReqSocket socket, IAPIFactory<T> factory) => factory.CreateReqRepAsyncContext(socket);
+        public static INngResult<IRepReqAsyncContext<T>> CreateAsyncContext<T>(this IRepSocket socket, IAPIFactory<T> factory) => factory.CreateRepReqAsyncContext(socket);
         #endregion
-
-        #region IFactory.CreateAsyncContext
-        public static ISendAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, IPushSocket socket)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateSendAsyncContext(socket);
-        }
-        public static IReceiveAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, IPullSocket socket)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateReceiveAsyncContext(socket);
-        }
-
-        public static ISendReceiveAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, IBusSocket socket)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateSendReceiveAsyncContext(socket);
-        }
-
-        public static ISendAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, IPubSocket socket)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateSendAsyncContext(socket);
-        }
-        public static ISubAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, ISubSocket socket)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateSubAsyncContext(socket);
-        }
-
-        public static IReqRepAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, IReqSocket socket)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateReqRepAsyncContext(socket);
-        }
-        public static IRepReqAsyncContext<T> CreateAsyncContext<T>(this IAPIFactory<T> factory, IRepSocket socket)
-        {
-            if (socket == null)
-                return null;
-            return factory.CreateRepReqAsyncContext(socket);
-        }
-        #endregion
-
-        public static ISendAsyncContext<T> CreatePublisher<T>(this IAPIFactory<T> factory, string url)
-        {
-            var socket = factory.PublisherCreate(url);
-            return socket.CreateAsyncContext(factory);
-        }
-        public static ISubAsyncContext<T> CreateSubscriber<T>(this IAPIFactory<T> factory, string url)
-        {
-            var socket = factory.SubscriberCreate(url);
-            return socket.CreateAsyncContext(factory);
-        }
-
-        public static ISendAsyncContext<T> CreatePusher<T>(this IAPIFactory<T> factory, string url, bool isListener)
-        {
-            var socket = factory.PusherCreate(url, isListener);
-            return socket.CreateAsyncContext(factory);
-        }
-        public static IReceiveAsyncContext<T> CreatePuller<T>(this IAPIFactory<T> factory, string url, bool isListener)
-        {
-            var socket = factory.PullerCreate(url, isListener);
-            return socket.CreateAsyncContext(factory);
-        }
-
-        public static IReqRepAsyncContext<T> CreateRequester<T>(this IAPIFactory<T> factory, string url)
-        {
-            var socket = factory.RequesterCreate(url);
-            return socket.CreateAsyncContext(factory);
-        }
-        public static IRepReqAsyncContext<T> CreateReplier<T>(this IAPIFactory<T> factory, string url)
-        {
-            var socket = factory.ReplierCreate(url);
-            return socket.CreateAsyncContext(factory);
-        }
     }
 }

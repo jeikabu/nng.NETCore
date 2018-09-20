@@ -25,8 +25,8 @@ namespace nng.Tests
 
         public async Task<List<Task>> RunAsync(int numPushers, int numPullers, int numMessagesPerPusher, AsyncCountdownEvent counter, CancellationToken token)
         {
-            var inUrl = UrlRandomIpc();
-            var outUrl = UrlRandomIpc();
+            var inUrl = UrlIpc();
+            var outUrl = UrlIpc();
             const int numBrokers = 1;
 
             var brokersReady = new AsyncBarrier(numBrokers + 1);
@@ -58,7 +58,7 @@ namespace nng.Tests
             for (var i = 0; i < numPushers; ++i)
             {
                 var task = Task.Run(async () => {
-                    using (var pushSocket = implementation.Factory.CreatePusher(inUrl, false))
+                    using (var pushSocket = implementation.Factory.PusherCreate(inUrl, false).Unwrap().CreateAsyncContext(implementation.Factory).Unwrap())
                     {
                         await clientsReady.SignalAndWait(); // This client ready, wait for rest
                         for (var m = 0; m < numMessagesPerPusher; ++m)

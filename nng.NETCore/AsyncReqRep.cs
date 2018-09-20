@@ -15,25 +15,26 @@ namespace nng
         public AsyncReqRespMsg(T message)
         {
             this.message = message;
-            tcs = new TaskCompletionSource<T>();
+            tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
         }
         internal T message;
-        internal TaskCompletionSource<T> tcs;
+        internal readonly TaskCompletionSource<T> tcs;
     }
 
     public class ReqAsyncCtx<T> : AsyncCtx<T>, IReqRepAsyncContext<T>
     {
-        public async Task<T> Send(T message)
+        /// <summary>
+        /// Send the specified message.
+        /// </summary>
+        /// <returns>The send.</returns>
+        /// <param name="message">Message.</param>
+        public Task<T> Send(T message)
         {
-            System.Diagnostics.Debug.Assert(State == AsyncState.Init);
-            if (State != AsyncState.Init)
-            {
-                await asyncMessage.tcs.Task;
-            }
+            CheckState();
             asyncMessage = new AsyncReqRespMsg<T>(message);
             // Trigger the async send
             callback(IntPtr.Zero);
-            return await asyncMessage.tcs.Task;
+            return asyncMessage.tcs.Task;
         }
 
         internal void callback(IntPtr arg)
@@ -81,29 +82,42 @@ namespace nng
     class Request<T>
     {
         public T response;
-        public TaskCompletionSource<T> requestTcs = new TaskCompletionSource<T>();
-        public TaskCompletionSource<bool> replyTcs = new TaskCompletionSource<bool>();
+        public readonly TaskCompletionSource<T> requestTcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+        public readonly TaskCompletionSource<bool> replyTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
     }
 
     public class RepAsyncCtx<T> : AsyncCtx<T>, IRepReqAsyncContext<T>
     {
-        public static IRepReqAsyncContext<T> Create(IMessageFactory<T> factory, ISocket socket)
+        public static INngResult<IRepReqAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
         {
-            var res = new RepAsyncCtx<T>();
-            if (res.Init(factory, socket, res.callback) != 0)
+            var ctx = new RepAsyncCtx<T>();
+            var res = ctx.Init(factory, socket, ctx.callback);
+            if (res == 0)
             {
-                return null;
+                // Start receive loop
+                ctx.callback(IntPtr.Zero);
+                return NngResult.Ok<IRepReqAsyncContext<T>>(ctx);
             }
-            // Start receive loop
-            res.callback(IntPtr.Zero);
-            return res;
+            else
+            {
+                return NngResult.Fail<IRepReqAsyncContext<T>>(res);
+            }
         }
 
+        /// <summary>
+        /// Receive a message.
+        /// </summary>
+        /// <returns>The receive.</returns>
         public Task<T> Receive()
         {
             return asyncMessage.requestTcs.Task;
         }
 
+        /// <summary>
+        /// Reply with the specified message.
+        /// </summary>
+        /// <returns>The reply.</returns>
+        /// <param name="message">Message.</param>
         public Task<bool> Reply(T message)
         {
             System.Diagnostics.Debug.Assert(State == AsyncState.Wait);
@@ -162,6 +176,8 @@ namespace nng
             State = AsyncState.Recv;
             nng_ctx_recv(ctxHandle, aioHandle);
         }
+
+        private RepAsyncCtx(){}
 
         Request<T> asyncMessage;
         object sync = new object();

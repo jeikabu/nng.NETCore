@@ -10,61 +10,45 @@ namespace nng
     using static nng.Native.Protocols.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class PubSocket<T> : Socket, IPubSocket
+    /// <summary>
+    /// Publish version 0 socket for publish/subscribe protocol
+    /// </summary>
+    public class PubSocket : Socket, IPubSocket
     {
-        public static PubSocket<T> Open()
+        /// <summary>
+        /// Create a publish socket
+        /// </summary>
+        /// <returns>The open.</returns>
+        public static INngResult<IPubSocket> Open()
         {
             int res = nng_pub0_open(out var socket);
             if (res != 0)
             {
-                return null;
+                return NngResult.Fail<IPubSocket>(res);
             }
-            return new PubSocket<T> { NngSocket = socket };
-        }
-
-        public static PubSocket<T> Create(string url)
-        {
-            var socket = Open();
-            if (socket == null)
-            {
-                return null;
-            }
-            var res = nng_listen(socket.NngSocket, url, 0);
-            if (res != 0)
-            {
-                socket.Dispose();
-                return null;
-            }
-            return socket;
+            return NngResult.Ok<IPubSocket>(new PubSocket { NngSocket = socket });
         }
 
         private PubSocket(){}
     }
 
-    public class SubSocket<T> : Socket, ISubSocket
+    /// <summary>
+    /// Subscribe version 0 socket for publish/subscribe protocol
+    /// </summary>
+    public class SubSocket : Socket, ISubSocket
     {
-        public static SubSocket<T> Open()
+        /// <summary>
+        /// Create a subscribe socket
+        /// </summary>
+        /// <returns>The open.</returns>
+        public static INngResult<ISubSocket> Open()
         {
-            if (nng_sub0_open(out var socket) != 0)
+            var res = nng_sub0_open(out var socket);
+            if (res != 0)
             {
-                return null;
+                return NngResult.Fail<ISubSocket>(res);
             }
-            return new SubSocket<T> { NngSocket = socket };
-        }
-
-        public static SubSocket<T> Create(string url)
-        {
-            var socket = Open();
-            if (socket == null)
-            {
-                return null;
-            }
-            if (nng_dial(socket.NngSocket, url, 0) != 0)
-            {
-                socket.Dispose();
-                return null;
-            }
-            return socket;
+            return NngResult.Ok<ISubSocket>(new SubSocket { NngSocket = socket });
         }
 
         private SubSocket(){}

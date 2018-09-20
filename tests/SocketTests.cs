@@ -25,14 +25,14 @@ namespace nng.Tests
         [ClassData(typeof(BadTransportsClassData))]
         public void BadTransports(string url)
         {
-            Assert.Null(factory.CreatePublisher(url));
-            Assert.Null(factory.CreatePuller(url, true));
-            Assert.Null(factory.CreatePuller(url, false));
-            Assert.Null(factory.CreatePusher(url, true));
-            Assert.Null(factory.CreatePusher(url, false));
-            Assert.Null(factory.CreateReplier(url));
-            Assert.Null(factory.CreateRequester(url));
-            Assert.Null(factory.CreateSubscriber(url));
+            Assert.True(factory.PublisherCreate(url).IsErr());
+            Assert.True(factory.PullerCreate(url, true).IsErr());
+            Assert.True(factory.PullerCreate(url, false).IsErr());
+            Assert.True(factory.PusherCreate(url, true).IsErr());
+            Assert.True(factory.PusherCreate(url, false).IsErr());
+            Assert.True(factory.ReplierCreate(url).IsErr());
+            Assert.True(factory.RequesterCreate(url).IsErr());
+            Assert.True(factory.SubscriberCreate(url).IsErr());
         }
 
         // Test to verify result of constructing two of the same socket:
@@ -55,43 +55,60 @@ namespace nng.Tests
         }
 
         [Theory]
-        [ClassData(typeof(TransportsClassData))]
+        [ClassData(typeof(TransportsNoTcpClassData))]
         public void DuplicateUrl(string url)
+        {
+            const int numIterations = 10;
+            int numOk = 0;
+            for (int i = 0; i < numIterations; ++i)
+            {
+                try
+                {
+                    DoDuplicateUrl(url);
+                    ++numOk;
+                }
+                catch{}
+            }
+            Assert.InRange((float)numOk/numIterations, 0.69, 1.0);
+        }
+
+        void DoDuplicateUrl(string url)
         {
             var tests = new DupeUrlTest[] {
                 new DupeUrlTest (
                     null,
-                    () => factory.CreatePublisher(url), 
+                    () => factory.PublisherCreate(url).Unwrap(),
                     false),
                 new DupeUrlTest (
                     null,
-                    () => factory.CreatePuller(url, true), 
+                    () => factory.PullerCreate(url, true).Unwrap(), 
                     false),
                 new DupeUrlTest (
-                    () => factory.CreatePusher(url, true),
-                    () => factory.CreatePuller(url, false), 
+                    () => factory.PusherCreate(url, true).Unwrap(),
+                    () => factory.PullerCreate(url, false).Unwrap(), 
                     true),
                 new DupeUrlTest (
                     null,
-                    () => factory.CreatePusher(url, true), 
+                    () => factory.PusherCreate(url, true).Unwrap(), 
                     false),
                 new DupeUrlTest (
-                    () => factory.CreatePuller(url, true),
-                    () => factory.CreatePusher(url, false), 
+                    () => factory.PullerCreate(url, true).Unwrap(),
+                    () => factory.PusherCreate(url, false).Unwrap(), 
                     true),
                 new DupeUrlTest (
                     null,
-                    () => factory.CreateReplier(url), 
+                    () => factory.ReplierCreate(url).Unwrap(), 
                     false),
                 new DupeUrlTest (
-                    () => factory.CreateReplier(url),
-                    () => factory.CreateRequester(url), 
+                    () => factory.ReplierCreate(url).Unwrap(),
+                    () => factory.RequesterCreate(url).Unwrap(), 
                     true),
                 new DupeUrlTest (
-                    () => factory.CreatePublisher(url),
-                    () => factory.CreateSubscriber(url), 
+                    () => factory.PublisherCreate(url).Unwrap(),
+                    () => factory.SubscriberCreate(url).Unwrap(), 
                     true),
             };
+            
             for (int i = 0; i < tests.Length; ++i)
             {
                 var test = tests[i];
@@ -105,16 +122,15 @@ namespace nng.Tests
                         pre = test.pre.Invoke();
                         Assert.NotNull(pre);
                     }
-                    
                     obj0 = test.func();
-                    obj1 = test.func();
                     if (test.isOk)
                     {
+                        obj1 = test.func();
                         Assert.NotNull(obj1);
                     }
                     else
                     {
-                        Assert.Null(obj1);
+                        Assert.Throws<InvalidOperationException>(() => obj1 = test.func());
                     }
                 }
                 finally
@@ -130,26 +146,44 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async void GetSetOpt(string url)
         {
-            var rep = factory.CreateReplier(url);
-            var req = factory.CreateRequester(url);
+            const int numIterations = 10;
+            int numOk = 0;
+            for (int i = 0; i < numIterations; ++i)
+            {
+                try
+                {
+                    await DoGetSetOpt(url);
+                    ++numOk;
+                }
+                catch {}
+            }
+            Assert.InRange((float)numOk/numIterations, 0.69, 1.0);
+        }
 
-            // bool
-            AssertGetSetOpts(req.Socket, NNG_OPT_TCP_NODELAY);
+        async Task DoGetSetOpt(string url)
+        {
+            using(var rep = factory.ReplierCreate(url).Unwrap())
+            using(var req = factory.RequesterCreate(url).Unwrap())
+            {
+                //await WaitReady();
+                // bool
+                AssertGetSetOpts(req, NNG_OPT_TCP_NODELAY);
 
-            // int
-            AssertGetSetOpts(req.Socket, NNG_OPT_RECVBUF, (int data) => data + 1);
-            
-            // nng_duration
-            AssertGetSetOpts(req.Socket, NNG_OPT_RECONNMINT, (nng_duration data) => data + 100);
+                // int
+                AssertGetSetOpts(req, NNG_OPT_RECVBUF, (int data) => data + 1);
+                
+                // nng_duration
+                AssertGetSetOpts(req, NNG_OPT_RECONNMINT, (nng_duration data) => data + 100);
 
-            // size_t
-            AssertGetSetOpts(req.Socket, NNG_OPT_RECVMAXSZ, (UIntPtr data) => data + 128);
+                // size_t
+                AssertGetSetOpts(req, NNG_OPT_RECVMAXSZ, (UIntPtr data) => data + 128);
 
-            // uint64_t
-            
-            // string
+                // uint64_t
+                
+                // string
 
-            // ptr
+                // ptr
+            }
         }
     }
 }

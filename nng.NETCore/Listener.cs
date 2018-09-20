@@ -9,6 +9,9 @@ namespace nng
     using static nng.Native.Defines;
     using static nng.Native.Listener.UnsafeNativeMethods;
 
+    /// <summary>
+    /// Used to accept a connection from a <see cref="IDialer"/>
+    /// </summary>
     public class Listener : IListener
     {
         public nng_listener NngListener { get; protected set; }
