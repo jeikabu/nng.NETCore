@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
+//[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace nng.Tests
 {
     static class Traits
@@ -16,10 +18,13 @@ namespace nng.Tests
     }
     static class Util
     {
-        public static string UrlRandomIpc() => "ipc://" + Guid.NewGuid().ToString();
-        public static string UrlRandomInproc() => "inproc://" + Guid.NewGuid().ToString();
-        public static string UrlRandomTcp() => "tcp://localhost:" + rng.Next(1000, 60000);
-        public static string UrlRandomWs() => "ws://localhost:" + rng.Next(1000, 60000);
+        public const int DefaultTimeoutMs = 1000;
+
+        public static string UrlIpc() => "ipc://" + Guid.NewGuid().ToString();
+        public static string UrlInproc() => "inproc://" + Guid.NewGuid().ToString();
+        public static string UrlTcp() => "tcp://localhost:" + rng.Next(1000, 60000);
+        public static string UrlWs() => "ws://localhost:" + rng.Next(1000, 60000);
+
         public static byte[] TopicRandom() => Guid.NewGuid().ToByteArray();
 
         public static Task WaitReady() => Task.Delay(100);
@@ -28,6 +33,18 @@ namespace nng.Tests
         {
             var timeout = Task.Delay(timeoutMs);
             Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="millisecondsTimeout"></param>
+        /// <param name="tasks"></param>
+        /// <returns><c>true</c> if tasks completed within alloted time.  Otherwise, <c>false</c></returns>
+        public static async Task<bool> WhenAll(int millisecondsTimeout, params Task[] tasks)
+        {
+            var timeoutTask = Task.Delay(millisecondsTimeout);
+            return timeoutTask != await Task.WhenAny(timeoutTask, Task.WhenAll(tasks));
         }
 
         public static async Task CancelAndWait(CancellationTokenSource cts, int timeoutMs, params Task[] tasks)
@@ -123,33 +140,37 @@ namespace nng.Tests
     {
         public IEnumerator<object[]> GetEnumerator()
         {
-            yield return new object[] { Util.UrlRandomIpc() };
-            yield return new object[] { Util.UrlRandomInproc() };
-            yield return new object[] { Util.UrlRandomTcp() };
-            yield return new object[] { Util.UrlRandomWs() };
+            yield return new object[] { Util.UrlIpc() };
+            yield return new object[] { Util.UrlInproc() };
+            yield return new object[] { Util.UrlTcp() };
+            yield return new object[] { Util.UrlWs() };
         }
         
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    class IpcTransportClassData : IEnumerable<object[]>
-    {
-        public IEnumerator<object[]> GetEnumerator()
-        {
-            yield return new object[] { Util.UrlRandomIpc() };
-            //yield return new object[] { Util.UrlRandomInproc() };
-        }
-        
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    }
-
+    /// <summary>
+    /// Some protocols seem to have issues with websocket transport (ws)
+    /// </summary>
     class TransportsNoWsClassData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
-            yield return new object[] { Util.UrlRandomIpc() };
-            yield return new object[] { Util.UrlRandomInproc() };
-            yield return new object[] { Util.UrlRandomTcp() };
+            yield return new object[] { Util.UrlIpc() };
+            yield return new object[] { Util.UrlInproc() };
+            yield return new object[] { Util.UrlTcp() };
+        }
+        
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+
+    class TransportsNoTcpClassData : IEnumerable<object[]>
+    {
+        public IEnumerator<object[]> GetEnumerator()
+        {
+            yield return new object[] { Util.UrlIpc() };
+            yield return new object[] { Util.UrlInproc() };
+            yield return new object[] { Util.UrlWs() };
         }
         
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

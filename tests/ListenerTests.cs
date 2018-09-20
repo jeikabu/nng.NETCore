@@ -24,7 +24,7 @@ namespace nng.Tests
         [Fact]
         public async Task Basic()
         {
-            var url = UrlRandomIpc();
+            var url = UrlInproc();
             using (var socket = factory.PublisherOpen().Unwrap())
             using (var listener = factory.ListenerCreate(socket, url))
             {
@@ -38,7 +38,7 @@ namespace nng.Tests
         [Fact]
         public async Task GetSetOptions()
         {
-            var url = UrlRandomIpc();
+            var url = UrlInproc();
             using (var socket = factory.PublisherOpen().Unwrap())
             using (var listener = factory.ListenerCreate(socket, url))
             {

@@ -16,7 +16,7 @@ namespace nng
         {
             CheckState();
 
-            sendTcs = new TaskCompletionSource<bool>();
+            sendTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             sendMessage = message;
             State = AsyncState.Send;
             nng_aio_set_msg(aioHandle, Factory.Borrow(sendMessage));

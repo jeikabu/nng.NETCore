@@ -15,10 +15,10 @@ namespace nng
         public AsyncReqRespMsg(T message)
         {
             this.message = message;
-            tcs = new TaskCompletionSource<T>();
+            tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
         }
         internal T message;
-        internal TaskCompletionSource<T> tcs;
+        internal readonly TaskCompletionSource<T> tcs;
     }
 
     public class ReqAsyncCtx<T> : AsyncCtx<T>, IReqRepAsyncContext<T>
@@ -28,17 +28,13 @@ namespace nng
         /// </summary>
         /// <returns>The send.</returns>
         /// <param name="message">Message.</param>
-        public async Task<T> Send(T message)
+        public Task<T> Send(T message)
         {
-            System.Diagnostics.Debug.Assert(State == AsyncState.Init);
-            if (State != AsyncState.Init)
-            {
-                await asyncMessage.tcs.Task;
-            }
+            CheckState();
             asyncMessage = new AsyncReqRespMsg<T>(message);
             // Trigger the async send
             callback(IntPtr.Zero);
-            return await asyncMessage.tcs.Task;
+            return asyncMessage.tcs.Task;
         }
 
         internal void callback(IntPtr arg)
@@ -86,8 +82,8 @@ namespace nng
     class Request<T>
     {
         public T response;
-        public TaskCompletionSource<T> requestTcs = new TaskCompletionSource<T>();
-        public TaskCompletionSource<bool> replyTcs = new TaskCompletionSource<bool>();
+        public readonly TaskCompletionSource<T> requestTcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
+        public readonly TaskCompletionSource<bool> replyTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
     }
 
     public class RepAsyncCtx<T> : AsyncCtx<T>, IRepReqAsyncContext<T>

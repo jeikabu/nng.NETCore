@@ -15,10 +15,10 @@ namespace nng
         public AsyncSendMsg(T message)
         {
             this.message = message;
-            tcs = new TaskCompletionSource<bool>();
+            tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
         }
         internal T message;
-        internal TaskCompletionSource<bool> tcs;
+        internal readonly TaskCompletionSource<bool> tcs;
     }
 
     struct AsyncResvMsg<T>

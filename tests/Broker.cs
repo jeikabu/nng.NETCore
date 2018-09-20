@@ -25,8 +25,8 @@ namespace nng.Tests
 
         public async Task<List<Task>> RunAsync(int numPushers, int numPullers, int numMessagesPerPusher, AsyncCountdownEvent counter, CancellationToken token)
         {
-            var inUrl = UrlRandomIpc();
-            var outUrl = UrlRandomIpc();
+            var inUrl = UrlIpc();
+            var outUrl = UrlIpc();
             const int numBrokers = 1;
 
             var brokersReady = new AsyncBarrier(numBrokers + 1);
