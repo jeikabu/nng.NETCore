@@ -58,7 +58,7 @@ namespace nng.Tests
             }
         }
 
-        Task DoAdvanced(string url)
+        async Task DoAdvanced(string url)
         {
             var readyToDial = new AsyncBarrier(3);
             var readyToSend = new AsyncBarrier(3);
@@ -91,7 +91,8 @@ namespace nng.Tests
                 }
             });
             cts.CancelAfter(DefaultTimeoutMs);
-            return Task.WhenAll(messageReceipt.WaitAsync(), bus0Task, bus1Task, bus2Task);
+            await Task.WhenAll(bus0Task, bus1Task, bus2Task);
+            Assert.Equal(0, messageReceipt.Count);
         }
     }
 }

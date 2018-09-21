@@ -52,6 +52,8 @@ namespace nng
             return WaitAsync();
         }
 
+        public int Count => m_count;
+
         private readonly AsyncManualResetEvent m_amre = new AsyncManualResetEvent();
         private int m_count;
     }
