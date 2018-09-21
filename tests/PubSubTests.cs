@@ -74,7 +74,7 @@ namespace nng.Tests
                     ++numOk;
                 }
             }
-            Assert.InRange((float)numOk/numIterations, 0.7, 1.0);
+            Assert.InRange((float)numOk/numIterations, 0.69, 1.0);
         }
 
         async Task<bool> DoPubSub(string url)
