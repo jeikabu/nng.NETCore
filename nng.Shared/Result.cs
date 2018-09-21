@@ -80,7 +80,11 @@ namespace nng
             {
                 return ok.Result;
             }
-            throw new System.InvalidOperationException();
+            else if (self is IErr<Err,Val> err)
+            {
+                throw new System.InvalidOperationException(err.Error.ToString());
+            }
+            throw new System.NotSupportedException();
         }
 
         /// <summary>
@@ -96,7 +100,11 @@ namespace nng
             {
                 return error.Error;
             }
-            throw new System.InvalidOperationException();
+            else if (self is IOk<Err,Val> ok)
+            {
+                throw new System.InvalidOperationException(ok.Result.ToString());
+            }
+            throw new System.NotSupportedException();
         }
     }
 

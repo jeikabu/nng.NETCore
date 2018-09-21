@@ -14,25 +14,26 @@ namespace nng.Tests
     [Collection("nng")]
     public class SocketTests
     {
-        IAPIFactory<IMessage> factory;
+        NngCollectionFixture Fixture;
+        IAPIFactory<IMessage> Factory => Fixture.Factory;
 
         public SocketTests(NngCollectionFixture collectionFixture)
         {
-            this.factory = collectionFixture.Factory;
+            Fixture = collectionFixture;
         }
 
         [Theory]
         [ClassData(typeof(BadTransportsClassData))]
         public void BadTransports(string url)
         {
-            Assert.True(factory.PublisherCreate(url).IsErr());
-            Assert.True(factory.PullerCreate(url, true).IsErr());
-            Assert.True(factory.PullerCreate(url, false).IsErr());
-            Assert.True(factory.PusherCreate(url, true).IsErr());
-            Assert.True(factory.PusherCreate(url, false).IsErr());
-            Assert.True(factory.ReplierCreate(url).IsErr());
-            Assert.True(factory.RequesterCreate(url).IsErr());
-            Assert.True(factory.SubscriberCreate(url).IsErr());
+            Assert.True(Factory.PublisherCreate(url).IsErr());
+            Assert.True(Factory.PullerCreate(url, true).IsErr());
+            Assert.True(Factory.PullerCreate(url, false).IsErr());
+            Assert.True(Factory.PusherCreate(url, true).IsErr());
+            Assert.True(Factory.PusherCreate(url, false).IsErr());
+            Assert.True(Factory.ReplierCreate(url).IsErr());
+            Assert.True(Factory.RequesterCreate(url).IsErr());
+            Assert.True(Factory.SubscriberCreate(url).IsErr());
         }
 
         // Test to verify result of constructing two of the same socket:
@@ -58,18 +59,10 @@ namespace nng.Tests
         [ClassData(typeof(TransportsNoTcpClassData))]
         public void DuplicateUrl(string url)
         {
-            const int numIterations = 10;
-            int numOk = 0;
-            for (int i = 0; i < numIterations; ++i)
+            for (int i = 0; i < Fixture.Iterations; ++i)
             {
-                try
-                {
-                    DoDuplicateUrl(url);
-                    ++numOk;
-                }
-                catch{}
+                DoDuplicateUrl(url);
             }
-            Assert.InRange((float)numOk/numIterations, 0.69, 1.0);
         }
 
         void DoDuplicateUrl(string url)
@@ -77,35 +70,35 @@ namespace nng.Tests
             var tests = new DupeUrlTest[] {
                 new DupeUrlTest (
                     null,
-                    () => factory.PublisherCreate(url).Unwrap(),
+                    () => Factory.PublisherCreate(url).Unwrap(),
                     false),
                 new DupeUrlTest (
                     null,
-                    () => factory.PullerCreate(url, true).Unwrap(), 
+                    () => Factory.PullerCreate(url, true).Unwrap(), 
                     false),
                 new DupeUrlTest (
-                    () => factory.PusherCreate(url, true).Unwrap(),
-                    () => factory.PullerCreate(url, false).Unwrap(), 
+                    () => Factory.PusherCreate(url, true).Unwrap(),
+                    () => Factory.PullerCreate(url, false).Unwrap(), 
                     true),
                 new DupeUrlTest (
                     null,
-                    () => factory.PusherCreate(url, true).Unwrap(), 
+                    () => Factory.PusherCreate(url, true).Unwrap(), 
                     false),
                 new DupeUrlTest (
-                    () => factory.PullerCreate(url, true).Unwrap(),
-                    () => factory.PusherCreate(url, false).Unwrap(), 
+                    () => Factory.PullerCreate(url, true).Unwrap(),
+                    () => Factory.PusherCreate(url, false).Unwrap(), 
                     true),
                 new DupeUrlTest (
                     null,
-                    () => factory.ReplierCreate(url).Unwrap(), 
+                    () => Factory.ReplierCreate(url).Unwrap(), 
                     false),
                 new DupeUrlTest (
-                    () => factory.ReplierCreate(url).Unwrap(),
-                    () => factory.RequesterCreate(url).Unwrap(), 
+                    () => Factory.ReplierCreate(url).Unwrap(),
+                    () => Factory.RequesterCreate(url).Unwrap(), 
                     true),
                 new DupeUrlTest (
-                    () => factory.PublisherCreate(url).Unwrap(),
-                    () => factory.SubscriberCreate(url).Unwrap(), 
+                    () => Factory.PublisherCreate(url).Unwrap(),
+                    () => Factory.SubscriberCreate(url).Unwrap(), 
                     true),
             };
             
@@ -146,24 +139,16 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async void GetSetOpt(string url)
         {
-            const int numIterations = 10;
-            int numOk = 0;
-            for (int i = 0; i < numIterations; ++i)
+            for (int i = 0; i < Fixture.Iterations; ++i)
             {
-                try
-                {
-                    await DoGetSetOpt(url);
-                    ++numOk;
-                }
-                catch {}
+                await DoGetSetOpt(url);
             }
-            Assert.InRange((float)numOk/numIterations, 0.69, 1.0);
         }
 
         async Task DoGetSetOpt(string url)
         {
-            using(var rep = factory.ReplierCreate(url).Unwrap())
-            using(var req = factory.RequesterCreate(url).Unwrap())
+            using(var rep = Factory.ReplierCreate(url).Unwrap())
+            using(var req = Factory.RequesterCreate(url).Unwrap())
             {
                 //await WaitReady();
                 // bool

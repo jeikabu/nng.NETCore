@@ -13,34 +13,34 @@ namespace nng.Tests
     [Collection("nng")]
     public class BusTests
     {
-        IAPIFactory<IMessage> factory;
+        NngCollectionFixture Fixture;
+        IAPIFactory<IMessage> Factory => Fixture.Factory;
 
         public BusTests(NngCollectionFixture collectionFixture)
         {
-            this.factory = collectionFixture.Factory;
+            Fixture = collectionFixture;
         }
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
         public async Task Basic(string url)
         {
-            const int numIterations = 10;
-            for (int i = 0; i < numIterations; ++i)
+            for (int i = 0; i < Fixture.Iterations; ++i)
             {
-                using (var bus0 = factory.BusCreate(url, true).Unwrap())
+                using (var bus0 = Factory.BusCreate(url, true).Unwrap())
                 {
-                    using (var bus1 = factory.BusCreate(url, false).Unwrap())
+                    using (var bus1 = Factory.BusCreate(url, false).Unwrap())
                     {
 
                     }
                 }
 
                 // Manually create listener/dialer
-                using (var bus0 = factory.BusOpen().Unwrap())
-                using (var listener0 = factory.ListenerCreate(bus0, url))
+                using (var bus0 = Factory.BusOpen().Unwrap())
+                using (var listener0 = Factory.ListenerCreate(bus0, url))
                 {
-                    using (var bus1 = factory.BusOpen().Unwrap())
-                    using (var dialer1 = factory.DialerCreate(bus1, url))
+                    using (var bus1 = Factory.BusOpen().Unwrap())
+                    using (var dialer1 = Factory.DialerCreate(bus1, url))
                     {
 
                     }
@@ -52,37 +52,29 @@ namespace nng.Tests
         [ClassData(typeof(TransportsNoWsClassData))]
         public async Task Advanced(string url)
         {
-            int numIterations = 10;
-            int numOk = 0;
-            for (int i = 0; i < numIterations; ++i)
+            for (int i = 0; i < Fixture.Iterations; ++i)
             {
-                if (await DoAdvanced(url))
-                {
-                    ++numOk;
-                }
+                await DoAdvanced(url);
             }
-            Assert.InRange((float)numOk/numIterations, 0.69, 1.0);
         }
 
-        async Task<bool> DoAdvanced(string url)
+        Task DoAdvanced(string url)
         {
             var readyToDial = new AsyncBarrier(3);
             var readyToSend = new AsyncBarrier(3);
             var messageReceipt = new AsyncCountdownEvent(2);
             var cts = new CancellationTokenSource();
             var bus0Task = Task.Run(async () => {
-                using (var ctx = factory.BusCreate(url, true).Unwrap().CreateAsyncContext(factory).Unwrap())
+                using (var ctx = Factory.BusCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
-                    //await WaitReady();
                     await readyToDial.SignalAndWait();
                     await readyToSend.SignalAndWait();
-                    //await WaitReady();
-                    await ctx.Send(factory.CreateMessage());
+                    await ctx.Send(Factory.CreateMessage());
                 }
             });
             var bus1Task = Task.Run(async () => {
                 await readyToDial.SignalAndWait();
-                using (var ctx = factory.BusCreate(url, false).Unwrap().CreateAsyncContext(factory).Unwrap())
+                using (var ctx = Factory.BusCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await readyToSend.SignalAndWait();
                     var _ = await ctx.Receive(cts.Token);
@@ -91,7 +83,7 @@ namespace nng.Tests
             });
             var bus2Task = Task.Run(async () => {
                 await readyToDial.SignalAndWait();
-                using (var ctx = factory.BusCreate(url, false).Unwrap().CreateAsyncContext(factory).Unwrap())
+                using (var ctx = Factory.BusCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await readyToSend.SignalAndWait();
                     var _ = await ctx.Receive(cts.Token);
@@ -99,7 +91,7 @@ namespace nng.Tests
                 }
             });
             cts.CancelAfter(DefaultTimeoutMs);
-            return await Util.WhenAll(DefaultTimeoutMs, messageReceipt.WaitAsync(), bus0Task, bus1Task, bus2Task);
+            return Task.WhenAll(messageReceipt.WaitAsync(), bus0Task, bus1Task, bus2Task);
         }
     }
 }

@@ -32,6 +32,8 @@ namespace nng.Tests
         }
 
         public IAPIFactory<IMessage> Factory { get; private set; }
+
+        public int Iterations => 10; 
     }
 
     [CollectionDefinition("nng")]

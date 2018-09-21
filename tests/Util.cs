@@ -35,18 +35,6 @@ namespace nng.Tests
             Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="millisecondsTimeout"></param>
-        /// <param name="tasks"></param>
-        /// <returns><c>true</c> if tasks completed within alloted time.  Otherwise, <c>false</c></returns>
-        public static async Task<bool> WhenAll(int millisecondsTimeout, params Task[] tasks)
-        {
-            var timeoutTask = Task.Delay(millisecondsTimeout);
-            return timeoutTask != await Task.WhenAny(timeoutTask, Task.WhenAll(tasks));
-        }
-
         public static async Task CancelAndWait(CancellationTokenSource cts, int timeoutMs, params Task[] tasks)
         {
             cts.Cancel();
