@@ -28,11 +28,8 @@ namespace nng.Tests
             for (int i = 0; i < Fixture.Iterations; ++i)
             {
                 using (var bus0 = Factory.BusCreate(url, true).Unwrap())
+                using (var bus1 = Factory.BusCreate(url, false).Unwrap())
                 {
-                    using (var bus1 = Factory.BusCreate(url, false).Unwrap())
-                    {
-
-                    }
                 }
 
                 // Manually create listener/dialer
@@ -70,6 +67,7 @@ namespace nng.Tests
                     await readyToDial.SignalAndWait();
                     await readyToSend.SignalAndWait();
                     await ctx.Send(Factory.CreateMessage());
+                    await WaitShort();
                 }
             });
             var bus1Task = Task.Run(async () => {

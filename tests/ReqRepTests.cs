@@ -54,6 +54,7 @@ namespace nng.Tests
 
                     var msg = await repAioCtx.Receive();
                     Assert.True(await repAioCtx.Reply(Factory.CreateMessage()));
+                    await WaitShort();
                 }
             });
             var req = Task.Run(async () => {

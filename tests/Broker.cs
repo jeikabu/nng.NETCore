@@ -64,7 +64,7 @@ namespace nng.Tests
                         for (var m = 0; m < numMessagesPerPusher; ++m)
                         {
                             await pushSocket.Send(implementation.CreateMessage());
-                            await Task.Delay(15);
+                            await WaitShort();
                         }
                     }
                     

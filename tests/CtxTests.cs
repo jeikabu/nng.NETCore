@@ -14,18 +14,19 @@ namespace nng.Tests
     [Collection("nng")]
     public class CtxTests
     {
-        IAPIFactory<IMessage> factory;
+        NngCollectionFixture Fixture;
+        IAPIFactory<IMessage> Factory => Fixture.Factory;
 
         public CtxTests(NngCollectionFixture collectionFixture)
         {
-            this.factory = collectionFixture.Factory;
+            Fixture = collectionFixture;
         }
 
         [Fact]
         public void GetSetOpt()
         {
             var url = UrlIpc();
-            using (var rep = factory.ReplierCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap() as ICtx)
+            using (var rep = Factory.ReplierCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap() as ICtx)
             {
                 // Get a value, set a new value, get back the new value
                 Assert.Equal(0, rep.GetCtxOpt(NNG_OPT_RECVTIMEO, out nng_duration recvTimeout));
