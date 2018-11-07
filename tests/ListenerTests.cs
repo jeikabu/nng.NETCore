@@ -14,24 +14,25 @@ namespace nng.Tests
     [Collection("nng")]
     public class ListenerTests
     {
-        IAPIFactory<IMessage> factory;
+        NngCollectionFixture Fixture;
+        IAPIFactory<IMessage> Factory => Fixture.Factory;
 
         public ListenerTests(NngCollectionFixture collectionFixture)
         {
-            this.factory = collectionFixture.Factory;
+            Fixture = collectionFixture;
         }
 
         [Fact]
         public async Task Basic()
         {
             var url = UrlInproc();
-            using (var socket = factory.PublisherOpen().Unwrap())
-            using (var listener = factory.ListenerCreate(socket, url))
+            using (var socket = Factory.PublisherOpen().Unwrap())
+            using (var listener = Factory.ListenerCreate(socket, url))
             {
                 Assert.NotNull(listener);
                 Assert.Equal(0, listener.Start());
                 await WaitReady();
-                Assert.NotNull(factory.SubscriberCreate(url));
+                Assert.NotNull(Factory.SubscriberCreate(url));
             }
         }
 
@@ -39,8 +40,8 @@ namespace nng.Tests
         public async Task GetSetOptions()
         {
             var url = UrlInproc();
-            using (var socket = factory.PublisherOpen().Unwrap())
-            using (var listener = factory.ListenerCreate(socket, url))
+            using (var socket = Factory.PublisherOpen().Unwrap())
+            using (var listener = Factory.ListenerCreate(socket, url))
             {
                 //AssertGetSetOpts(listener, NNG_OPT_RECVBUF, (int data) => data + 16);
                 AssertGetSetOpts(listener, NNG_OPT_RECVMAXSZ, (UIntPtr data) => data + 16);

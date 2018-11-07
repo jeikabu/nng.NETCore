@@ -13,11 +13,12 @@ namespace nng.Tests
     [Collection("nng")]
     public class PubSubTests
     {
-        IAPIFactory<IMessage> factory;
+        NngCollectionFixture Fixture;
+        IAPIFactory<IMessage> Factory => Fixture.Factory;
 
         public PubSubTests(NngCollectionFixture collectionFixture)
         {
-            this.factory = collectionFixture.Factory;
+            Fixture = collectionFixture;
         }
 
         // [Fact]
@@ -43,12 +44,12 @@ namespace nng.Tests
             ISubAsyncContext<IMessage> sub = null;
             try
             {
-                pub = factory.PublisherCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap();
+                pub = Factory.PublisherCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap();
                 await WaitReady();
-                sub = factory.SubscriberCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap();
+                sub = Factory.SubscriberCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap();
                 var topic = TopicRandom();
                 Assert.Equal(0, sub.Subscribe(topic));
-                var msg = factory.CreateMessage();
+                var msg = Factory.CreateMessage();
                 msg.Append(topic);
                 var sendTask = pub.Send(msg);
                 var resvTask = sub.Receive(CancellationToken.None);
@@ -65,19 +66,14 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task PubSub(string url)
         {
-            const int numIterations = 10;
-            int numOk = 0;
-            for (int i = 0; i < numIterations; ++i)
+            // FAILS
+            for (int i = 0; i < Fixture.Iterations; ++i)
             {
-                if (await DoPubSub(url))
-                {
-                    ++numOk;
-                }
+                await DoPubSub(url);
             }
-            Assert.InRange((float)numOk/numIterations, 0.7, 1.0);
         }
 
-        async Task<bool> DoPubSub(string url)
+        Task DoPubSub(string url)
         {
             var topic = TopicRandom();
             var serverReady = new AsyncBarrier(2);
@@ -85,18 +81,19 @@ namespace nng.Tests
             var cts = new CancellationTokenSource();
             var pubTask = Task.Run(async () =>
             {
-                using (var pubSocket = factory.PublisherCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap())
+                using (var pubSocket = Factory.PublisherCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await serverReady.SignalAndWait();
                     await clientReady.SignalAndWait();
                     await WaitReady();
-                    Assert.True(await pubSocket.Send(factory.CreateTopicMessage(topic)));
+                    Assert.True(await pubSocket.Send(Factory.CreateTopicMessage(topic)));
+                    await WaitShort();
                 }
             });
             var subTask = Task.Run(async () =>
             {
                 await serverReady.SignalAndWait();
-                using (var sub = factory.SubscriberCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap())
+                using (var sub = Factory.SubscriberCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     sub.Subscribe(topic);
                     await clientReady.SignalAndWait();
@@ -104,7 +101,7 @@ namespace nng.Tests
                 }
             });
             cts.CancelAfter(DefaultTimeoutMs);
-            return await Util.WhenAll(DefaultTimeoutMs, pubTask, subTask);
+            return Task.WhenAll(pubTask, subTask);
         }
 
         [Theory]
@@ -121,7 +118,7 @@ namespace nng.Tests
             var counter = new AsyncCountdownEvent(numTotalMessages);
             var cts = new CancellationTokenSource();
 
-            var broker = new Broker(new PubSubBrokerImpl(factory));
+            var broker = new Broker(new PubSubBrokerImpl(Factory));
             var tasks = await broker.RunAsync(numPublishers, numSubscribers, numMessagesPerSender, counter, cts.Token);
 
             await AssertWait(msTimeout, counter.WaitAsync());

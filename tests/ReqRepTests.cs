@@ -11,24 +11,25 @@ namespace nng.Tests
     [Collection("nng")]
     public class ReqRepTests
     {
-        IAPIFactory<IMessage> factory;
+        NngCollectionFixture Fixture;
+        IAPIFactory<IMessage> Factory => Fixture.Factory;
 
         public ReqRepTests(NngCollectionFixture collectionFixture)
         {
-            this.factory = collectionFixture.Factory;
+            Fixture = collectionFixture;
         }
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
         public async Task ReqRepBasic(string url)
         {
-            using (var repAioCtx = factory.ReplierCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap())
-            using (var reqAioCtx = factory.RequesterCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap())
+            using (var repAioCtx = Factory.ReplierCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
+            using (var reqAioCtx = Factory.RequesterCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
             {
                 var receiveTask = repAioCtx.Receive();
-                var asyncReq = reqAioCtx.Send(factory.CreateMessage());
+                var asyncReq = reqAioCtx.Send(Factory.CreateMessage());
                 var _receivedReq = await receiveTask;
-                Assert.True(await repAioCtx.Reply(factory.CreateMessage()));
+                Assert.True(await repAioCtx.Reply(Factory.CreateMessage()));
                 var _response = await asyncReq;
             }
         }
@@ -37,39 +38,34 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task ReqRepTasks(string url)
         {
-            const int numIterations = 10;
-            int numOk = 0;
-            for (int i = 0; i < numIterations; ++i)
+            for (int i = 0; i < Fixture.Iterations; ++i)
             {
-                if (await DoReqRep(url))
-                {
-                    ++numOk;
-                }
+                await DoReqRep(url);
             }
-            Assert.InRange((float)numOk/numIterations, 0.7, 1.0);
         }
 
-        async Task<bool> DoReqRep(string url)
+        Task DoReqRep(string url)
         {
             var barrier = new AsyncBarrier(2);
             var rep = Task.Run(async () => {
-                using (var repAioCtx = factory.ReplierCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap())
+                using (var repAioCtx = Factory.ReplierCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await barrier.SignalAndWait();
 
                     var msg = await repAioCtx.Receive();
-                    Assert.True(await repAioCtx.Reply(factory.CreateMessage()));
+                    Assert.True(await repAioCtx.Reply(Factory.CreateMessage()));
+                    await WaitShort();
                 }
             });
             var req = Task.Run(async () => {
                 await barrier.SignalAndWait();
-                using (var reqAioCtx = factory.RequesterCreate(url).Unwrap().CreateAsyncContext(factory).Unwrap())
+                using (var reqAioCtx = Factory.RequesterCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
-                    var response = await reqAioCtx.Send(factory.CreateMessage());
+                    var response = await reqAioCtx.Send(Factory.CreateMessage());
                     //Assert.NotNull(response);
                 }
             });
-            return await Util.WhenAll(DefaultTimeoutMs, rep, req);
+            return Task.WhenAll(rep, req);
         }
     }
 }

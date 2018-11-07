@@ -14,23 +14,24 @@ namespace nng.Tests
     [Collection("nng")]
     public class DialerTests
     {
-        IAPIFactory<IMessage> factory;
+        NngCollectionFixture Fixture;
+        IAPIFactory<IMessage> Factory => Fixture.Factory;
 
         public DialerTests(NngCollectionFixture collectionFixture)
         {
-            this.factory = collectionFixture.Factory;
+            Fixture = collectionFixture;
         }
 
         [Fact]
         public async Task Basic()
         {
-            for (int i = 0; i < 10; ++i)
+            for (int i = 0; i < Fixture.Iterations; ++i)
             {
                 var url = UrlIpc();
-                using (var pub = factory.PublisherCreate(url).Unwrap())
+                using (var pub = Factory.PublisherCreate(url).Unwrap())
                 {
-                    var socket = factory.SubscriberOpen().Unwrap();
-                    using (var dialer = factory.DialerCreate(socket, url))
+                    var socket = Factory.SubscriberOpen().Unwrap();
+                    using (var dialer = Factory.DialerCreate(socket, url))
                     {
                         Assert.NotNull(dialer);
                         Assert.Equal(0, dialer.Start());

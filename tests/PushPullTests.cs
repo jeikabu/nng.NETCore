@@ -13,49 +13,45 @@ namespace nng.Tests
     [Collection("nng")]
     public class PushPullTests
     {
-        IAPIFactory<IMessage> factory;
+        NngCollectionFixture Fixture;
+        IAPIFactory<IMessage> Factory => Fixture.Factory;
 
         public PushPullTests(NngCollectionFixture collectionFixture)
         {
-            this.factory = collectionFixture.Factory;
+            Fixture = collectionFixture;
         }
 
         [Theory]
         [ClassData(typeof(TransportsNoWsClassData))]
         public async Task PushPull(string url)
         {
-            const int numIterations = 10;
-            int numOk = 0;
-            for (int i = 0; i < numIterations; ++i)
+            for (int i = 0; i < Fixture.Iterations; ++i)
             {
-                if (await DoPushPull(url))
-                {
-                    ++numOk;
-                }
+                await DoPushPull(url);
             }
-            Assert.InRange((float)numOk/numIterations, 0.7, 1.0);
         }
 
-        async Task<bool> DoPushPull(string url)
+        Task DoPushPull(string url)
         {
             var barrier = new AsyncBarrier(2);
             var cts = new CancellationTokenSource();
             var push = Task.Run(async () => {
-                using(var pushSocket = factory.PusherCreate(url, true).Unwrap().CreateAsyncContext(factory).Unwrap())
+                using(var pushSocket = Factory.PusherCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await barrier.SignalAndWait();
-                    Assert.True(await pushSocket.Send(factory.CreateMessage()));
+                    Assert.True(await pushSocket.Send(Factory.CreateMessage()));
+                    await WaitShort();
                 }
             });
             var pull = Task.Run(async () => {
                 await barrier.SignalAndWait();
-                using (var pullSocket = factory.PullerCreate(url, false).Unwrap().CreateAsyncContext(factory).Unwrap())
+                using (var pullSocket = Factory.PullerCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await pullSocket.Receive(cts.Token);
                 }
             });
             cts.CancelAfter(DefaultTimeoutMs);
-            return await Util.WhenAll(DefaultTimeoutMs, pull, push);
+            return Task.WhenAll(pull, push);
         }
 
         [Fact]
@@ -71,7 +67,7 @@ namespace nng.Tests
             var counter = new AsyncCountdownEvent(numTotalMessages);
             var cts = new CancellationTokenSource();
             
-            var broker = new Broker(new PushPullBrokerImpl(factory));
+            var broker = new Broker(new PushPullBrokerImpl(Factory));
             var tasks = await broker.RunAsync(numPushers, numPullers, numMessagesPerPusher, counter, cts.Token);
 
             await AssertWait(msTimeout, counter.WaitAsync());

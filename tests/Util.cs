@@ -28,23 +28,12 @@ namespace nng.Tests
         public static byte[] TopicRandom() => Guid.NewGuid().ToByteArray();
 
         public static Task WaitReady() => Task.Delay(100);
+        public static Task WaitShort() => Task.Delay(25);
 
         public static async Task AssertWait(int timeoutMs, params Task[] tasks)
         {
             var timeout = Task.Delay(timeoutMs);
             Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="millisecondsTimeout"></param>
-        /// <param name="tasks"></param>
-        /// <returns><c>true</c> if tasks completed within alloted time.  Otherwise, <c>false</c></returns>
-        public static async Task<bool> WhenAll(int millisecondsTimeout, params Task[] tasks)
-        {
-            var timeoutTask = Task.Delay(millisecondsTimeout);
-            return timeoutTask != await Task.WhenAny(timeoutTask, Task.WhenAll(tasks));
         }
 
         public static async Task CancelAndWait(CancellationTokenSource cts, int timeoutMs, params Task[] tasks)
@@ -164,13 +153,12 @@ namespace nng.Tests
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    class TransportsNoTcpClassData : IEnumerable<object[]>
+    class TransportsNoTcpWsClassData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
             yield return new object[] { Util.UrlIpc() };
             yield return new object[] { Util.UrlInproc() };
-            yield return new object[] { Util.UrlWs() };
         }
         
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

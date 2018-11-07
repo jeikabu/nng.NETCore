@@ -147,38 +147,50 @@ namespace nng.Native
     #endregion
     }
 
-    
-
+    [StructLayout(LayoutKind.Sequential)]
     public struct nng_ctx
     {
         public UInt32 id;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct nng_dialer
     {
         public UInt32 id;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct nng_listener
     {
         public UInt32 id;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct nng_pipe
     {
         public UInt32 id;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct nng_socket
     {
         public UInt32 id;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct nng_aio
     {
         IntPtr ptr;
         public static readonly nng_aio Null = new nng_aio { ptr = (IntPtr)(-1) };
     }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct nng_msg
     {
         IntPtr ptr;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct nng_duration
     {
         public Int32 TimeMs {get; set;}
@@ -194,6 +206,8 @@ namespace nng.Native
         public static nng_duration operator +(nng_duration lhs, int rhs) => 
             new nng_duration { TimeMs = lhs.TimeMs + rhs };
     }
+
+    [StructLayout(LayoutKind.Sequential)]
     public struct nng_iov
     {
         #pragma warning disable CS0169
