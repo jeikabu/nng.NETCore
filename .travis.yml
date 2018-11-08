@@ -11,3 +11,4 @@ sudo: false
 # https://docs.travis-ci.com/user/languages/csharp/#net-core
 script:
   - dotnet restore
+  - dotnet test --filter "platform!=windows"
