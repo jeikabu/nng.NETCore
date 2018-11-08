@@ -87,6 +87,7 @@ namespace nng.Tests
                     await clientReady.SignalAndWait();
                     await WaitReady();
                     Assert.True(await pubSocket.Send(Factory.CreateTopicMessage(topic)));
+                    await WaitShort();
                 }
             });
             var subTask = Task.Run(async () =>

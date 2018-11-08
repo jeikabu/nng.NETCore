@@ -28,6 +28,7 @@ namespace nng.Tests
         public static byte[] TopicRandom() => Guid.NewGuid().ToByteArray();
 
         public static Task WaitReady() => Task.Delay(100);
+        public static Task WaitShort() => Task.Delay(25);
 
         public static async Task AssertWait(int timeoutMs, params Task[] tasks)
         {
@@ -152,13 +153,12 @@ namespace nng.Tests
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    class TransportsNoTcpClassData : IEnumerable<object[]>
+    class TransportsNoTcpWsClassData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
             yield return new object[] { Util.UrlIpc() };
             yield return new object[] { Util.UrlInproc() };
-            yield return new object[] { Util.UrlWs() };
         }
         
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

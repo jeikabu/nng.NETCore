@@ -63,7 +63,7 @@ Updating nng native shared library:
 
 ## Status
 
-Very pre-alpha.  Using latest [nng release](https://github.com/nanomsg/nng/releases) (currently v1.0.1).  Once this is a bit farther along will track NNG version numbers.
+Very pre-alpha.  Using latest [nng release](https://github.com/nanomsg/nng/releases) (currently v1.1.0-rc).  Once this is a bit farther along will track nng version numbers.
 
 [![NuGet](https://img.shields.io/nuget/v/Subor.nng.NETCore.svg?colorB=brightgreen)](https://www.nuget.org/packages/Subor.nng.NETCore)
 [![Build status](https://ci.appveyor.com/api/projects/status/ohpurtgoq42wauan/branch/master?svg=true)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
@@ -117,3 +117,5 @@ nng.NETCore is meant to be a completely different approach than [zplus/csnng](ht
 - __Tests as Documentation__: [xUnit](https://xunit.github.io/) unit/integration tests in "plain" C# much like you'd write
 - __.NET Core friendly__: Using [`dotnet`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet) and targetting .NET Standard from the start
 - Simple class heirarchy (maybe) and minimal exceptions
+
+See also [runng](https://github.com/jeikabu/runng).  Our like-minded NNG binding/wrapper for Rust.

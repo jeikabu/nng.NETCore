@@ -56,7 +56,7 @@ namespace nng.Tests
         }
 
         [Theory]
-        [ClassData(typeof(TransportsNoTcpClassData))]
+        [ClassData(typeof(TransportsNoTcpWsClassData))]
         public void DuplicateUrl(string url)
         {
             for (int i = 0; i < Fixture.Iterations; ++i)
@@ -136,7 +136,7 @@ namespace nng.Tests
         }
 
         [Theory]
-        [ClassData(typeof(TransportsClassData))]
+        [ClassData(typeof(TransportsNoWsClassData))]
         public async void GetSetOpt(string url)
         {
             for (int i = 0; i < Fixture.Iterations; ++i)

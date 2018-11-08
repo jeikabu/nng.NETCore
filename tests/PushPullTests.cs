@@ -40,6 +40,7 @@ namespace nng.Tests
                 {
                     await barrier.SignalAndWait();
                     Assert.True(await pushSocket.Send(Factory.CreateMessage()));
+                    await WaitShort();
                 }
             });
             var pull = Task.Run(async () => {
