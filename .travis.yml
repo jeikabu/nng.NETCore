@@ -1,0 +1,13 @@
+language: csharp
+mono: none
+dotnet: 2.0
+
+os:
+  - linux
+  - osx
+sudo: false
+
+# At least one script line is required:
+# https://docs.travis-ci.com/user/languages/csharp/#net-core
+script:
+  - dotnet restore
