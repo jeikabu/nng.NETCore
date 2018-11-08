@@ -46,7 +46,12 @@ namespace nng
         {
             if (unmanagedDllName == "nng")
             {
-                string arch = Environment.Is64BitProcess ? "-x64" : "-x86";
+#if NETSTANDARD2_0
+                bool is64bit = Environment.Is64BitProcess;
+#else
+                bool is64bit = (IntPtr.Size == 8);
+#endif
+                string arch = is64bit ? "-x64" : "-x86";
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     var fullPath = Path.Combine(assemblyPath, "runtimes", "osx" + arch, "native", "libnng.dylib");

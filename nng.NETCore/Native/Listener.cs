@@ -6,7 +6,9 @@ namespace nng.Native.Listener
 {
     using static Globals;
 
+#if NETSTANDARD2_0
     [System.Security.SuppressUnmanagedCodeSecurity]
+#endif
     public sealed class UnsafeNativeMethods
     {
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
