@@ -1,6 +1,5 @@
 image: 
 - Visual Studio 2017
-- Ubuntu
 configuration:
   - Debug
   - Release
@@ -14,8 +13,7 @@ build:
   verbosity: minimal
 
 test_script:
-  - cmd: OpenCover.Console.exe -register:user -target:dotnet.exe -targetargs:"test --filter platform!=posix" -output:".\coverage.xml" -oldstyle
-  - sh: dotnet test --filter "platform!=windows"
+  - cmd: OpenCover.Console.exe -register:user -target:dotnet.exe -targetargs:"test --filter platform!=posix tests" -output:".\coverage.xml" -oldstyle
 
 after_test:
   - cmd: codecov -f "coverage.xml" -t 2a07cd3d-8620-4495-8c14-3252b10b90bd

@@ -1,0 +1,16 @@
+language: csharp
+mono: none
+# Need explicit dotnet version otherwise OSX fails to download/install dotnet
+dotnet: 2.1.403
+
+os:
+  - linux
+  - osx
+sudo: false
+
+# At least one script line is required:
+# https://docs.travis-ci.com/user/languages/csharp/#net-core
+script:
+  - dotnet restore
+  - dotnet build
+  - dotnet test --filter "platform!=windows" tests

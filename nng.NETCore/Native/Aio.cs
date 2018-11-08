@@ -6,7 +6,9 @@ namespace nng.Native.Aio
 {
     using static Globals;
 
+#if NETSTANDARD2_0
     [System.Security.SuppressUnmanagedCodeSecurity]
+#endif
     public sealed class UnsafeNativeMethods
     {
         public delegate void AioCallback(IntPtr arg);
