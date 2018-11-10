@@ -5,8 +5,9 @@
 ## Usage
 
 Currently only works in projects targetting:
-- .NET Core 2.0+
-- .NET Standard 2.0+ (see below about .NET Standard 1.5+)
+- .NET Core App 1.0+
+- .NET Standard 1.5+
+    - `SuppressUnmanagedCodeSecurity` is used with .NET Standard 2.0+ for improved PInvoke performance
 
 After installing the package and building your output folder should have `runtimes/` directory containing native binaries.
 
@@ -17,10 +18,6 @@ var context = new nng.NngLoadContext(path);
 var factory = nng.NngLoadContext.Init(context);
 // Use factory...
 ```
-
-__.NET Standard 1.5__
-
-Use of `SuppressUnmanagedCodeSecurity` requires .NET Standard 2.0.  If you don't mind a modest perfomance hit you can target .NET Standard 1.5.  `#if NETSTANDARD2_0` blocks are used where needed so you should just need to recompile.
 
 __.NET Framework 4.6.1__
 
