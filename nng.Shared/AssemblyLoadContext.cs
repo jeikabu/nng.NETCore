@@ -1,3 +1,4 @@
+#if (NETSTANDARD1_5 || NETSTANDARD1_6 || NETSTANDARD2_0)
 using System;
 using System.IO;
 using System.Reflection;
@@ -75,3 +76,4 @@ namespace nng
         readonly string assemblyPath;
     }
 }
+#endif
