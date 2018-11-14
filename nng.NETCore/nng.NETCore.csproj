@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.5;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard1.5;netstandard2.0;net461</TargetFrameworks>
     <!-- Output to runtimes/ which will then be included by packer.csproj -->
     <OutputPath>..\packer\bin\$(Configuration)\runtimes\any\lib\</OutputPath>
     <RootNamespace>nng</RootNamespace>
