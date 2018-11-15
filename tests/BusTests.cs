@@ -66,6 +66,7 @@ namespace nng.Tests
                 {
                     await readyToDial.SignalAndWait();
                     await readyToSend.SignalAndWait();
+                    await WaitShort();
                     await ctx.Send(Factory.CreateMessage());
                     await WaitShort();
                 }

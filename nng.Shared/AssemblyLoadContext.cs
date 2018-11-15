@@ -1,3 +1,4 @@
+#if (NETSTANDARD1_5 || NETSTANDARD1_6 || NETSTANDARD2_0)
 using System;
 using System.IO;
 using System.Reflection;
@@ -26,6 +27,14 @@ namespace nng
         /// <summary>
         /// 
         /// </summary>
+        // public NngLoadContext()
+        // {
+        //     assemblyPath = Path.GetDirectoryName(GetType().GetTypeInfo().Assembly.Location);
+        // }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="path">Absolute path to assemblies</param>
         public NngLoadContext(string path)
         {
@@ -36,7 +45,15 @@ namespace nng
         {
             if (assemblyName.Name == managedAssemblyName)
             {
-                var fullPath = Path.Combine(assemblyPath, managedAssemblyName + ".dll");
+                var fullPath = Path.Combine(assemblyPath, "runtimes", "any", "lib", 
+                    #if NETSTANDARD1_5
+                    "netstandard1.5"
+                    #elif NETSTANDARD2_0
+                    "netstandard2.0"
+                    #else
+                    #error "Unsupported framework?"
+                    #endif
+                    , managedAssemblyName + ".dll");
                 return LoadFromAssemblyPath(fullPath);
             }
             return null;
@@ -75,3 +92,4 @@ namespace nng
         readonly string assemblyPath;
     }
 }
+#endif
