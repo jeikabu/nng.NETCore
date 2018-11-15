@@ -8,21 +8,21 @@ Currently only works in projects targetting:
 - .NET Core App 1.0+
 - .NET Standard 1.5+
     - `SuppressUnmanagedCodeSecurity` is used with .NET Standard 2.0+ for improved PInvoke performance
+- .NET Framework 4.6.1+
 
 After installing the package and building your output folder should have `runtimes/` directory containing native binaries.
 
-You can either use `NngLoadContext` (or your own `AssemblyLoadContext`) to load the appropriate native library and use NNG:  
+On .NET Core/Standard you can either use `NngLoadContext` (or your own `AssemblyLoadContext`) to load the appropriate native library and use NNG:  
 ```csharp
-var path = Path.GetDirectoryName(typeof(nng.NngLoadContext).Assembly.Location);
-var context = new nng.NngLoadContext(path);
-var factory = nng.NngLoadContext.Init(context);
+var path = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+var ctx = new nng.NngLoadContext(path);
+var factory = nng.NngLoadContext.Init(ctx);
 // Use factory...
 ```
 
 __.NET Framework 4.6.1__
 
-If we get rid of [the dependency on System.Runtime.Loader](https://github.com/dotnet/corefx/issues/22142) should be able to support:
-- .NET Framework 4.6.1+
+[System.Runtime.Loader is not available in .NET Framework](https://github.com/dotnet/corefx/issues/22142), so the correct assembly must be loaded by some other means.
 
 If your application is targetting .Net Framework 4.6+ and you get lots of:
 ```
