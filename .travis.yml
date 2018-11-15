@@ -13,4 +13,4 @@ sudo: false
 script:
   - dotnet restore
   - dotnet build
-  - dotnet test --filter "platform!=windows" tests
+  - dotnet test --filter "platform!=windows" --verbosity normal tests
