@@ -26,7 +26,7 @@ namespace nng.Tests
             #else
             var configuration = "Release";
             #endif
-            var managedAssemblyPath = Path.Combine(root, "nng.NETCore", "bin", configuration, "netstandard2.0");
+            var managedAssemblyPath = Path.Combine(root, "packer", "bin", configuration);
             var alc = new NngLoadContext(managedAssemblyPath);
             Factory = NngLoadContext.Init(alc);
         }

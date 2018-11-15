@@ -1,14 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="../common.targets" />
+
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.5;netstandard2.0;net461</TargetFrameworks>
     <!-- Output to runtimes/ which will then be included by packer.csproj -->
     <OutputPath>..\packer\bin\$(Configuration)\runtimes\any\lib\</OutputPath>
-    <RootNamespace>nng</RootNamespace>
-    <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-    <LangVersion>7.3</LangVersion>
     <DebugType>full</DebugType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- runtimes/ will be included by packer.csproj so exclude this -->
@@ -18,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="system.memory" Version="4.5.1" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\nng.Shared\nng.Shared.csproj">
       <Private>false</Private>
