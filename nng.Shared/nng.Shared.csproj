@@ -19,7 +19,7 @@
     <PackageReference Include="system.memory" Version="4.5.1" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5' or '$(TargetFramework)' == 'netstandard1.6' or '$(TargetFramework)' == 'netstandard2.0' ">
+  <ItemGroup Condition="$(DefineConstants.Contains('FEATURE_NETSTANDARD1_5_AND_UP'))">
       <PackageReference Include="system.runtime.loader" Version="4.3.0" />
   </ItemGroup>
 

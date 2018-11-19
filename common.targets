@@ -7,6 +7,10 @@
     <TargetFrameworks>netstandard1.5;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)'=='netstandard1.5' or '$(TargetFramework)'=='netstandard1.6' or '$(TargetFramework)'=='netstandard2.0' or '$(TargetFramework)'=='netstandard2.1'">
+    <DefineConstants>FEATURE_NETSTANDARD1_5_AND_UP</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup>
     <RootNamespace>nng</RootNamespace>
     <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>

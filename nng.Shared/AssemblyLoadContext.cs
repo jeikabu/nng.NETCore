@@ -1,4 +1,4 @@
-#if (NETSTANDARD1_5 || NETSTANDARD1_6 || NETSTANDARD2_0)
+#if FEATURE_NETSTANDARD1_5_AND_UP
 using System;
 using System.IO;
 using System.Reflection;
