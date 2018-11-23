@@ -15,18 +15,7 @@ namespace nng.Tests
     {
         public NngCollectionFixture()
         {
-            var dirInfo = new DirectoryInfo(Path.GetDirectoryName(GetType().Assembly.Location));
-            // Assume we're in:
-            // <root>/tests/bin/Debug/netcoreapp2.1/
-            // And we need to get to:
-            // <root>/nng.NETCore/bin/Debug/netstandard2.0/
-            var root = dirInfo.Parent.Parent.Parent.Parent.FullName;
-            #if DEBUG
-            var configuration = "Debug";
-            #else
-            var configuration = "Release";
-            #endif
-            var managedAssemblyPath = Path.Combine(root, "packer", "bin", configuration);
+            var managedAssemblyPath = Path.GetDirectoryName(GetType().Assembly.Location);
             var alc = new NngLoadContext(managedAssemblyPath);
             Factory = NngLoadContext.Init(alc);
         }
