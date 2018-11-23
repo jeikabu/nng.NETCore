@@ -3,12 +3,13 @@
   <Import Project="../common.targets" />
 
   <PropertyGroup>
-    <!-- Output to runtimes/ which will then be included by packer.csproj -->
-    <OutputPath>..\packer\bin\$(Configuration)\runtimes\any\lib\</OutputPath>
+    <OutputPath>runtimes\any\lib\</OutputPath>
     <DebugType>full</DebugType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <!-- runtimes/ will be included by packer.csproj so exclude this -->
-    <IsPackable>false</IsPackable>
+    <PackageOutputPath>../bin/$(Configuration)</PackageOutputPath>
+    <!-- Including assembly as part of runtimes/ so don't want it placed in lib/ -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <PackageId>Subor.nng.NETCore</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,11 +22,16 @@
     </ProjectReference>
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="runtimes\**">
-      <Link>..\..\..\%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <Visible>false</Visible>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+  <!-- Must be run after build so output assembly is in runtimes/ -->
+  <Target Name="Runtimes" AfterTargets="Build">
+    <ItemGroup>
+      <Content Include="runtimes\**">
+        <PackagePath>runtimes</PackagePath>
+        <Visible>false</Visible>
+      </Content>
+      <Content Include="build\**">
+        <PackagePath>build</PackagePath>
+      </Content>
+    </ItemGroup>
+  </Target>
 </Project>
