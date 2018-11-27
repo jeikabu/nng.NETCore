@@ -10,6 +10,8 @@
     <!-- Including assembly as part of runtimes/ so don't want it placed in lib/ -->
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <PackageId>Subor.nng.NETCore</PackageId>
+    <PackageVersion>0.0.7</PackageVersion>
+    <Version>0.0.7</Version>
   </PropertyGroup>
 
   <ItemGroup>
