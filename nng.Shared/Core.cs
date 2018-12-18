@@ -60,6 +60,34 @@ namespace nng
         /// </summary>
         /// <returns>The newly created identical message duplicate</returns>
         IMessage Dup();
+        /// <summary>
+        /// Get the pipe object associated with the message.
+        /// </summary>
+        IPipe Pipe { get; }
+    }
+
+    /// <summary>
+    /// Handle to a "pipe", which can be thought of as a single connection.
+    /// </summary>
+    public interface IPipe
+    {
+        /// <summary>
+        /// Get the underlying nng_pipe.
+        /// </summary>
+        nng_pipe NngPipe { get; }
+
+        /// <summary>
+        /// A positive identifier for the pipe, if it is valid.
+        /// </summary>
+        int Id { get; }
+
+        bool GetOptionBool(string option);
+        int GetOptionInt(string option);
+        int GetOptionMs(string option);
+        UIntPtr GetOptionPtr(string option);
+        string GetOptionString(string option);
+        UIntPtr GetOptionSize(string option);
+        ulong GetOptionUInt64(string option);
     }
 
     public static class Extensions

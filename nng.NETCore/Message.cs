@@ -65,6 +65,8 @@ namespace nng
             return new Message(msg);
         }
 
+        public IPipe Pipe => _pipe ?? (_pipe = new Pipe(nng_msg_get_pipe(NngMsg)));
+
         public int Append(byte[] data) => nng_msg_append(NngMsg, data);
         public int Append(uint data) => nng_msg_append_u32(NngMsg, data);
         public int Chop(UIntPtr size) => nng_msg_chop(NngMsg, size);
@@ -79,6 +81,7 @@ namespace nng
 
         readonly nng_msg message;
         readonly NngMessageHeader _header;
+        Pipe _pipe;
 
         #region IDisposable
         public void Dispose()
@@ -101,5 +104,58 @@ namespace nng
         #endregion
 
         
+    }
+
+    public class Pipe : IPipe
+    {
+        public Pipe(nng_pipe pipe)
+        {
+            NngPipe = pipe;
+        }
+
+        public nng_pipe NngPipe { get; }
+        public int Id => nng_pipe_id(NngPipe);
+
+        public bool GetOptionBool(string option)
+        {
+            nng_pipe_getopt_bool(NngPipe, option, out int val);
+            return val != 0;
+        }
+
+        public int GetOptionInt(string option)
+        {
+            nng_pipe_getopt_int(NngPipe, option, out int val);
+            return val;
+        }
+
+        public int GetOptionMs(string option)
+        {
+            nng_pipe_getopt_ms(NngPipe, option, out int val);
+            return val;
+        }
+
+        public UIntPtr GetOptionPtr(string option)
+        {
+            nng_pipe_getopt_ptr(NngPipe, option, out UIntPtr val);
+            return val;
+        }
+
+        public string GetOptionString(string option)
+        {
+            nng_pipe_getopt_string(NngPipe, option, out string val);
+            return val;
+        }
+
+        public UIntPtr GetOptionSize(string option)
+        {
+            nng_pipe_getopt_size(NngPipe, option, out UIntPtr val);
+            return val;
+        }
+
+        public ulong GetOptionUInt64(string option)
+        {
+            nng_pipe_getopt_uint64(NngPipe, option, out ulong val);
+            return val;
+        }
     }
 }

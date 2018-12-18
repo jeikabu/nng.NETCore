@@ -169,5 +169,19 @@ namespace nng.Tests
             ChopTrimPart(msg);
             ChopTrimPart(msg.Header);
         }
+
+        [Fact]
+        public void Pipe()
+        {
+            var msg = factory.CreateMessage();
+            Assert.Equal(-1, msg.Pipe.Id);
+            Assert.False(msg.Pipe.GetOptionBool("option-name"));
+            Assert.Equal(0, msg.Pipe.GetOptionInt("option-name"));
+            Assert.Equal(0, msg.Pipe.GetOptionMs("option-name"));
+            Assert.Equal(UIntPtr.Zero, msg.Pipe.GetOptionPtr("option-name"));
+            Assert.Null(msg.Pipe.GetOptionString("option-name"));
+            Assert.Equal(UIntPtr.Zero, msg.Pipe.GetOptionSize("option-name"));
+            Assert.Equal(0UL, msg.Pipe.GetOptionUInt64("option-name"));
+        }
     }
 }

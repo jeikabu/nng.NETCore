@@ -136,5 +136,29 @@ namespace nng.Native.Msg
 
         // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         // public static extern int nng_msg_getopt(nng_msg message, Int32, IntPtr, UIntPtr);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_pipe_id(nng_pipe pipe);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_pipe_getopt_bool(nng_pipe pipe, string opt, out int val);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_pipe_getopt_int(nng_pipe pipe, string opt, out int val);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_pipe_getopt_ms(nng_pipe pipe, string opt, out int val);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_pipe_getopt_ptr(nng_pipe pipe, string opt, out UIntPtr val);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_pipe_getopt_string(nng_pipe pipe, string opt, out string val);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_pipe_getopt_size(nng_pipe pipe, string opt, out UIntPtr val);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_pipe_getopt_uint64(nng_pipe pipe, string opt, out ulong val);
     }
 }
