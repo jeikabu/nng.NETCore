@@ -4,15 +4,15 @@
 
 ## Usage
 
-Currently only works in projects targetting:
+Currently works in projects targetting:
 - .NET Core App 1.0+
 - .NET Standard 1.5+
-    - `SuppressUnmanagedCodeSecurity` is used with .NET Standard 2.0+ for improved PInvoke performance
+    - [`SuppressUnmanagedCodeSecurity`](https://docs.microsoft.com/en-us/dotnet/api/system.security.suppressunmanagedcodesecurityattribute) is used with .NET Standard 2.0+ for improved PInvoke performance
 - .NET Framework 4.6.1+
 
-After installing the package and building your output folder should have `runtimes/` directory containing native binaries.
+After installing the package and building, your output folder should have `runtimes/` directory containing native binaries.
 
-On .NET Core/Standard you can either use `NngLoadContext` (or your own `AssemblyLoadContext`) to load the appropriate native library and use NNG:  
+On .NET Core/Standard you can either use `NngLoadContext` (or your own [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext)) to load the appropriate native library and use NNG:  
 ```csharp
 var path = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 var ctx = new nng.NngLoadContext(path);
@@ -42,25 +42,28 @@ Try adding the following to your project:
 
 ## Build & Run
 
+You should be able to build nng.NETCore for/on any platform supported by [.NET Core](https://dotnet.github.io/).
+
 1. Build: `dotnet build`
 1. Run: `dotnet run` or `dotnet test tests`
 
-Updating nng native shared library:
-1. Download/clone [nng source](https://github.com/nanomsg/nng)
+You should be able to build the NNG native shared library for any platform supported by [NNG](https://github.com/nanomsg/nng):
+1. Download/clone [NNG source](https://github.com/nanomsg/nng)
 1. On Windows, create Command Prompt suitable for Visual Studio:
-    - Run x64 Visual Studio Developer Command Prompt to create a 64-bit library (or x86 for 32-bit)
+    - Run __x64__ _Visual Studio Developer Command Prompt_ to create a 64-bit library (or __x86__ for 32-bit)
     - OR, run `vcvars64.bat` in cmd.exe (or `vcvars32.bat`)
-1. Make sure [cmake](https://cmake.org/) and [Ninja](https://ninja-build.org/) are in your `PATH`
+1. Make sure [cmake](https://cmake.org/) and [Ninja](https://ninja-build.org/) are in `PATH` environment variable
 1. Run:
     ```
     mkdir build && cd build
     cmake -G Ninja -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release ..
     ninja
     ```
+1. Copy library to appropriate `nng.NETCore/runtimes/XXX/native/` directory
 
 ## Status
 
-Very pre-alpha.  Using latest [nng release](https://github.com/nanomsg/nng/releases) (currently v1.1.1).  Once this is a bit farther along will track nng version numbers.
+Very alpha.  Using latest [NNG release](https://github.com/nanomsg/nng/releases) (currently v1.1.1).  Once this is a bit farther along will track NNG version numbers.
 
 [![NuGet](https://img.shields.io/nuget/v/Subor.nng.NETCore.svg?colorB=brightgreen)](https://www.nuget.org/packages/Subor.nng.NETCore)
 [![Build status](https://ci.appveyor.com/api/projects/status/ohpurtgoq42wauan/branch/master?svg=true)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
@@ -79,11 +82,12 @@ __Core Functionality__
 | iov | 0% | 0% | 0%
 | listener | 75% | 50% | 50%
 | msg | 75% | 75% | 75%
-| pipe | 0% | 0% | 0% | 
-| socket | 100% | 50% | 50% | Missing synchronous methods and nng_getopt_string
+| pipe | 50% | 50% | 25% | 
 | raw socket | 0% | 0% | 0% | Low priority
-| compat | 0% | 0% | 0% | No plans to implement
+| socket | 100% | 50% | 50% | Missing synchronous methods and nng_getopt_string
+| stats | 0% | 0% | 0%
 | TLS | 0% | 0% | 0% | Low priority
+| compat | 0% | 0% | 0% | No plans to implement
 | Http | 0% | 0% | 0% | No plans to implement
 | CV/Mtx/thread | 0% | 0% | 0% | No plans to implement
 
@@ -105,7 +109,7 @@ __Protocols and Transports__
 | ws | 50% | 25% | 25%
 | zerotier | 0% | 0% | 0% | Low priority
 
-## Background
+## History/Origin Story
 
 nng.NETCore is meant to be a completely different approach than [zplus/csnng](https://github.com/zplus/csnng) (our fork of [csnng](https://github.com/mwpowellhtx/csnng)).  Namely:
 
@@ -115,4 +119,4 @@ nng.NETCore is meant to be a completely different approach than [zplus/csnng](ht
 - __.NET Core friendly__: Using [`dotnet`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet) and targetting .NET Standard from the start
 - Simple class heirarchy (maybe) and minimal exceptions
 
-See also [runng](https://github.com/jeikabu/runng).  Our like-minded NNG binding/wrapper for Rust.
+See also [runng](https://github.com/jeikabu/runng).  Our like-minded NNG binding/wrapper for [Rust](https://www.rust-lang.org/).
