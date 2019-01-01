@@ -9,8 +9,8 @@
 
   <PropertyGroup>
     <PackageId>Subor.nng.NETCore.Shared</PackageId>
-    <PackageVersion>0.0.7</PackageVersion>
-    <Version>0.0.7</Version>
+    <PackageVersion>0.0.8</PackageVersion>
+    <Version>0.0.8</Version>
 
     <PackageOutputPath>../bin/$(Configuration)</PackageOutputPath>
   </PropertyGroup>

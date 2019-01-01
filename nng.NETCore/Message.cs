@@ -65,6 +65,8 @@ namespace nng
             return new Message(msg);
         }
 
+        public IPipe Pipe => _pipe ?? (_pipe = new Pipe(nng_msg_get_pipe(NngMsg)));
+
         public int Append(byte[] data) => nng_msg_append(NngMsg, data);
         public int Append(uint data) => nng_msg_append_u32(NngMsg, data);
         public int Chop(UIntPtr size) => nng_msg_chop(NngMsg, size);
@@ -79,6 +81,7 @@ namespace nng
 
         readonly nng_msg message;
         readonly NngMessageHeader _header;
+        Pipe _pipe;
 
         #region IDisposable
         public void Dispose()
@@ -101,5 +104,41 @@ namespace nng
         #endregion
 
         
+    }
+
+    public class Pipe : IPipe
+    {
+        public Pipe(nng_pipe pipe)
+        {
+            NngPipe = pipe;
+        }
+
+        public nng_pipe NngPipe { get; }
+        public int Id => nng_pipe_id(NngPipe);
+
+        public int GetOpt(string name, out bool data)
+        {
+            int size = nng_pipe_getopt_bool(NngPipe, name, out int val);
+            data = val != 0;
+            return size;
+        }
+
+        public int GetOpt(string name, out int data)
+            => nng_pipe_getopt_int(NngPipe, name, out data);
+
+        public int GetOpt(string name, out nng_duration data)
+            => nng_pipe_getopt_ms(NngPipe, name, out data);
+
+        public int GetOpt(string name, out IntPtr data)
+            => nng_pipe_getopt_ptr(NngPipe, name, out data);
+
+        public int GetOpt(string name, out string data)
+            => nng_pipe_getopt_string(NngPipe, name, out data);
+
+        public int GetOpt(string name, out UIntPtr data)
+            => nng_pipe_getopt_size(NngPipe, name, out data);
+
+        public int GetOpt(string name, out ulong data)
+            => nng_pipe_getopt_uint64(NngPipe, name, out data);
     }
 }
