@@ -81,13 +81,13 @@ namespace nng
         /// </summary>
         int Id { get; }
 
-        bool GetOptionBool(string option);
-        int GetOptionInt(string option);
-        int GetOptionMs(string option);
-        UIntPtr GetOptionPtr(string option);
-        string GetOptionString(string option);
-        UIntPtr GetOptionSize(string option);
-        ulong GetOptionUInt64(string option);
+        int GetOpt(string name, out bool data);
+        int GetOpt(string name, out int data);
+        int GetOpt(string name, out nng_duration data);
+        int GetOpt(string name, out IntPtr data);
+        int GetOpt(string name, out string data);
+        int GetOpt(string name, out UIntPtr data);
+        int GetOpt(string name, out ulong data);
     }
 
     public static class Extensions

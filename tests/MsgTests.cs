@@ -175,13 +175,35 @@ namespace nng.Tests
         {
             var msg = factory.CreateMessage();
             Assert.Equal(-1, msg.Pipe.Id);
-            Assert.False(msg.Pipe.GetOptionBool("option-name"));
-            Assert.Equal(0, msg.Pipe.GetOptionInt("option-name"));
-            Assert.Equal(0, msg.Pipe.GetOptionMs("option-name"));
-            Assert.Equal(UIntPtr.Zero, msg.Pipe.GetOptionPtr("option-name"));
-            Assert.Null(msg.Pipe.GetOptionString("option-name"));
-            Assert.Equal(UIntPtr.Zero, msg.Pipe.GetOptionSize("option-name"));
-            Assert.Equal(0UL, msg.Pipe.GetOptionUInt64("option-name"));
+
+            int result;
+            result = msg.Pipe.GetOpt("option-name", out bool boolData);
+            Assert.NotEqual(0, result);
+            Assert.False(boolData);
+
+            result = msg.Pipe.GetOpt("option-name", out int intData);
+            Assert.NotEqual(0, result);
+            Assert.Equal(0, intData);
+
+            result = msg.Pipe.GetOpt("option-name", out nng_duration msData);
+            Assert.NotEqual(0, result);
+            Assert.Equal(default(nng_duration), msData);
+
+            result = msg.Pipe.GetOpt("option-name", out IntPtr ptr);
+            Assert.NotEqual(0, result);
+            Assert.Equal(IntPtr.Zero, ptr);
+
+            result = msg.Pipe.GetOpt("option-name", out string strData);
+            Assert.NotEqual(0, result);
+            Assert.Null(strData);
+
+            result = msg.Pipe.GetOpt("option-name", out UIntPtr sizeData);
+            Assert.NotEqual(0, result);
+            Assert.Equal(UIntPtr.Zero, sizeData);
+
+            result = msg.Pipe.GetOpt("option-name", out ulong ulongData);
+            Assert.NotEqual(0, result);
+            Assert.Equal(0UL, ulongData);
         }
     }
 }

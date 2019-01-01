@@ -116,46 +116,29 @@ namespace nng
         public nng_pipe NngPipe { get; }
         public int Id => nng_pipe_id(NngPipe);
 
-        public bool GetOptionBool(string option)
+        public int GetOpt(string name, out bool data)
         {
-            nng_pipe_getopt_bool(NngPipe, option, out int val);
-            return val != 0;
+            int size = nng_pipe_getopt_bool(NngPipe, name, out int val);
+            data = val != 0;
+            return size;
         }
 
-        public int GetOptionInt(string option)
-        {
-            nng_pipe_getopt_int(NngPipe, option, out int val);
-            return val;
-        }
+        public int GetOpt(string name, out int data)
+            => nng_pipe_getopt_int(NngPipe, name, out data);
 
-        public int GetOptionMs(string option)
-        {
-            nng_pipe_getopt_ms(NngPipe, option, out int val);
-            return val;
-        }
+        public int GetOpt(string name, out nng_duration data)
+            => nng_pipe_getopt_ms(NngPipe, name, out data);
 
-        public UIntPtr GetOptionPtr(string option)
-        {
-            nng_pipe_getopt_ptr(NngPipe, option, out UIntPtr val);
-            return val;
-        }
+        public int GetOpt(string name, out IntPtr data)
+            => nng_pipe_getopt_ptr(NngPipe, name, out data);
 
-        public string GetOptionString(string option)
-        {
-            nng_pipe_getopt_string(NngPipe, option, out string val);
-            return val;
-        }
+        public int GetOpt(string name, out string data)
+            => nng_pipe_getopt_string(NngPipe, name, out data);
 
-        public UIntPtr GetOptionSize(string option)
-        {
-            nng_pipe_getopt_size(NngPipe, option, out UIntPtr val);
-            return val;
-        }
+        public int GetOpt(string name, out UIntPtr data)
+            => nng_pipe_getopt_size(NngPipe, name, out data);
 
-        public ulong GetOptionUInt64(string option)
-        {
-            nng_pipe_getopt_uint64(NngPipe, option, out ulong val);
-            return val;
-        }
+        public int GetOpt(string name, out ulong data)
+            => nng_pipe_getopt_uint64(NngPipe, name, out data);
     }
 }

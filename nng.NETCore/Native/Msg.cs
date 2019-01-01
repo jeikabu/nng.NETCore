@@ -147,10 +147,10 @@ namespace nng.Native.Msg
         public static extern int nng_pipe_getopt_int(nng_pipe pipe, string opt, out int val);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_pipe_getopt_ms(nng_pipe pipe, string opt, out int val);
+        public static extern int nng_pipe_getopt_ms(nng_pipe pipe, string opt, out nng_duration val);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_pipe_getopt_ptr(nng_pipe pipe, string opt, out UIntPtr val);
+        public static extern int nng_pipe_getopt_ptr(nng_pipe pipe, string opt, out IntPtr val);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_pipe_getopt_string(nng_pipe pipe, string opt, out string val);
