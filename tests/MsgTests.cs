@@ -169,5 +169,41 @@ namespace nng.Tests
             ChopTrimPart(msg);
             ChopTrimPart(msg.Header);
         }
+
+        [Fact]
+        public void Pipe()
+        {
+            var msg = factory.CreateMessage();
+            Assert.Equal(-1, msg.Pipe.Id);
+
+            int result;
+            result = msg.Pipe.GetOpt("option-name", out bool boolData);
+            Assert.NotEqual(0, result);
+            Assert.False(boolData);
+
+            result = msg.Pipe.GetOpt("option-name", out int intData);
+            Assert.NotEqual(0, result);
+            Assert.Equal(0, intData);
+
+            result = msg.Pipe.GetOpt("option-name", out nng_duration msData);
+            Assert.NotEqual(0, result);
+            Assert.Equal(default(nng_duration), msData);
+
+            result = msg.Pipe.GetOpt("option-name", out IntPtr ptr);
+            Assert.NotEqual(0, result);
+            Assert.Equal(IntPtr.Zero, ptr);
+
+            result = msg.Pipe.GetOpt("option-name", out string strData);
+            Assert.NotEqual(0, result);
+            Assert.Null(strData);
+
+            result = msg.Pipe.GetOpt("option-name", out UIntPtr sizeData);
+            Assert.NotEqual(0, result);
+            Assert.Equal(UIntPtr.Zero, sizeData);
+
+            result = msg.Pipe.GetOpt("option-name", out ulong ulongData);
+            Assert.NotEqual(0, result);
+            Assert.Equal(0UL, ulongData);
+        }
     }
 }
