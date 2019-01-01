@@ -213,4 +213,60 @@ namespace nng.Native
         #pragma warning disable CS0169
         IntPtr ptr;
     }
+
+    public enum nng_stat_type_enum
+    {
+        NNG_STAT_SCOPE   = 0, // Stat is for scoping, and carries no value
+        NNG_STAT_LEVEL   = 1, // Numeric "absolute" value, diffs meaningless
+        NNG_STAT_COUNTER = 2, // Incrementing value (diffs are meaningful)
+        NNG_STAT_STRING  = 3, // Value is a string
+        NNG_STAT_BOOLEAN = 4, // Value is a boolean
+        NNG_STAT_ID      = 5, // Value is a numeric ID
+    };
+
+    public enum nng_unit_enum
+    {
+        NNG_UNIT_NONE     = 0, // No special units
+        NNG_UNIT_BYTES    = 1, // Bytes, e.g. bytes sent, etc.
+        NNG_UNIT_MESSAGES = 2, // Messages, one per message
+        NNG_UNIT_MILLIS   = 3, // Milliseconds
+        NNG_UNIT_EVENTS   = 4  // Some other type of event
+    };
+    
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_stat
+    {
+        string         s_name;
+        string   s_desc;
+        string   s_string;
+        UInt64       s_value;
+        nni_time       s_time;
+        nni_stat_type  s_type;
+        nni_stat_unit  s_unit;
+        UIntPtr /*nni_stat_item * */ s_item; // Used during snapshot collection
+        nni_list       s_children;
+        UIntPtr /*nni_stat * */     s_parent;
+        nni_list_node  s_node;
+    }
+
+#region NNI
+    [StructLayout(LayoutKind.Sequential)]
+    struct nni_time
+    {
+        UInt64 value;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct nni_stat_type
+    {
+        nng_stat_type_enum value;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct nni_stat_unit
+    {
+        nng_unit_enum value;
+    }
+    
+#endregion
 }
