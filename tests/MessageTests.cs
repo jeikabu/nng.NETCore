@@ -38,8 +38,7 @@ namespace nng.Tests
             var msg = MsgRandom();
 
             var clone = msg.Dup();
-            Assert.True(Util.BytesEqual(msg.Raw, clone.Raw));
-            Assert.True(Util.BytesEqual(msg.Header.Raw, clone.Header.Raw));
+            Assert.True(Util.Equals(msg, clone));
         }
 
         [Fact]
@@ -168,6 +167,21 @@ namespace nng.Tests
             var msg = factory.CreateMessage();
             ChopTrimPart(msg);
             ChopTrimPart(msg.Header);
+        }
+
+        [Fact]
+        public void Spans()
+        {
+            var randomBytes = Guid.NewGuid().ToByteArray();
+            var msg = factory.CreateMessage();
+            unsafe {
+                var randomStack = stackalloc byte[randomBytes.Length];
+                var randomSpan = new Span<byte>(randomStack, randomBytes.Length);
+                randomBytes.AsSpan().CopyTo(randomSpan);
+                msg.Append(randomSpan);
+            }
+            
+            Assert.True(Util.BytesEqual(randomBytes, msg.Raw));
         }
 
         [Fact]

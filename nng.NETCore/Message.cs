@@ -16,7 +16,8 @@ namespace nng
             this.message = message;
         }
 
-        public int Append(byte[] data) => nng_msg_header_append(NngMsg, data);
+        //public int Append(byte[] data) => nng_msg_header_append(NngMsg, data);
+        public int Append(ReadOnlySpan<byte> data) => nng_msg_header_append(NngMsg, data);
         public int Append(UInt32 data) => nng_msg_header_append_u32(NngMsg, data);
         public int Chop(UIntPtr size) => nng_msg_header_chop(NngMsg, size);
         public int Chop(out uint data) => nng_msg_header_chop_u32(NngMsg, out data);
@@ -67,7 +68,8 @@ namespace nng
 
         public IPipe Pipe => _pipe ?? (_pipe = new Pipe(nng_msg_get_pipe(NngMsg)));
 
-        public int Append(byte[] data) => nng_msg_append(NngMsg, data);
+        //public int Append(byte[] data) => nng_msg_append(NngMsg, data);
+        public int Append(ReadOnlySpan<byte> data) => nng_msg_append(NngMsg, data);
         public int Append(uint data) => nng_msg_append_u32(NngMsg, data);
         public int Chop(UIntPtr size) => nng_msg_chop(NngMsg, size);
         public int Chop(out uint data) => nng_msg_chop_u32(NngMsg, out data);

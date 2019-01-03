@@ -61,6 +61,11 @@ namespace nng.Tests
             return lhs.SequenceEqual(rhs);
         }
 
+        public static bool Equals(IMessage lhs, IMessage rhs)
+        {
+            return BytesEqual(lhs.Raw, rhs.Raw) && BytesEqual(lhs.Header.Raw, rhs.Header.Raw);
+        }
+
         public static void AssertGetSetOpts(IHasOpts options, string name)
         {
             Assert.Equal(0, options.GetOpt(name, out bool isSet));
