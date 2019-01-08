@@ -51,12 +51,25 @@ namespace nng.Native.Msg
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern UIntPtr nng_msg_len(nng_msg message);
 
-        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        static extern Int32 nng_msg_append(nng_msg message, byte[] data, UIntPtr size);
+        // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        // static extern Int32 nng_msg_append(nng_msg message, byte[] data, UIntPtr size);
 
-        public static Int32 nng_msg_append(nng_msg message, byte[] data)
+        // public static Int32 nng_msg_append(nng_msg message, byte[] data)
+        // {
+        //     return nng_msg_append(message, data, (UIntPtr)data.Length);
+        // }
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        static extern unsafe Int32 nng_msg_append(nng_msg message, byte* data, UIntPtr size);
+
+        public static Int32 nng_msg_append(nng_msg message, ReadOnlySpan<byte> data)
         {
-            return nng_msg_append(message, data, (UIntPtr)data.Length);
+            unsafe {
+                fixed (byte* ptr = &data[0])
+                {
+                    return nng_msg_append(message, ptr, (UIntPtr)data.Length);
+                }
+            }
         }
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
@@ -73,12 +86,25 @@ namespace nng.Native.Msg
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern Int32 nng_msg_chop(nng_msg message, UIntPtr size);
 
-        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        static extern Int32 nng_msg_header_append(nng_msg message, byte[] data, UIntPtr size);
+        // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        // static extern Int32 nng_msg_header_append(nng_msg message, byte[] data, UIntPtr size);
 
-        public static Int32 nng_msg_header_append(nng_msg message, byte[] data)
+        // public static Int32 nng_msg_header_append(nng_msg message, byte[] data)
+        // {
+        //     return nng_msg_header_append(message, data, (UIntPtr)data.Length);
+        // }
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        static extern unsafe Int32 nng_msg_header_append(nng_msg message, byte* data, UIntPtr size);
+
+        public static Int32 nng_msg_header_append(nng_msg message, ReadOnlySpan<byte> data)
         {
-            return nng_msg_header_append(message, data, (UIntPtr)data.Length);
+            unsafe {
+                fixed (byte* ptr = &data[0])
+                {
+                    return nng_msg_header_append(message, ptr, (UIntPtr)data.Length);
+                }
+            }
         }
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]

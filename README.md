@@ -1,18 +1,35 @@
 # nng.NETCore
 
-.NET Core bindings for [NNG](https://github.com/nanomsg/nng).
+.NET Core bindings to [NNG](https://github.com/nanomsg/nng):
+
+> NNG, like its predecessors nanomsg (and to some extent ZeroMQ), is a lightweight, broker-less library, offering a simple API to solve common recurring messaging problems, such as publish/subscribe, RPC-style request/reply, or service discovery. The API frees the programmer from worrying about details like connection management, retries, and other common considerations, so that they can focus on the application instead of the plumbing.
+
+__Goals of nng.NETCore__:
+
+- __Async first__: async/await access to [nng_aio](https://nanomsg.github.io/nng/man/v1.0.0/nng_aio.5.html) and [nng_ctx](https://nanomsg.github.io/nng/man/v1.0.0/nng_ctx.5.html)
+- __Native layer__: P/Invoke in separate files/namespace.  Don't like our high-level OO wrapper?  Re-use the pinvoke and make your own.  Also makes cross-platform-friendly pinvoke easier.
+- __Tests as Documentation__: [xUnit](https://xunit.github.io/) unit/integration tests in "plain" C# much like you'd write
+- __.NET Core friendly__: Using [`dotnet`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet) and targetting .NET Standard from the start
+- __Few surprises__: Simple class heirarchy (more composition than inheritance), minimal exceptions, idiomatic C# that when reasonable is similar to original native code
 
 ## Usage
 
-Currently works in projects targetting:
+Supports projects targetting:
 - .NET Core App 1.0+
 - .NET Standard 1.5+
     - [`SuppressUnmanagedCodeSecurity`](https://docs.microsoft.com/en-us/dotnet/api/system.security.suppressunmanagedcodesecurityattribute) is used with .NET Standard 2.0+ for improved PInvoke performance
-- .NET Framework 4.6.1+
+- .NET Framework 4.6.1+ ([caveats](#.net-framework))
+
+[Supported platforms](https://github.com/subor/nng.NETCore/tree/master/nng.NETCore/runtimes):
+- Windows Vista or later 32/64-bit
+- macOS/OSX 10.?+ (built on 10.14)
+- Linux 64-bit (built on Ubuntu 18.04)
+
+Should be easy to add others that are supported by both .NET Core and NNG.
 
 After installing the package and building, your output folder should have `runtimes/` directory containing native binaries.
 
-On .NET Core/Standard you can either use `NngLoadContext` (or your own [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext)) to load the appropriate native library and use NNG:  
+On .NET Core/Standard use `NngLoadContext` (or your own [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext)) to load the appropriate native library and use NNG:  
 ```csharp
 var path = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 var ctx = new nng.NngLoadContext(path);
@@ -20,34 +37,16 @@ var factory = nng.NngLoadContext.Init(ctx);
 // Use factory...
 ```
 
-__.NET Framework 4.6.1__
-
-[System.Runtime.Loader is not available in .NET Framework](https://github.com/dotnet/corefx/issues/22142), so the correct assembly must be loaded by some other means.
-
-If your application is targetting .Net Framework 4.6+ and you get lots of:
-```
-message NETSDK1041: Encountered conflict between 'Reference:XXX\.nuget\packages\subor.nng.netcore\0.0.5\lib\netstandard2.0\Microsoft.Win32.Primitives.dll' and 'Reference:Microsoft.Win32.Primitives'.  NETSDK1034: Choosing 'Reference:XXX\.nuget\packages\subor.nng.netcore\0.0.5\lib\netstandard2.0\Microsoft.Win32.Primitives.dll' because file version '4.6.26419.2' is greater than '4.6.25714.1'.
-
-<snip>
-
-XXX\Properties\AssemblyInfo.cs(8,12,8,25): error CS0246: The type or namespace name 'AssemblyTitleAttribute' could not be found (are you missing a using directive or an assembly reference?)
-```
-
-Try adding the following to your project:
-```xml
-<PropertyGroup>
-    <DependsOnNETStandard>false</DependsOnNETStandard>
-</PropertyGroup>
-```
+See [`tests/`](https://github.com/subor/nng.NETCore/tree/master/tests) for basic examples.
 
 ## Build & Run
 
-You should be able to build nng.NETCore for/on any platform supported by [.NET Core](https://dotnet.github.io/).
+You should be able to build nng.NETCore for/on any platform supported by [.NET Core](https://dotnet.github.io/):
 
 1. Build: `dotnet build`
 1. Run: `dotnet run` or `dotnet test tests`
 
-You should be able to build the NNG native shared library for any platform supported by [NNG](https://github.com/nanomsg/nng):
+You should be able to build the NNG native shared library for any [platform supported by NNG](https://github.com/nanomsg/nng#supported-platforms):
 1. Download/clone [NNG source](https://github.com/nanomsg/nng)
 1. On Windows, create Command Prompt suitable for Visual Studio:
     - Run __x64__ _Visual Studio Developer Command Prompt_ to create a 64-bit library (or __x86__ for 32-bit)
@@ -70,53 +69,24 @@ Very alpha.  Using latest [NNG release](https://github.com/nanomsg/nng/releases)
 [![Build status](https://img.shields.io/appveyor/tests/jake-ruyi/nng-netcore/master.svg)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
 [![codecov](https://codecov.io/gh/subor/nng.NETCore/branch/master/graph/badge.svg)](https://codecov.io/gh/subor/nng.NETCore)
 
-Implementation status of various APIs is as follows:
+For list of missing APIs/features see [`is:issue is:open label:enhancement`](https://github.com/subor/nng.NETCore/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
 
-__Core Functionality__
+## .NET Framework
 
-| Feature | Pinvoke | Wrapper | Tests | Notes
-|-|-|-|-|-
-| aio | 100% | 75% | 75% | Missing get/set_input/output/iov
-| ctx | 100% | 50% | 50% | Doesn't seem to be ctx-supported options other than nng_duration
-| dialer | 75% | 50% | 50%
-| iov | 0% | 0% | 0%
-| listener | 75% | 50% | 50%
-| msg | 75% | 75% | 75%
-| pipe | 50% | 50% | 25% | 
-| raw socket | 0% | 0% | 0% | Low priority
-| socket | 100% | 50% | 50% | Missing synchronous methods and nng_getopt_string
-| stats | 0% | 0% | 0%
-| TLS | 0% | 0% | 0% | Low priority
-| compat | 0% | 0% | 0% | No plans to implement
-| Http | 0% | 0% | 0% | No plans to implement
-| CV/Mtx/thread | 0% | 0% | 0% | No plans to implement
+[System.Runtime.Loader is not available in .NET Framework](https://github.com/dotnet/corefx/issues/22142), so the correct assembly must be loaded by some other means.
 
-__Protocols and Transports__
+If your application is targetting .Net Framework 4.6+ and you get lots of:
+```
+message NETSDK1041: Encountered conflict between 'Reference:XXX\.nuget\packages\subor.nng.netcore\0.0.5\lib\netstandard2.0\Microsoft.Win32.Primitives.dll' and 'Reference:Microsoft.Win32.Primitives'.  NETSDK1034: Choosing 'Reference:XXX\.nuget\packages\subor.nng.netcore\0.0.5\lib\netstandard2.0\Microsoft.Win32.Primitives.dll' because file version '4.6.26419.2' is greater than '4.6.25714.1'.
 
-| Feature | Pinvoke | Wrapper | Tests | Notes
-|-|-|-|-|-
-| bus | 75% | 50% | 25% | 
-| inproc | 100% | 50% | 50% |
-| ipc | 100% | 50% | 50% |
-| pair | 0% | 0% | 0% | Low priority
-| pub/sub | 100% | 50% | 50% |
-| push/pull | 100% | 50% | 50% |
-| req/rep | 100% | 50% | 50% |
-| respondent | 0% | 0% | 0% | Low priority
-| surveyor | 0% | 0% | 0% | Low priority
-| tcp | 100% | 50% | 50% |
-| tls | 0% | 0% | 0% | Low priority
-| ws | 50% | 25% | 25%
-| zerotier | 0% | 0% | 0% | Low priority
+<snip>
 
-## History/Origin Story
+XXX\Properties\AssemblyInfo.cs(8,12,8,25): error CS0246: The type or namespace name 'AssemblyTitleAttribute' could not be found (are you missing a using directive or an assembly reference?)
+```
 
-nng.NETCore is meant to be a completely different approach than [zplus/csnng](https://github.com/zplus/csnng) (our fork of [csnng](https://github.com/mwpowellhtx/csnng)).  Namely:
-
-- __Async first__: using [nng_aio](https://nanomsg.github.io/nng/man/v1.0.0/nng_aio.5.html) and [nng_ctx](https://nanomsg.github.io/nng/man/v1.0.0/nng_ctx.5.html) ready for async/await
-- __Native layer__: P/Invoke in separate files/namespace.  Don't like our high-level OO wrapper?  Re-use the pinvoke and make your own.  Will also make it easier to do cross-platform-friendly pinvoke
-- __Tests as Documentation__: [xUnit](https://xunit.github.io/) unit/integration tests in "plain" C# much like you'd write
-- __.NET Core friendly__: Using [`dotnet`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet) and targetting .NET Standard from the start
-- Simple class heirarchy (maybe) and minimal exceptions
-
-See also [runng](https://github.com/jeikabu/runng).  Our like-minded NNG binding/wrapper for [Rust](https://www.rust-lang.org/).
+Try adding the following to your project:
+```xml
+<PropertyGroup>
+    <DependsOnNETStandard>false</DependsOnNETStandard>
+</PropertyGroup>
+```

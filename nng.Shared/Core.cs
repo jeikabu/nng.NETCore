@@ -26,7 +26,8 @@ namespace nng
     /// </summary>
     public interface IMessagePart
     {
-        int Append(byte[] data);
+        //int Append(byte[] data);
+        int Append(ReadOnlySpan<byte> data);
         int Append(uint data);
         int Chop(UIntPtr size);
         int Chop(out uint data);
