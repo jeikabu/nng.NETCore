@@ -79,14 +79,14 @@ namespace nng.Tests
             ctx.Init(this, socket, ctx.callback);
             return NngResult.Ok<ISendReceiveAsyncContext<IMessage>>(ctx);
         }
-        
+
         public INngResult<ISubAsyncContext<IMessage>> CreateSubAsyncContext(ISocket socket)
         {
             var ctx = new SubAsyncContext<IMessage>();
             ctx.Init(this, socket, ctx.callback);
             return NngResult.Ok<ISubAsyncContext<IMessage>>(ctx);
         }
-        
+
         public INngResult<IReqRepAsyncContext<IMessage>> CreateReqRepAsyncContext(ISocket socket)
         {
             var ctx = new ReqAsyncCtx<IMessage>();
@@ -97,6 +97,13 @@ namespace nng.Tests
         public INngResult<IRepReqAsyncContext<IMessage>> CreateRepReqAsyncContext(ISocket socket)
         {
             return RepAsyncCtx<IMessage>.Create(this, socket);
+        }
+        #endregion
+
+        #region IMiscFactory
+        public INngResult<IStatRoot> GetStatSnapshot()
+        {
+            return Stat.GetStatSnapshot();
         }
         #endregion
     }
