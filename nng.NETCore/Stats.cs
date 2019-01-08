@@ -14,11 +14,11 @@ namespace nng
     {
         public nng_stat NngStat { get; protected set; }
 
-        public string Name => nng_stat_name(NngStat);
-        public string Desc => nng_stat_desc(NngStat);
+        public string Name => nng_stat_name_string(NngStat);
+        public string Desc => nng_stat_desc_string(NngStat);
         public nng_stat_type_enum Type => nng_stat_type(NngStat);
         public UInt64 Value => nng_stat_value(NngStat);
-        public string ValueString => nng_stat_string(NngStat);
+        public string ValueString => nng_stat_string_string(NngStat);
         public nng_unit_enum Unit => nng_stat_unit(NngStat);
         public UInt64 Timestamp => nng_stat_timestamp(NngStat);
         public IStatChild Next()
@@ -83,7 +83,7 @@ namespace nng
             while (!next.NngStat.IsNull)
             {
                 yield return next;
-                next = Next();
+                next = next.Next();
             }
         }
 

@@ -30,22 +30,14 @@ namespace nng.Tests
             using (var pushSocket = Factory.PusherCreate("inproc://stats", true).Unwrap())
             using (var pullSocket = Factory.PullerCreate("inproc://stats", false).Unwrap())
             {
-                //var root = Factory.GetStatSnapshot().Unwrap();
                 using (var root = Factory.GetStatSnapshot().Unwrap())
                 {
-                    var next = root.Child();
-                    while (!next.NngStat.IsNull)
+                    foreach (var child in root.Child())
                     {
-                        Console.WriteLine("Child: " + next.Name);
-                        next = next.Next();
+                        var _ = String.Format("Child {0}[{1}]: {2}", child.Name, child.Type, child.Desc);
                     }
                 }
             }
-        }
-
-        void init_stats()
-        {
-
         }
     }
 }

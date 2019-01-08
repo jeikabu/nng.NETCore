@@ -15,7 +15,18 @@ namespace nng
         string Name { get; }
         string Desc { get; }
         nng_stat_type_enum Type { get; }
+        /// <summary>
+        /// Returns numeric value for the stat.
+        /// </summary>
+        /// <value>
+        /// If Type is NNG_STAT_BOOLEAN then 0 is <c>false</c> and 1 is <c>true</c>.
+        /// If stat is not a numeric type 0 is returned.
+        /// </value>
         UInt64 Value { get; }
+        /// <summary>
+        /// Returns string value for the stat if Type is NNG_STAT_STRING, otherwise <c>null</c>.
+        /// </summary>
+        /// <value></value>
         string ValueString { get; }
         nng_unit_enum Unit { get; }
         UInt64 Timestamp { get; }
@@ -23,7 +34,7 @@ namespace nng
     }
 
     /// <summary>
-    /// Represents all child/non-root stats
+    /// Represents all child/non-root stats.  Can iterate over self and siblings.
     /// </summary>
     public interface IStatChild : IStat, IEnumerable<IStatChild>
     {

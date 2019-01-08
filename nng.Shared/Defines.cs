@@ -237,52 +237,7 @@ namespace nng.Native
     public struct nng_stat
     {
         IntPtr ptr;
-        // string s_name;
-        // string s_desc;
-        // string s_string;
-        // UInt64 s_value;
-        // nni_time s_time;
-        // nni_stat_type s_type;
-        // nni_stat_unit s_unit;
-        // UIntPtr s_item; // nni_stat_item *
-        // nni_list s_children;
-        // UIntPtr s_parent; // nni_stat *
-        // nni_list_node s_node;
 
         public bool IsNull => ptr == IntPtr.Zero;
     }
-
-    #region NNI
-    [StructLayout(LayoutKind.Sequential)]
-    struct nni_time
-    {
-        UInt64 value;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct nni_stat_type
-    {
-        nng_stat_type_enum value;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct nni_stat_unit
-    {
-        nng_unit_enum value;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct nni_list_node
-    {
-        UIntPtr ln_next; // struct nni_list_node *
-        UIntPtr ln_prev; // struct nni_list_node *
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct nni_list
-    {
-        nni_list_node ll_head;
-        UIntPtr ll_offset; // size_t
-    }
-    #endregion
 }
