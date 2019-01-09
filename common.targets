@@ -21,7 +21,7 @@
 
   <PropertyGroup>
     <Authors>Subor</Authors>
-    <PackageLicenseUrl>https://github.com/subor/nng.NETCore/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Owners>Subor</Owners>
     <PackageProjectUrl>https://github.com/subor/nng.NETCore</PackageProjectUrl>
     <Summary>.NET Core bindings to nng</Summary>
