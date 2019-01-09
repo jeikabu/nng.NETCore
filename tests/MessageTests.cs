@@ -10,7 +10,7 @@ namespace nng.Tests
 {
     using static nng.Native.Defines;
     using static nng.Tests.Util;
-    
+
 
     [Collection("nng")]
     public class MsgTests
@@ -66,10 +66,10 @@ namespace nng.Tests
             // Append appends
             msg.Append(bytes0);
             msg.Append(bytes1);
-            Assert.True(msg.Raw.EndsWith(bytes1));
+            Assert.True(msg.AsSpan().EndsWith(bytes1));
             msg.Header.Append(bytes1);
             msg.Header.Append(bytes0);
-            Assert.True(msg.Header.Raw.EndsWith(bytes0));
+            Assert.True(msg.Header.AsSpan().EndsWith(bytes0));
         }
 
         [Fact]
@@ -95,10 +95,10 @@ namespace nng.Tests
             // Insert prepends
             msg.Append(bytes1);
             msg.Insert(bytes0);
-            Assert.True(msg.Raw.StartsWith(bytes0));
+            Assert.True(msg.AsSpan().StartsWith(bytes0));
             msg.Header.Append(bytes0);
             msg.Header.Insert(bytes1);
-            Assert.True(msg.Header.Raw.StartsWith(bytes1));
+            Assert.True(msg.Header.AsSpan().StartsWith(bytes1));
         }
 
         IEnumerable<byte> Concat(params int[] values)
@@ -126,16 +126,16 @@ namespace nng.Tests
             var int1 = Util.rng.Next(1000, 1000000);
             var uint0 = (uint)int0;
             var uint1 = (uint)int1;
-            
+
             var msg = factory.CreateMessage();
             msg.Append(uint0);
             msg.Append(uint1);
             var bodyBytes = Concat(int0, int1).ToArray();
-            Assert.True(Util.BytesEqual(bodyBytes, msg.Raw));
+            Assert.True(Util.BytesEqual(bodyBytes, msg.AsSpan()));
             msg.Header.Append(uint1);
             msg.Header.Append(uint0);
             var headerBytes = Concat(int1, int0).ToArray();
-            Assert.True(Util.BytesEqual(headerBytes, msg.Header.Raw));
+            Assert.True(Util.BytesEqual(headerBytes, msg.Header.AsSpan()));
         }
 
         void ChopTrimPart(IMessagePart part)
@@ -151,14 +151,14 @@ namespace nng.Tests
             part.Trim((UIntPtr)4);
             part.Trim(out var trim);
             Assert.Equal(int0, trim);
-            Assert.True(Util.BytesEqual(bytes0, part.Raw));
-            
+            Assert.True(Util.BytesEqual(bytes0, part.AsSpan()));
+
             part.Append(int1);
             part.Append(int1);
             part.Chop((UIntPtr)4);
             part.Chop(out var chop);
             Assert.Equal(int1, chop);
-            Assert.True(Util.BytesEqual(bytes0, part.Raw));
+            Assert.True(Util.BytesEqual(bytes0, part.AsSpan()));
         }
 
         [Fact]
@@ -174,14 +174,15 @@ namespace nng.Tests
         {
             var randomBytes = Guid.NewGuid().ToByteArray();
             var msg = factory.CreateMessage();
-            unsafe {
+            unsafe
+            {
                 var randomStack = stackalloc byte[randomBytes.Length];
                 var randomSpan = new Span<byte>(randomStack, randomBytes.Length);
                 randomBytes.AsSpan().CopyTo(randomSpan);
                 msg.Append(randomSpan);
             }
-            
-            Assert.True(Util.BytesEqual(randomBytes, msg.Raw));
+
+            Assert.True(Util.BytesEqual(randomBytes, msg.AsSpan()));
         }
 
         [Fact]

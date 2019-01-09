@@ -13,7 +13,7 @@ namespace nng.Native.Msg
     {
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_msg_alloc(out nng_msg message, UIntPtr size);
-        
+
         public static int nng_msg_alloc(out nng_msg message, uint size = 0)
         {
             return nng_msg_alloc(out message, (UIntPtr)size);
@@ -28,10 +28,11 @@ namespace nng.Native.Msg
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         static extern unsafe void* nng_msg_header(nng_msg message);
 
-        public static ReadOnlySpan<byte> nng_msg_header_span(nng_msg message)
+        public static Span<byte> nng_msg_header_span(nng_msg message)
         {
-            unsafe {
-                return new ReadOnlySpan<byte>(nng_msg_header(message), (int)nng_msg_header_len(message));
+            unsafe
+            {
+                return new Span<byte>(nng_msg_header(message), (int)nng_msg_header_len(message));
             }
         }
 
@@ -41,10 +42,11 @@ namespace nng.Native.Msg
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         static extern unsafe void* nng_msg_body(nng_msg message);
 
-        public static ReadOnlySpan<byte> nng_msg_body_span(nng_msg message)
+        public static Span<byte> nng_msg_body_span(nng_msg message)
         {
-            unsafe {
-                return new ReadOnlySpan<byte>(nng_msg_body(message), (int)nng_msg_len(message));
+            unsafe
+            {
+                return new Span<byte>(nng_msg_body(message), (int)nng_msg_len(message));
             }
         }
 
@@ -64,7 +66,8 @@ namespace nng.Native.Msg
 
         public static Int32 nng_msg_append(nng_msg message, ReadOnlySpan<byte> data)
         {
-            unsafe {
+            unsafe
+            {
                 fixed (byte* ptr = &data[0])
                 {
                     return nng_msg_append(message, ptr, (UIntPtr)data.Length);
@@ -99,7 +102,8 @@ namespace nng.Native.Msg
 
         public static Int32 nng_msg_header_append(nng_msg message, ReadOnlySpan<byte> data)
         {
-            unsafe {
+            unsafe
+            {
                 fixed (byte* ptr = &data[0])
                 {
                     return nng_msg_header_append(message, ptr, (UIntPtr)data.Length);

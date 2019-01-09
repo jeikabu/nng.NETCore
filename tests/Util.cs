@@ -39,7 +39,7 @@ namespace nng.Tests
         public static async Task CancelAndWait(CancellationTokenSource cts, int timeoutMs, params Task[] tasks)
         {
             cts.Cancel();
-            try 
+            try
             {
                 await Task.WhenAny(Task.Delay(timeoutMs), Task.WhenAll(tasks));
             }
@@ -63,7 +63,7 @@ namespace nng.Tests
 
         public static bool Equals(IMessage lhs, IMessage rhs)
         {
-            return BytesEqual(lhs.Raw, rhs.Raw) && BytesEqual(lhs.Header.Raw, rhs.Header.Raw);
+            return BytesEqual(lhs.AsSpan(), rhs.AsSpan()) && BytesEqual(lhs.Header.AsSpan(), rhs.Header.AsSpan());
         }
 
         public static void AssertGetSetOpts(IHasOpts options, string name)
@@ -139,7 +139,7 @@ namespace nng.Tests
             yield return new object[] { Util.UrlTcp() };
             yield return new object[] { Util.UrlWs() };
         }
-        
+
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
@@ -154,7 +154,7 @@ namespace nng.Tests
             yield return new object[] { Util.UrlInproc() };
             yield return new object[] { Util.UrlTcp() };
         }
-        
+
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
@@ -165,7 +165,7 @@ namespace nng.Tests
             yield return new object[] { Util.UrlIpc() };
             yield return new object[] { Util.UrlInproc() };
         }
-        
+
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

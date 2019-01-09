@@ -38,7 +38,7 @@ namespace nng
         int Trim(UIntPtr size);
         int Trim(out uint data);
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ReadOnlySpan<byte> Raw { get; }
+        Span<byte> AsSpan();
     }
 
     /// <summary>

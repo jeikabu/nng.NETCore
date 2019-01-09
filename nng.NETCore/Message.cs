@@ -8,7 +8,7 @@ namespace nng
 {
     using static nng.Native.Basic.UnsafeNativeMethods;
     using static nng.Native.Msg.UnsafeNativeMethods;
-    
+
     public class NngMessageHeader : IMessagePart
     {
         public NngMessageHeader(nng_msg message)
@@ -27,7 +27,7 @@ namespace nng
         public int Length => (int)nng_msg_header_len(NngMsg);
         public int Trim(UIntPtr size) => nng_msg_header_trim(NngMsg, size);
         public int Trim(out uint data) => nng_msg_header_trim_u32(NngMsg, out data);
-        public ReadOnlySpan<byte> Raw => nng_msg_header_span(NngMsg);
+        public Span<byte> AsSpan() => nng_msg_header_span(NngMsg);
 
         nng_msg NngMsg => message;
         readonly nng_msg message;
@@ -79,7 +79,7 @@ namespace nng
         public int Length => (int)nng_msg_len(NngMsg);
         public int Trim(UIntPtr size) => nng_msg_trim(NngMsg, size);
         public int Trim(out uint data) => nng_msg_trim_u32(NngMsg, out data);
-        public ReadOnlySpan<byte> Raw => nng_msg_body_span(NngMsg);
+        public Span<byte> AsSpan() => nng_msg_body_span(NngMsg);
 
         readonly nng_msg message;
         readonly NngMessageHeader _header;
@@ -105,7 +105,7 @@ namespace nng
         bool disposed = false;
         #endregion
 
-        
+
     }
 
     public class Pipe : IPipe
