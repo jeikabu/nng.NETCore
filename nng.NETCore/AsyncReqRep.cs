@@ -122,14 +122,16 @@ namespace nng
         {
             System.Diagnostics.Debug.Assert(State == AsyncState.Wait);
             asyncMessage.response = message;
+            // Save response TCS here to avoid race where send completes and asyncMessage replaced
+            var ret = asyncMessage.replyTcs.Task;
             // Move from wait to send state
             callback(IntPtr.Zero);
-            return asyncMessage.replyTcs.Task;
+            return ret;
         }
 
         internal void callback(IntPtr arg)
         {
-            lock (sync)
+            try
             {
                 var res = 0;
                 switch (State)
@@ -156,9 +158,11 @@ namespace nng
                         nng_ctx_send(ctxHandle, aioHandle);
                         break;
                     case AsyncState.Send:
+                        //Console.WriteLine("CB: sent");
                         res = nng_aio_result(aioHandle);
                         if (res != 0)
                         {
+                            Console.WriteLine("CB: send failed");
                             Factory.Destroy(ref asyncMessage.response);
                             asyncMessage.replyTcs.TrySetNngError(res);
                         }
@@ -167,6 +171,9 @@ namespace nng
                         currentReq.replyTcs.SetResult(true);
                         break;
                 }
+            } catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.ToString());
             }
         }
 
