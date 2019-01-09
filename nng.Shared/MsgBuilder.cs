@@ -4,33 +4,24 @@ using System.Linq;
 
 namespace nng
 {
-    public class MsgPart
+    /// <summary>
+    /// Part of a message like the header or body.
+    /// </summary>
+    /// <typeparam name="byte"></typeparam>
+    public class MsgPart : List<byte>
     {
-        public MsgPart Add(IEnumerable<byte> data)
-        {
-            buffer.AddRange(data);
-            return this;
-        }
-
-        public MsgPart Add(uint data)
+        public MsgPart() : base() { }
+        public MsgPart(IEnumerable<byte> collection)
+            : base(collection)
+        { }
+        public void Add(uint data)
         {
             data = (uint)System.Net.IPAddress.HostToNetworkOrder((int)data);
             var bytes = BitConverter.GetBytes(data);
-            buffer.AddRange(bytes);
-            return this;
+            AddRange(bytes);
         }
-
-        public byte[] ToArray()
-        {
-            if (buffer.Count > 0)
-            {
-                return buffer.ToArray();
-            }
-            return null;
-        }
-
-        readonly List<byte> buffer = new List<byte>();
     }
+
 
     /// <summary>
     /// Work with nng messages with minimal P/Invoke calls
@@ -43,12 +34,39 @@ namespace nng
         public MsgBuilder()
         {
             Header = new MsgPart();
-            Body  = new MsgPart();
+            Body = new MsgPart();
         }
+
+        public MsgBuilder(IMessage message)
+        {
+            var headerSpan = message.Header.AsSpan();
+            if (headerSpan.Length > 0)
+            {
+                Header = new MsgPart(headerSpan.ToArray());
+            }
+            var bodySpan = message.AsSpan();
+            if (bodySpan.Length > 0)
+            {
+                Body = new MsgPart(bodySpan.ToArray());
+            }
+        }
+
         public MsgBuilder(MsgPart header, MsgPart body)
         {
             Header = header;
-            Body  = body;
+            Body = body;
+        }
+
+        public MsgBuilder AddRange(IEnumerable<byte> data)
+        {
+            Body.AddRange(data);
+            return this;
+        }
+
+        public MsgBuilder Add(uint data)
+        {
+            Body.Add(data);
+            return this;
         }
 
         public Msg Build()
@@ -57,11 +75,23 @@ namespace nng
             var body = Body?.ToArray();
             return new Msg(header, body);
         }
+
+        /// <summary>
+        /// Reset builder by clearing buffers
+        /// </summary>
+        public void Reset()
+        {
+            Header?.Clear();
+            Body?.Clear();
+        }
     }
 
+    /// <summary>
+    /// Message represented as buffers to construct native nng_msg
+    /// </summary>
     public class Msg
     {
-        public Msg(ReadOnlyMemory<byte> header = default, ReadOnlyMemory<byte> body = default)
+        public Msg(Memory<byte> header = default, Memory<byte> body = default)
         {
             this.header = header;
             this.body = body;
@@ -73,17 +103,20 @@ namespace nng
         /// <param name="message"></param>
         public Msg(IMessage message)
         {
-            var headerSpan = message.Header.Raw;
+            var headerSpan = message.Header.AsSpan();
             if (headerSpan.Length > 0)
             {
                 header = headerSpan.ToArray();
             }
-            var bodySpan = message.Raw;
+            var bodySpan = message.AsSpan();
             if (bodySpan.Length > 0)
             {
                 body = bodySpan.ToArray();
             }
         }
+
+        public Span<byte> Header => header.Span;
+        public Span<byte> Body => body.Span;
 
         public IMessage ToMessage<TMsg>(IMessageFactory<TMsg> factory) where TMsg : IMessage
         {
@@ -99,7 +132,7 @@ namespace nng
             return message;
         }
 
-        readonly ReadOnlyMemory<byte> header;
-        readonly ReadOnlyMemory<byte> body;
+        readonly Memory<byte> header;
+        readonly Memory<byte> body;
     }
 }
