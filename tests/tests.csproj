@@ -1,8 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!-- Needed so tests run in similar environment as consumers of nupkg -->
+  <Import Project="..\nng.NETCore\build\Subor.nng.NETCore.targets" />
+
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
 
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPackable>false</IsPackable>
     <RootNamespace>nng.Tests</RootNamespace>
     <LangVersion>7.2</LangVersion>

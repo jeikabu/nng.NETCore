@@ -7,6 +7,10 @@
     <TargetFrameworks>netstandard1.5;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)'=='netstandard1.5' or '$(TargetFramework)'=='netstandard1.6' or '$(TargetFramework)'=='netstandard2.0' or '$(TargetFramework)'=='netstandard2.1'">
+    <DefineConstants>FEATURE_NETSTANDARD1_5_AND_UP</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup>
     <RootNamespace>nng</RootNamespace>
     <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
@@ -17,7 +21,7 @@
 
   <PropertyGroup>
     <Authors>Subor</Authors>
-    <PackageLicenseUrl>https://github.com/subor/nng.NETCore/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Owners>Subor</Owners>
     <PackageProjectUrl>https://github.com/subor/nng.NETCore</PackageProjectUrl>
     <Summary>.NET Core bindings to nng</Summary>

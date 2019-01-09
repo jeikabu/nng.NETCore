@@ -11,16 +11,16 @@ namespace nng.Native
         public const int NNG_DURATION_DEFAULT = -2;
         public const int NNG_DURATION_ZERO = 0;
 
-    #region Flags/nng_flag_enum
-    [Flags]
-    public enum NngFlag : Int32
-    {
-        NNG_FLAG_ALLOC = 1,
-        NNG_FLAG_NONBLOCK = 2,
-    }
-    #endregion
+        #region Flags/nng_flag_enum
+        [Flags]
+        public enum NngFlag : Int32
+        {
+            NNG_FLAG_ALLOC = 1,
+            NNG_FLAG_NONBLOCK = 2,
+        }
+        #endregion
 
-    #region Get/SetOpt
+        #region Get/SetOpt
         public const string NNG_OPT_SOCKNAME = "socket-name";
         public const string NNG_OPT_RAW = "raw";
         public const string NNG_OPT_PROTO = "protocol";
@@ -70,81 +70,81 @@ namespace nng.Native
         public const string NNG_OPT_WS_RESPONSE_HEADERS = "ws:response-headers";
         public const string NNG_OPT_WSS_REQUEST_HEADERS = NNG_OPT_WS_REQUEST_HEADERS;
         public const string NNG_OPT_WSS_RESPONSE_HEADERS = NNG_OPT_WS_RESPONSE_HEADERS;
-    #endregion
+        #endregion
 
-    #region nng_errno_enum
-        public const int NNG_OK           = 0;
-        public const int NNG_EINTR        = 1;
-        public const int NNG_ENOMEM       = 2;
-        public const int NNG_EINVAL       = 3;
-        public const int NNG_EBUSY        = 4;
-        public const int NNG_ETIMEDOUT    = 5;
+        #region nng_errno_enum
+        public const int NNG_OK = 0;
+        public const int NNG_EINTR = 1;
+        public const int NNG_ENOMEM = 2;
+        public const int NNG_EINVAL = 3;
+        public const int NNG_EBUSY = 4;
+        public const int NNG_ETIMEDOUT = 5;
         public const int NNG_ECONNREFUSED = 6;
-        public const int NNG_ECLOSED      = 7;
-        public const int NNG_EAGAIN       = 8;
-        public const int NNG_ENOTSUP      = 9;
-        public const int NNG_EADDRINUSE   = 10;
-        public const int NNG_ESTATE       = 11;
-        public const int NNG_ENOENT       = 12;
-        public const int NNG_EPROTO       = 13;
+        public const int NNG_ECLOSED = 7;
+        public const int NNG_EAGAIN = 8;
+        public const int NNG_ENOTSUP = 9;
+        public const int NNG_EADDRINUSE = 10;
+        public const int NNG_ESTATE = 11;
+        public const int NNG_ENOENT = 12;
+        public const int NNG_EPROTO = 13;
         public const int NNG_EUNREACHABLE = 14;
-        public const int NNG_EADDRINVAL   = 15;
-        public const int NNG_EPERM        = 16;
-        public const int NNG_EMSGSIZE     = 17;
+        public const int NNG_EADDRINVAL = 15;
+        public const int NNG_EPERM = 16;
+        public const int NNG_EMSGSIZE = 17;
         public const int NNG_ECONNABORTED = 18;
-        public const int NNG_ECONNRESET   = 19;
-        public const int NNG_ECANCELED    = 20;
-        public const int NNG_ENOFILES     = 21;
-        public const int NNG_ENOSPC       = 22;
-        public const int NNG_EEXIST       = 23;
-        public const int NNG_EREADONLY    = 24;
-        public const int NNG_EWRITEONLY   = 25;
-        public const int NNG_ECRYPTO      = 26;
-        public const int NNG_EPEERAUTH    = 27;
-        public const int NNG_ENOARG       = 28;
-        public const int NNG_EAMBIGUOUS   = 29;
-        public const int NNG_EBADTYPE     = 30;
-        public const int NNG_EINTERNAL    = 1000;
-        public const int NNG_ESYSERR      = 0x10000000;
-        public const int NNG_ETRANERR     = 0x20000000;
+        public const int NNG_ECONNRESET = 19;
+        public const int NNG_ECANCELED = 20;
+        public const int NNG_ENOFILES = 21;
+        public const int NNG_ENOSPC = 22;
+        public const int NNG_EEXIST = 23;
+        public const int NNG_EREADONLY = 24;
+        public const int NNG_EWRITEONLY = 25;
+        public const int NNG_ECRYPTO = 26;
+        public const int NNG_EPEERAUTH = 27;
+        public const int NNG_ENOARG = 28;
+        public const int NNG_EAMBIGUOUS = 29;
+        public const int NNG_EBADTYPE = 30;
+        public const int NNG_EINTERNAL = 1000;
+        public const int NNG_ESYSERR = 0x10000000;
+        public const int NNG_ETRANERR = 0x20000000;
 
         public enum NngErrno
         {
-            EINTR        = NNG_EINTR,
-            ENOMEM       = NNG_ENOMEM,
-            EINVAL       = NNG_EINVAL,
-            EBUSY        = NNG_EBUSY,
-            ETIMEDOUT    = NNG_ETIMEDOUT,
+            EINTR = NNG_EINTR,
+            ENOMEM = NNG_ENOMEM,
+            EINVAL = NNG_EINVAL,
+            EBUSY = NNG_EBUSY,
+            ETIMEDOUT = NNG_ETIMEDOUT,
             ECONNREFUSED = NNG_ECONNREFUSED,
-            ECLOSED      = NNG_ECLOSED,
-            EAGAIN       = NNG_EAGAIN,
-            ENOTSUP      = NNG_ENOTSUP,
-            EADDRINUSE   = NNG_EADDRINUSE,
-            ESTATE       = NNG_ESTATE,
-            ENOENT       = NNG_ENOENT,
-            EPROTO       = NNG_EPROTO,
+            ECLOSED = NNG_ECLOSED,
+            EAGAIN = NNG_EAGAIN,
+            ENOTSUP = NNG_ENOTSUP,
+            EADDRINUSE = NNG_EADDRINUSE,
+            ESTATE = NNG_ESTATE,
+            ENOENT = NNG_ENOENT,
+            EPROTO = NNG_EPROTO,
             EUNREACHABLE = NNG_EUNREACHABLE,
-            EADDRINVAL   = NNG_EADDRINVAL,
-            EPERM        = NNG_EPERM,
-            EMSGSIZE     = NNG_EMSGSIZE,
+            EADDRINVAL = NNG_EADDRINVAL,
+            EPERM = NNG_EPERM,
+            EMSGSIZE = NNG_EMSGSIZE,
             ECONNABORTED = NNG_ECONNABORTED,
-            ECONNRESET   = NNG_ECONNRESET,
-            ECANCELED    = NNG_ECANCELED,
-            ENOFILES     = NNG_ENOFILES,
-            ENOSPC       = NNG_ENOSPC,
-            EEXIST       = NNG_EEXIST,
-            EREADONLY    = NNG_EREADONLY,
-            EWRITEONLY   = NNG_EWRITEONLY,
-            ECRYPTO      = NNG_ECRYPTO,
-            EPEERAUTH    = NNG_EPEERAUTH,
-            ENOARG       = NNG_ENOARG,
-            EAMBIGUOUS   = NNG_EAMBIGUOUS,
-            EBADTYPE     = NNG_EBADTYPE,
-            EINTERNAL    = NNG_EINTERNAL,
-            ESYSERR      = NNG_ESYSERR,
-            ETRANERR     = NNG_ETRANERR,
+            ECONNRESET = NNG_ECONNRESET,
+            ECANCELED = NNG_ECANCELED,
+            ENOFILES = NNG_ENOFILES,
+            ENOSPC = NNG_ENOSPC,
+            EEXIST = NNG_EEXIST,
+            EREADONLY = NNG_EREADONLY,
+            EWRITEONLY = NNG_EWRITEONLY,
+            ECRYPTO = NNG_ECRYPTO,
+            EPEERAUTH = NNG_EPEERAUTH,
+            ENOARG = NNG_ENOARG,
+            EAMBIGUOUS = NNG_EAMBIGUOUS,
+            EBADTYPE = NNG_EBADTYPE,
+            EINTERNAL = NNG_EINTERNAL,
+            ESYSERR = NNG_ESYSERR,
+            ETRANERR = NNG_ETRANERR,
         }
-    #endregion
+        #endregion
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -193,24 +193,51 @@ namespace nng.Native
     [StructLayout(LayoutKind.Sequential)]
     public struct nng_duration
     {
-        public Int32 TimeMs {get; set;}
+        public Int32 TimeMs { get; set; }
 
         public nng_duration(nng_duration copy)
         {
             TimeMs = copy.TimeMs;
         }
 
-        public static nng_duration operator +(nng_duration lhs, nng_duration rhs) => 
+        public static nng_duration operator +(nng_duration lhs, nng_duration rhs) =>
             new nng_duration { TimeMs = lhs.TimeMs + rhs.TimeMs };
 
-        public static nng_duration operator +(nng_duration lhs, int rhs) => 
+        public static nng_duration operator +(nng_duration lhs, int rhs) =>
             new nng_duration { TimeMs = lhs.TimeMs + rhs };
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct nng_iov
     {
-        #pragma warning disable CS0169
+#pragma warning disable CS0169
         IntPtr ptr;
+    }
+
+    public enum nng_stat_type_enum
+    {
+        NNG_STAT_SCOPE = 0, // Stat is for scoping, and carries no value
+        NNG_STAT_LEVEL = 1, // Numeric "absolute" value, diffs meaningless
+        NNG_STAT_COUNTER = 2, // Incrementing value (diffs are meaningful)
+        NNG_STAT_STRING = 3, // Value is a string
+        NNG_STAT_BOOLEAN = 4, // Value is a boolean
+        NNG_STAT_ID = 5, // Value is a numeric ID
+    };
+
+    public enum nng_unit_enum
+    {
+        NNG_UNIT_NONE = 0, // No special units
+        NNG_UNIT_BYTES = 1, // Bytes, e.g. bytes sent, etc.
+        NNG_UNIT_MESSAGES = 2, // Messages, one per message
+        NNG_UNIT_MILLIS = 3, // Milliseconds
+        NNG_UNIT_EVENTS = 4  // Some other type of event
+    };
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_stat
+    {
+        IntPtr ptr;
+
+        public bool IsNull => ptr == IntPtr.Zero;
     }
 }

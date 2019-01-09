@@ -61,11 +61,10 @@ namespace nng.Tests
                 await barrier.SignalAndWait();
                 using (var reqAioCtx = Factory.RequesterCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
-                    var response = await reqAioCtx.Send(Factory.CreateMessage());
-                    //Assert.NotNull(response);
+                    var _response = await reqAioCtx.Send(Factory.CreateMessage());
                 }
             });
-            return Task.WhenAll(rep, req);
+            return Util.AssertWait(1000, req, rep);
         }
     }
 }

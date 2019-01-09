@@ -26,7 +26,8 @@ namespace nng
     /// </summary>
     public interface IMessagePart
     {
-        int Append(byte[] data);
+        //int Append(byte[] data);
+        int Append(ReadOnlySpan<byte> data);
         int Append(uint data);
         int Chop(UIntPtr size);
         int Chop(out uint data);
@@ -37,7 +38,7 @@ namespace nng
         int Trim(UIntPtr size);
         int Trim(out uint data);
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
-        ReadOnlySpan<byte> Raw { get; }
+        Span<byte> AsSpan();
     }
 
     /// <summary>
@@ -60,6 +61,34 @@ namespace nng
         /// </summary>
         /// <returns>The newly created identical message duplicate</returns>
         IMessage Dup();
+        /// <summary>
+        /// Get the pipe object associated with the message.
+        /// </summary>
+        IPipe Pipe { get; }
+    }
+
+    /// <summary>
+    /// Handle to a "pipe", which can be thought of as a single connection.
+    /// </summary>
+    public interface IPipe
+    {
+        /// <summary>
+        /// Get the underlying nng_pipe.
+        /// </summary>
+        nng_pipe NngPipe { get; }
+
+        /// <summary>
+        /// A positive identifier for the pipe, if it is valid.
+        /// </summary>
+        int Id { get; }
+
+        int GetOpt(string name, out bool data);
+        int GetOpt(string name, out int data);
+        int GetOpt(string name, out nng_duration data);
+        int GetOpt(string name, out IntPtr data);
+        int GetOpt(string name, out string data);
+        int GetOpt(string name, out UIntPtr data);
+        int GetOpt(string name, out ulong data);
     }
 
     public static class Extensions

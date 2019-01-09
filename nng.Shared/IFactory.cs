@@ -25,7 +25,7 @@ namespace nng
         INngResult<ISubSocket> SubscriberOpen();
         INngResult<IPushSocket> PusherOpen();
         INngResult<IPullSocket> PullerOpen();
-        
+
         IListener ListenerCreate(ISocket socket, string url);
         IDialer DialerCreate(ISocket socket, string url);
 
@@ -46,7 +46,12 @@ namespace nng
         INngResult<IRepReqAsyncContext<T>> CreateRepReqAsyncContext(ISocket socket);
     }
 
-    public interface IAPIFactory<T> : IMessageFactory<T>, ISocketFactory, IAsyncContextFactory<T>
-    {}
+    public interface IMiscFactory
+    {
+        INngResult<IStatRoot> GetStatSnapshot();
+    }
+
+    public interface IAPIFactory<T> : IMessageFactory<T>, ISocketFactory, IAsyncContextFactory<T>, IMiscFactory
+    { }
 
 }
