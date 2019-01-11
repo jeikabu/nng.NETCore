@@ -35,6 +35,9 @@ namespace nng.Tests
         public INngResult<ISubSocket> SubscriberOpen() => SubSocket.Open();
         public INngResult<IPushSocket> PusherOpen() => PushSocket.Open();
         public INngResult<IPullSocket> PullerOpen() => PullSocket.Open();
+        public INngResult<IPairSocket> PairOpen() => Pair1Socket.Open();
+        public INngResult<IRespondentSocket> RespondentOpen() => RespondentSocket.Open();
+        public INngResult<ISurveyorSocket> SurveyorOpen() => SurveyorSocket.Open();
         public IListener ListenerCreate(ISocket socket, string url) => Listener.Create(socket, url);
         public IDialer DialerCreate(ISocket socket, string url) => Dialer.Create(socket, url);
 

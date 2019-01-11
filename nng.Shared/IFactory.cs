@@ -25,6 +25,9 @@ namespace nng
         INngResult<ISubSocket> SubscriberOpen();
         INngResult<IPushSocket> PusherOpen();
         INngResult<IPullSocket> PullerOpen();
+        INngResult<IPairSocket> PairOpen();
+        INngResult<IRespondentSocket> RespondentOpen();
+        INngResult<ISurveyorSocket> SurveyorOpen();
 
         IListener ListenerCreate(ISocket socket, string url);
         IDialer DialerCreate(ISocket socket, string url);

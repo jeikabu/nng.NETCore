@@ -63,6 +63,36 @@ namespace nng
         public static INngResult<IPullSocket> PullerCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.PullerOpen(), url, isListener);
 
         /// <summary>
+        /// Create pair socket for pair protocol
+        /// </summary>
+        /// <param name="factory"></param>
+        /// <param name="url"></param>
+        /// <param name="isListener"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static INngResult<IPairSocket> PairCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.PairOpen(), url, isListener);
+
+        /// <summary>
+        /// Create respondent socket for survey protocol
+        /// </summary>
+        /// <param name="factory"></param>
+        /// <param name="url"></param>
+        /// <param name="isListener"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static INngResult<IRespondentSocket> RespondentCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.RespondentOpen(), url, isListener);
+
+        /// <summary>
+        /// Create surveyor socket for survey protocol
+        /// </summary>
+        /// <param name="factory"></param>
+        /// <param name="url"></param>
+        /// <param name="isListener"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static INngResult<ISurveyorSocket> SurveyorCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.SurveyorOpen(), url, isListener);
+
+        /// <summary>
         /// Creates a dialer or listener associated with a socket and starts it.
         /// </summary>
         /// <returns>The or listen.</returns>

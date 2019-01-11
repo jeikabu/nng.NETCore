@@ -138,6 +138,7 @@ namespace nng
         public static INngResult<ISubAsyncContext<T>> CreateAsyncContext<T>(this ISubSocket socket, IAPIFactory<T> factory) => factory.CreateSubAsyncContext(socket);
         public static INngResult<IReqRepAsyncContext<T>> CreateAsyncContext<T>(this IReqSocket socket, IAPIFactory<T> factory) => factory.CreateReqRepAsyncContext(socket);
         public static INngResult<IRepReqAsyncContext<T>> CreateAsyncContext<T>(this IRepSocket socket, IAPIFactory<T> factory) => factory.CreateRepReqAsyncContext(socket);
+        public static INngResult<ISendReceiveAsyncContext<T>> CreateAsyncContext<T>(this IPairSocket socket, IAPIFactory<T> factory) => factory.CreateSendReceiveAsyncContext(socket);
         #endregion
     }
 }
