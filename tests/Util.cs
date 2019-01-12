@@ -101,6 +101,25 @@ namespace nng.Tests
             Assert.Equal(newSize, nextSize);
         }
 
+        public static async Task<Exception> AssertThrowsNng(Func<Task> func, Defines.NngErrno errno)
+        {
+            try
+            {
+                await func();
+                Assert.True(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is NngException nngException)
+                {
+                    Assert.Equal((int)errno, nngException.ErrorCode);
+                    return nngException;
+                }
+                return ex;
+            }
+            return null;
+        }
+
         public static readonly Random rng = new Random();
     }
 
