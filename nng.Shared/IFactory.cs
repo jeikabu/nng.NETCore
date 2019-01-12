@@ -36,6 +36,13 @@ namespace nng
         INngResult<TSocket> Listen<TSocket>(INngResult<TSocket> socketRes, string url) where TSocket : ISocket;
     }
 
+    public enum SendReceiveContextSubtype
+    {
+        Bus,
+        Pair,
+        Survey,
+    }
+
     /// <summary>
     /// Create contexts for asynchronous IO (nng_aio and nng_ctx)
     /// </summary>
@@ -43,7 +50,7 @@ namespace nng
     {
         INngResult<ISendAsyncContext<T>> CreateSendAsyncContext(ISocket socket);
         INngResult<IReceiveAsyncContext<T>> CreateReceiveAsyncContext(ISocket socket);
-        INngResult<ISendReceiveAsyncContext<T>> CreateSendReceiveAsyncContext(ISocket socket);
+        INngResult<ISendReceiveAsyncContext<T>> CreateSendReceiveAsyncContext(ISocket socket, SendReceiveContextSubtype subtype);
         INngResult<ISubAsyncContext<T>> CreateSubAsyncContext(ISocket socket);
         INngResult<IReqRepAsyncContext<T>> CreateReqRepAsyncContext(ISocket socket);
         INngResult<IRepReqAsyncContext<T>> CreateRepReqAsyncContext(ISocket socket);

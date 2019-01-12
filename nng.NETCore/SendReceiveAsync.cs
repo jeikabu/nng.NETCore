@@ -74,8 +74,8 @@ namespace nng
             }
         }
 
-        TaskCompletionSource<bool> sendTcs;
-        T sendMessage;
-        CancellationTokenTaskSource<T> receiveTcs;
+        protected TaskCompletionSource<bool> sendTcs;
+        protected T sendMessage;
+        protected CancellationTokenTaskSource<T> receiveTcs;
     }
 }

@@ -46,7 +46,53 @@ namespace nng.Tests
         }
 
         [Theory]
-        [ClassData(typeof(TransportsNoWsClassData))]
+        [ClassData(typeof(TransportsClassData))]
+        public async Task SurveyorFail(string url)
+        {
+            for (int i = 0; i < Fixture.Iterations; ++i)
+            {
+                await DoSurveyorFail(url);
+            }
+        }
+
+        async Task DoSurveyorFail(string url)
+        {
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(DefaultTimeoutMs);
+            using (var ctx = Factory.SurveyorCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+            {
+                // Receive with no survey fails
+                await Util.AssertThrowsNng(() => ctx.Receive(cts.Token), Defines.NngErrno.ESTATE);
+                // Survey with no responses times out
+                ctx.Socket.SetOpt(Native.Defines.NNG_OPT_SURVEYOR_SURVEYTIME, new nng_duration { TimeMs = 10 });
+                await ctx.Send(Factory.CreateMessage());
+                await Util.AssertThrowsNng(() => ctx.Receive(cts.Token), Defines.NngErrno.ETIMEDOUT);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public async Task RespondentFail(string url)
+        {
+            for (int i = 0; i < Fixture.Iterations; ++i)
+            {
+                await DoRespondentFail(url);
+            }
+        }
+
+        async Task DoRespondentFail(string url)
+        {
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(DefaultTimeoutMs);
+            using (var ctx = Factory.RespondentCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+            {
+                // Response with no survey fails
+                await Util.AssertThrowsNng(() => ctx.Send(Factory.CreateMessage()), Defines.NngErrno.ESTATE);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
         public async Task Advanced(string url)
         {
             for (int i = 0; i < Fixture.Iterations; ++i)
@@ -57,43 +103,38 @@ namespace nng.Tests
 
         async Task DoAdvanced(string url)
         {
-            var readyToDial = new AsyncBarrier(3);
-            var readyToSend = new AsyncBarrier(3);
+            var readyToDial = new AsyncBarrier(2);
+            var readyToSend = new AsyncBarrier(2);
             var messageReceipt = new AsyncCountdownEvent(2);
             var cts = new CancellationTokenSource();
-            var bus0Task = Task.Run(async () =>
+            var surveyorTask = Task.Run(async () =>
             {
-                using (var ctx = Factory.BusCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var ctx = Factory.SurveyorCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await readyToDial.SignalAndWait();
                     await readyToSend.SignalAndWait();
+                    // Send survey and receive response
                     await WaitShort();
                     await ctx.Send(Factory.CreateMessage());
                     await WaitShort();
-                }
-            });
-            var bus1Task = Task.Run(async () =>
-            {
-                await readyToDial.SignalAndWait();
-                using (var ctx = Factory.BusCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
-                {
-                    await readyToSend.SignalAndWait();
-                    var _ = await ctx.Receive(cts.Token);
+                    var response = await ctx.Receive(cts.Token);
                     messageReceipt.Signal();
                 }
             });
-            var bus2Task = Task.Run(async () =>
+            var respondentTask = Task.Run(async () =>
             {
                 await readyToDial.SignalAndWait();
-                using (var ctx = Factory.BusCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var ctx = Factory.RespondentCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await readyToSend.SignalAndWait();
-                    var _ = await ctx.Receive(cts.Token);
+                    // Receive survey and send response
+                    var survey = await ctx.Receive(cts.Token);
                     messageReceipt.Signal();
+                    await ctx.Send(survey);
                 }
             });
             cts.CancelAfter(DefaultTimeoutMs);
-            await Task.WhenAll(bus0Task, bus1Task, bus2Task);
+            await Util.AssertWait(DefaultTimeoutMs, surveyorTask, respondentTask);
             Assert.Equal(0, messageReceipt.Count);
         }
     }

@@ -13,12 +13,12 @@ namespace nng
         }
         public NngException(int errorCode)
         {
-            error = errorCode;
+            ErrorCode = errorCode;
         }
 
         public override string Message => string.Empty;//nng_strerror(error);
 
-        int error = 0;
+        public int ErrorCode { get; } = 0;
     }
 
     /// <summary>

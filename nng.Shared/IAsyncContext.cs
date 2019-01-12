@@ -133,12 +133,14 @@ namespace nng
         #region ISocket.CreateAsyncContext
         public static INngResult<ISendAsyncContext<T>> CreateAsyncContext<T>(this IPushSocket socket, IAPIFactory<T> factory) => factory.CreateSendAsyncContext(socket);
         public static INngResult<IReceiveAsyncContext<T>> CreateAsyncContext<T>(this IPullSocket socket, IAPIFactory<T> factory) => factory.CreateReceiveAsyncContext(socket);
-        public static INngResult<ISendReceiveAsyncContext<T>> CreateAsyncContext<T>(this IBusSocket socket, IAPIFactory<T> factory) => factory.CreateSendReceiveAsyncContext(socket);
+        public static INngResult<ISendReceiveAsyncContext<T>> CreateAsyncContext<T>(this IBusSocket socket, IAPIFactory<T> factory) => factory.CreateSendReceiveAsyncContext(socket, SendReceiveContextSubtype.Bus);
         public static INngResult<ISendAsyncContext<T>> CreateAsyncContext<T>(this IPubSocket socket, IAPIFactory<T> factory) => factory.CreateSendAsyncContext(socket);
         public static INngResult<ISubAsyncContext<T>> CreateAsyncContext<T>(this ISubSocket socket, IAPIFactory<T> factory) => factory.CreateSubAsyncContext(socket);
         public static INngResult<IReqRepAsyncContext<T>> CreateAsyncContext<T>(this IReqSocket socket, IAPIFactory<T> factory) => factory.CreateReqRepAsyncContext(socket);
         public static INngResult<IRepReqAsyncContext<T>> CreateAsyncContext<T>(this IRepSocket socket, IAPIFactory<T> factory) => factory.CreateRepReqAsyncContext(socket);
-        public static INngResult<ISendReceiveAsyncContext<T>> CreateAsyncContext<T>(this IPairSocket socket, IAPIFactory<T> factory) => factory.CreateSendReceiveAsyncContext(socket);
+        public static INngResult<ISendReceiveAsyncContext<T>> CreateAsyncContext<T>(this IPairSocket socket, IAPIFactory<T> factory) => factory.CreateSendReceiveAsyncContext(socket, SendReceiveContextSubtype.Pair);
+        public static INngResult<ISendReceiveAsyncContext<T>> CreateAsyncContext<T>(this IRespondentSocket socket, IAPIFactory<T> factory) => factory.CreateSendReceiveAsyncContext(socket, SendReceiveContextSubtype.Survey);
+        public static INngResult<ISendReceiveAsyncContext<T>> CreateAsyncContext<T>(this ISurveyorSocket socket, IAPIFactory<T> factory) => factory.CreateSendReceiveAsyncContext(socket, SendReceiveContextSubtype.Survey);
         #endregion
     }
 }
