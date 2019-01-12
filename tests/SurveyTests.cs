@@ -59,15 +59,22 @@ namespace nng.Tests
         {
             var cts = new CancellationTokenSource();
             cts.CancelAfter(DefaultTimeoutMs);
-            using (var ctx = Factory.SurveyorCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+            var task = Task.Run(async () =>
             {
-                // Receive with no survey fails
-                await Util.AssertThrowsNng(() => ctx.Receive(cts.Token), Defines.NngErrno.ESTATE);
-                // Survey with no responses times out
-                ctx.Socket.SetOpt(Native.Defines.NNG_OPT_SURVEYOR_SURVEYTIME, new nng_duration { TimeMs = 10 });
-                await ctx.Send(Factory.CreateMessage());
-                await Util.AssertThrowsNng(() => ctx.Receive(cts.Token), Defines.NngErrno.ETIMEDOUT);
-            }
+                using (var ctx = Factory.SurveyorCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                {
+                    // Receive with no survey fails
+                    await Util.AssertThrowsNng(() => ctx.Receive(cts.Token), Defines.NngErrno.ESTATE);
+                    // Survey with no responses times out
+                    var asyncctx = (ICtx)ctx;
+                    asyncctx.SetCtxOpt(Native.Defines.NNG_OPT_SURVEYOR_SURVEYTIME, new nng_duration { TimeMs = 10 });
+                    // NB: when using nng_ctx must call ctx_setopt instead of (socket) setopt
+                    //ctx.Socket.SetOpt(Native.Defines.NNG_OPT_SURVEYOR_SURVEYTIME, new nng_duration { TimeMs = 10 });
+                    await ctx.Send(Factory.CreateMessage());
+                    await Util.AssertThrowsNng(() => ctx.Receive(cts.Token), Defines.NngErrno.ETIMEDOUT);
+                }
+            });
+            await Util.AssertWait(DefaultTimeoutMs, task);
         }
 
         [Theory]
@@ -82,13 +89,15 @@ namespace nng.Tests
 
         async Task DoRespondentFail(string url)
         {
-            var cts = new CancellationTokenSource();
-            cts.CancelAfter(DefaultTimeoutMs);
-            using (var ctx = Factory.RespondentCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+            var task = Task.Run(async () =>
             {
-                // Response with no survey fails
-                await Util.AssertThrowsNng(() => ctx.Send(Factory.CreateMessage()), Defines.NngErrno.ESTATE);
-            }
+                using (var ctx = Factory.RespondentCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                {
+                    // Response with no survey fails
+                    await Util.AssertThrowsNng(() => ctx.Send(Factory.CreateMessage()), Defines.NngErrno.ESTATE);
+                }
+            });
+            await Util.AssertWait(DefaultTimeoutMs, task);
         }
 
         [Theory]
