@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace nng
 {
-    using static nng.Native.Basic.UnsafeNativeMethods;
     using static nng.Native.Msg.UnsafeNativeMethods;
 
     public class NngMessageHeader : IMessagePart

@@ -5,10 +5,7 @@ using System.Threading.Tasks;
 
 namespace nng
 {
-    using static nng.Native.Basic.UnsafeNativeMethods;
-    using static nng.Native.Ctx.UnsafeNativeMethods;
     using static nng.Native.Protocols.UnsafeNativeMethods;
-    using static nng.Native.Socket.UnsafeNativeMethods;
 
     /// <summary>
     /// Request version 0 socket for request/reply protocol

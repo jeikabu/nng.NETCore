@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 namespace nng
 {
-    using static nng.Native.Basic.UnsafeNativeMethods;
-    using static nng.Native.Defines;
     using static nng.Native.Stats.UnsafeNativeMethods;
 
     public abstract class Stat : IStat

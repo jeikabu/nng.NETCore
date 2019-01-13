@@ -6,9 +6,6 @@ using System.Threading.Tasks;
 namespace nng
 {
     using static nng.Native.Aio.UnsafeNativeMethods;
-    using static nng.Native.Basic.UnsafeNativeMethods;
-    using static nng.Native.Ctx.UnsafeNativeMethods;
-    using static nng.Native.Msg.UnsafeNativeMethods;
 
     public class SendReceiveAsyncContext<T> : AsyncBase<T>, ISendReceiveAsyncContext<T>
     {
