@@ -19,17 +19,13 @@ namespace nng
         /// Create a publish socket
         /// </summary>
         /// <returns>The open.</returns>
-        public static INngResult<IPubSocket> Open()
+        public static NngResult<IPubSocket> Open()
         {
             int res = nng_pub0_open(out var socket);
-            if (res != 0)
-            {
-                return NngResult.Fail<IPubSocket>(res);
-            }
-            return NngResult.Ok<IPubSocket>(new PubSocket { NngSocket = socket });
+            return NngResult<IPubSocket>.OkThen(res, () => new PubSocket { NngSocket = socket });
         }
 
-        private PubSocket(){}
+        private PubSocket() { }
     }
 
     /// <summary>
@@ -41,17 +37,13 @@ namespace nng
         /// Create a subscribe socket
         /// </summary>
         /// <returns>The open.</returns>
-        public static INngResult<ISubSocket> Open()
+        public static NngResult<ISubSocket> Open()
         {
             var res = nng_sub0_open(out var socket);
-            if (res != 0)
-            {
-                return NngResult.Fail<ISubSocket>(res);
-            }
-            return NngResult.Ok<ISubSocket>(new SubSocket { NngSocket = socket });
+            return NngResult<ISubSocket>.OkThen(res, () => new SubSocket { NngSocket = socket });
         }
 
-        private SubSocket(){}
+        private SubSocket() { }
     }
 
     public class SubAsyncContext<T> : ResvAsyncContext<T>, ISubAsyncContext<T>

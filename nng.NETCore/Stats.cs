@@ -32,15 +32,10 @@ namespace nng
             return StatChild.Create(child);
         }
 
-        public static INngResult<IStatRoot> GetStatSnapshot()
+        public static NngResult<IStatRoot> GetStatSnapshot()
         {
             var res = nng_stats_get(out nng_stat statsp);
-            if (res != 0)
-            {
-                return NngResult.Fail<IStatRoot>(res);
-            }
-            var root = new StatRoot { NngStat = statsp };
-            return NngResult.Ok<IStatRoot>(root);
+            return NngResult<IStatRoot>.OkThen(res, () => new StatRoot { NngStat = statsp });
         }
     }
 

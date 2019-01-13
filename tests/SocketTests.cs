@@ -56,7 +56,7 @@ namespace nng.Tests
         }
 
         [Theory]
-        [ClassData(typeof(TransportsNoTcpWsClassData))]
+        [ClassData(typeof(TransportsNoTcpClassData))]
         public void DuplicateUrl(string url)
         {
             for (int i = 0; i < Fixture.Iterations; ++i)
@@ -74,34 +74,34 @@ namespace nng.Tests
                     false),
                 new DupeUrlTest (
                     null,
-                    () => Factory.PullerCreate(url, true).Unwrap(), 
+                    () => Factory.PullerCreate(url, true).Unwrap(),
                     false),
                 new DupeUrlTest (
                     () => Factory.PusherCreate(url, true).Unwrap(),
-                    () => Factory.PullerCreate(url, false).Unwrap(), 
+                    () => Factory.PullerCreate(url, false).Unwrap(),
                     true),
                 new DupeUrlTest (
                     null,
-                    () => Factory.PusherCreate(url, true).Unwrap(), 
+                    () => Factory.PusherCreate(url, true).Unwrap(),
                     false),
                 new DupeUrlTest (
                     () => Factory.PullerCreate(url, true).Unwrap(),
-                    () => Factory.PusherCreate(url, false).Unwrap(), 
+                    () => Factory.PusherCreate(url, false).Unwrap(),
                     true),
                 new DupeUrlTest (
                     null,
-                    () => Factory.ReplierCreate(url).Unwrap(), 
+                    () => Factory.ReplierCreate(url).Unwrap(),
                     false),
                 new DupeUrlTest (
                     () => Factory.ReplierCreate(url).Unwrap(),
-                    () => Factory.RequesterCreate(url).Unwrap(), 
+                    () => Factory.RequesterCreate(url).Unwrap(),
                     true),
                 new DupeUrlTest (
                     () => Factory.PublisherCreate(url).Unwrap(),
-                    () => Factory.SubscriberCreate(url).Unwrap(), 
+                    () => Factory.SubscriberCreate(url).Unwrap(),
                     true),
             };
-            
+
             for (int i = 0; i < tests.Length; ++i)
             {
                 var test = tests[i];
@@ -123,7 +123,7 @@ namespace nng.Tests
                     }
                     else
                     {
-                        Assert.Throws<InvalidOperationException>(() => obj1 = test.func());
+                        Assert.ThrowsAny<Exception>(() => obj1 = test.func());
                     }
                 }
                 finally
@@ -147,8 +147,8 @@ namespace nng.Tests
 
         async Task DoGetSetOpt(string url)
         {
-            using(var rep = Factory.ReplierCreate(url).Unwrap())
-            using(var req = Factory.RequesterCreate(url).Unwrap())
+            using (var rep = Factory.ReplierCreate(url).Unwrap())
+            using (var req = Factory.RequesterCreate(url).Unwrap())
             {
                 //await WaitReady();
                 // bool
@@ -156,7 +156,7 @@ namespace nng.Tests
 
                 // int
                 AssertGetSetOpts(req, NNG_OPT_RECVBUF, (int data) => data + 1);
-                
+
                 // nng_duration
                 AssertGetSetOpts(req, NNG_OPT_RECONNMINT, (nng_duration data) => data + 100);
 
@@ -164,7 +164,7 @@ namespace nng.Tests
                 AssertGetSetOpts(req, NNG_OPT_RECVMAXSZ, (UIntPtr data) => data + 128);
 
                 // uint64_t
-                
+
                 // string
 
                 // ptr

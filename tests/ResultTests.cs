@@ -14,59 +14,54 @@ namespace nng
             ResultTest<int, int>();
         }
 
-        public void ResultTest<TErr, TRes>()
+        public void ResultTest<TRes, TErr>()
         {
-            IResult<TErr, TRes> CreateOk()
+            Result<TRes, TErr> CreateOk()
             {
-                return new Ok<TErr, TRes>(default);
+                return Result<TRes, TErr>.Ok(default);
             }
-            IResult<TErr, TRes> CreateErr()
+            Result<TRes, TErr> CreateErr()
             {
-                return new Err<TErr, TRes>(default);
+                return Result<TRes, TErr>.Err(default);
             }
 
             {
                 var anOk = CreateOk();
                 Assert.True(anOk.IsOk());
                 Assert.False(anOk.IsErr());
-                Assert.True(anOk is IOk<TErr,TRes>);
-                Assert.False(anOk is IErr<TErr,TRes>);
+                anOk.Ok();
+                Assert.ThrowsAny<Exception>(() => anOk.Err());
                 anOk.Unwrap();
-                Assert.Throws<InvalidOperationException>(() => anOk.Error());
-                switch (anOk)
-                {
-                    case Ok<TErr, TRes> ok:
-                        //ok
-                    break;
-                    default:
-                    case Err<TErr, TRes> fail:
-                    Assert.True(false);
-                    break;
-                }
+                // switch (anOk)
+                // {
+                //     case Ok<TErr, TRes> ok:
+                //         //ok
+                //         break;
+                //     default:
+                //     case Err<TErr, TRes> fail:
+                //         Assert.True(false);
+                //         break;
+                // }
             }
             {
                 var anErr = CreateErr();
                 Assert.False(anErr.IsOk());
                 Assert.True(anErr.IsErr());
-                Assert.False(anErr is IOk<TErr,TRes>);
-                Assert.True(anErr is IErr<TErr,TRes>);
-                Assert.Throws<InvalidOperationException>(() => anErr.Unwrap());
-                anErr.Error();
-                switch (anErr)
-                {
-                    default:
-                    case Ok<TErr, TRes> ok:
-                        Assert.True(false);
-                    break;
-                    
-                    case Err<TErr, TRes> fail:
-                    //ok
-                    break;
-                }
-            }
+                Assert.ThrowsAny<Exception>(() => anErr.Ok());
+                anErr.Err();
+                Assert.ThrowsAny<Exception>(() => anErr.Unwrap());
+                // switch (anErr)
+                // {
+                //     default:
+                //     case Ok<TErr, TRes> ok:
+                //         Assert.True(false);
+                //         break;
 
-            // Error with default value works
-            new Err<TErr, TRes>(default);
+                //     case Err<TErr, TRes> fail:
+                //         //ok
+                //         break;
+                // }
+            }
         }
 
         [Fact]
@@ -77,48 +72,45 @@ namespace nng
 
         void NngResultTest<TRes>()
         {
-
             {
-                var anOk = (INngResult<TRes>)NngResult.Ok<TRes>(default);
+                var anOk = NngResult<TRes>.Ok(default);
                 Assert.True(anOk.IsOk());
                 Assert.False(anOk.IsErr());
-                Assert.True(anOk is NngOk<TRes>);
-                Assert.False(anOk is NngErr<TRes>);
+                anOk.Ok();
+                Assert.ThrowsAny<Exception>(() => anOk.Err());
                 anOk.Unwrap();
-                Assert.Throws<InvalidOperationException>(() => anOk.Error());
-                switch (anOk)
-                {
-                    case NngOk<TRes> ok:
-                        //ok
-                    break;
-                    default:
-                    case NngErr<TRes> fail:
-                    Assert.True(false);
-                    break;
-                }
+                // switch (anOk)
+                // {
+                //     case NngOk<TRes> ok:
+                //         //ok
+                //         break;
+                //     default:
+                //     case NngErr<TRes> fail:
+                //         Assert.True(false);
+                //         break;
+                // }
             }
             {
-                var anErr = (INngResult<TRes>)NngResult.Fail<TRes>(Defines.NngErrno.EINVAL);
+                var anErr = NngResult<TRes>.Fail((int)Defines.NngErrno.EINVAL);
                 Assert.False(anErr.IsOk());
                 Assert.True(anErr.IsErr());
-                Assert.False(anErr is NngOk<TRes>);
-                Assert.True(anErr is NngErr<TRes>);
-                Assert.Throws<InvalidOperationException>(() => anErr.Unwrap());
-                anErr.Error();
-                switch (anErr)
-                {
-                    default:
-                    case NngOk<TRes> ok:
-                        Assert.True(false);
-                    break;
-                    
-                    case NngErr<TRes> fail:
-                    //ok
-                    break;
-                }
+                Assert.ThrowsAny<Exception>(() => anErr.Ok());
+                anErr.Err();
+                Assert.ThrowsAny<Exception>(() => anErr.Unwrap());
+                // switch (anErr)
+                // {
+                //     default:
+                //     case NngOk<TRes> ok:
+                //         Assert.True(false);
+                //         break;
+
+                //     case NngErr<TRes> fail:
+                //         //ok
+                //         break;
+                // }
             }
 
-            Assert.Throws<System.InvalidOperationException>(() => NngResult.Fail<TRes>(0));
+            Assert.ThrowsAny<Exception>(() => NngResult<TRes>.Fail(0));
         }
     }
 }

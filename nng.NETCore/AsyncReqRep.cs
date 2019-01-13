@@ -47,7 +47,7 @@ namespace nng
                     nng_aio_set_msg(aioHandle, Factory.Borrow(asyncMessage.message));
                     nng_ctx_send(ctxHandle, aioHandle);
                     break;
-                
+
                 case AsyncState.Send:
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
@@ -88,7 +88,7 @@ namespace nng
 
     public class RepAsyncCtx<T> : AsyncCtx<T>, IRepReqAsyncContext<T>
     {
-        public static INngResult<IRepReqAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
+        public static NngResult<IRepReqAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
         {
             var ctx = new RepAsyncCtx<T>();
             var res = ctx.Init(factory, socket, ctx.callback);
@@ -96,11 +96,11 @@ namespace nng
             {
                 // Start receive loop
                 ctx.callback(IntPtr.Zero);
-                return NngResult.Ok<IRepReqAsyncContext<T>>(ctx);
+                return NngResult<IRepReqAsyncContext<T>>.Ok(ctx);
             }
             else
             {
-                return NngResult.Fail<IRepReqAsyncContext<T>>(res);
+                return NngResult<IRepReqAsyncContext<T>>.Fail(res);
             }
         }
 
@@ -171,7 +171,8 @@ namespace nng
                         currentReq.replyTcs.SetResult(true);
                         break;
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.Error.WriteLine(ex.ToString());
             }
@@ -184,7 +185,7 @@ namespace nng
             nng_ctx_recv(ctxHandle, aioHandle);
         }
 
-        private RepAsyncCtx(){}
+        private RepAsyncCtx() { }
 
         Request<T> asyncMessage;
         object sync = new object();
