@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace nng
+namespace nng.Tests
 {
     public class ResultTests
     {
@@ -79,16 +79,18 @@ namespace nng
                 anOk.Ok();
                 Assert.ThrowsAny<Exception>(() => anOk.Err());
                 anOk.Unwrap();
-                // switch (anOk)
-                // {
-                //     case NngOk<TRes> ok:
-                //         //ok
-                //         break;
-                //     default:
-                //     case NngErr<TRes> fail:
-                //         Assert.True(false);
-                //         break;
-                // }
+                switch (anOk)
+                {
+                    // This syntax doesn't work T_T
+                    //case (true, _, var ok):
+                    case var ok when ok.IsOk():
+                        //ok
+                        break;
+                    default:
+                    case var err when err.IsErr():
+                        Assert.True(false);
+                        break;
+                }
             }
             {
                 var anErr = NngResult<TRes>.Fail((int)Defines.NngErrno.EINVAL);
@@ -97,17 +99,17 @@ namespace nng
                 Assert.ThrowsAny<Exception>(() => anErr.Ok());
                 anErr.Err();
                 Assert.ThrowsAny<Exception>(() => anErr.Unwrap());
-                // switch (anErr)
-                // {
-                //     default:
-                //     case NngOk<TRes> ok:
-                //         Assert.True(false);
-                //         break;
+                switch (anErr)
+                {
+                    default:
+                    case var ok when ok.IsOk():
+                        Assert.True(false);
+                        break;
 
-                //     case NngErr<TRes> fail:
-                //         //ok
-                //         break;
-                // }
+                    case var err when err.IsErr():
+                        //ok
+                        break;
+                }
             }
 
             Assert.ThrowsAny<Exception>(() => NngResult<TRes>.Fail(0));
