@@ -4,24 +4,36 @@ using System.Runtime.CompilerServices;
 
 namespace nng
 {
+    /// <summary>
+    /// Result of an operation that succeeds with one value or fails with another.
+    /// </summary>
     public struct Result<TOk, TErr>
     {
         TErr error;
         TOk ok;
         bool isOk;
 
+        /// <summary>
+        /// Create a success result.
+        /// </summary>
+        /// <param name="ok"></param>
+        /// <returns></returns>
         public static Result<TOk, TErr> Ok(TOk ok)
         {
             return new Result<TOk, TErr> { ok = ok, isOk = true };
         }
 
+        /// <summary>
+        /// Create a fail result.
+        /// </summary>
+        /// <param name="err"></param>
+        /// <returns></returns>
         public static Result<TOk, TErr> Err(TErr err)
         {
             return new Result<TOk, TErr> { error = err, isOk = false };
         }
 
         public bool IsOk() => isOk;
-        public bool IsErr() => !isOk;
 
         public bool TryOk(out TOk okValue)
         {
@@ -41,16 +53,9 @@ namespace nng
             return !isOk;
         }
 
-        public TOk Ok()
-        {
-            if (IsOk())
-                return ok;
-            throw null;
-        }
-
         public TErr Err()
         {
-            if (IsErr())
+            if (!IsOk())
                 return error;
             throw null;
         }
@@ -70,6 +75,9 @@ namespace nng
         }
     }
 
+    /// <summary>
+    /// Result of an operation that succeeds with a value or fails with an NngErrno.
+    /// </summary>
     public struct NngResult<TOk>
     {
         Result<TOk, NngErrno> result;
@@ -86,6 +94,12 @@ namespace nng
             return new NngResult<TOk> { result = res };
         }
 
+        /// <summary>
+        /// If errno is 0, return success otherwise return fail.
+        /// </summary>
+        /// <param name="errno"></param>
+        /// <param name="ok"></param>
+        /// <returns></returns>
         public static NngResult<TOk> OkIfZero(int errno, TOk ok)
         {
             if (errno == 0)
@@ -94,6 +108,12 @@ namespace nng
                 return Err((NngErrno)errno);
         }
 
+        /// <summary>
+        /// If errno is 0, return success initialized with value returned by func, otherwise fail.
+        /// </summary>
+        /// <param name="errno"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static NngResult<TOk> OkThen(int errno, Func<TOk> func)
         {
@@ -103,6 +123,11 @@ namespace nng
                 return Err((NngErrno)errno);
         }
 
+        /// <summary>
+        /// Create fail result using non-zero errno.
+        /// </summary>
+        /// <param name="errno"></param>
+        /// <returns></returns>
         public static NngResult<TOk> Fail(int errno)
         {
             if (errno == 0)
@@ -111,14 +136,22 @@ namespace nng
         }
 
         public bool IsOk() => result.IsOk();
-        public bool IsErr() => result.IsErr();
+        public bool IsErr() => !IsOk();
 
         public bool TryOk(out TOk okValue) => result.TryOk(out okValue);
 
         public bool TryError(out NngErrno errorValue) => result.TryError(out errorValue);
 
-        public TOk Ok() => result.Ok();
+        /// <summary>
+        /// Returns success value.  If this is a fail result throws an exception.
+        /// </summary>
+        /// <returns></returns>
+        public TOk Ok() => result.Unwrap();
 
+        /// <summary>
+        /// Returns fail value.  If this is a success result throws an exception.
+        /// </summary>
+        /// <returns></returns>
         public NngErrno Err() => result.Err();
 
         public TOk Unwrap() => result.Unwrap();

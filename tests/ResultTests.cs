@@ -28,8 +28,6 @@ namespace nng.Tests
             {
                 var anOk = CreateOk();
                 Assert.True(anOk.IsOk());
-                Assert.False(anOk.IsErr());
-                anOk.Ok();
                 Assert.ThrowsAny<Exception>(() => anOk.Err());
                 anOk.Unwrap();
                 // switch (anOk)
@@ -46,8 +44,6 @@ namespace nng.Tests
             {
                 var anErr = CreateErr();
                 Assert.False(anErr.IsOk());
-                Assert.True(anErr.IsErr());
-                Assert.ThrowsAny<Exception>(() => anErr.Ok());
                 anErr.Err();
                 Assert.ThrowsAny<Exception>(() => anErr.Unwrap());
                 // switch (anErr)
