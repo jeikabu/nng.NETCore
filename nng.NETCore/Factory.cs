@@ -2,6 +2,7 @@ using nng.Native;
 
 namespace nng.Tests
 {
+    using static nng.Native.Defines;
     using static nng.Native.Msg.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
@@ -35,6 +36,9 @@ namespace nng.Tests
         public NngResult<ISubSocket> SubscriberOpen() => SubSocket.Open();
         public NngResult<IPushSocket> PusherOpen() => PushSocket.Open();
         public NngResult<IPullSocket> PullerOpen() => PullSocket.Open();
+        public NngResult<IPairSocket> PairOpen() => Pair1Socket.Open();
+        public NngResult<IRespondentSocket> RespondentOpen() => RespondentSocket.Open();
+        public NngResult<ISurveyorSocket> SurveyorOpen() => SurveyorSocket.Open();
         public IListener ListenerCreate(ISocket socket, string url) => Listener.Create(socket, url);
         public IDialer DialerCreate(ISocket socket, string url) => Dialer.Create(socket, url);
 
@@ -73,11 +77,31 @@ namespace nng.Tests
             ctx.Init(this, socket, ctx.callback);
             return NngResult<IReceiveAsyncContext<IMessage>>.Ok(ctx);
         }
-        public NngResult<ISendReceiveAsyncContext<IMessage>> CreateSendReceiveAsyncContext(ISocket socket)
+        public NngResult<ISendReceiveAsyncContext<IMessage>> CreateSendReceiveAsyncContext(ISocket socket, SendReceiveContextSubtype subtype)
         {
-            var ctx = new SendReceiveAsyncContext<IMessage>();
-            ctx.Init(this, socket, ctx.callback);
-            return NngResult<ISendReceiveAsyncContext<IMessage>>.Ok(ctx);
+            ISendReceiveAsyncContext<IMessage> res = null;
+            switch (subtype)
+            {
+                case SendReceiveContextSubtype.Bus:
+                case SendReceiveContextSubtype.Pair:
+                    {
+                        var ctx = new SendReceiveAsyncContext<IMessage>();
+                        ctx.Init(this, socket, ctx.callback);
+                        res = ctx;
+                    }
+
+                    break;
+                case SendReceiveContextSubtype.Survey:
+                    {
+                        var ctx = new SurveyAsyncContext<IMessage>();
+                        ctx.Init(this, socket, ctx.callback);
+                        res = ctx;
+                    }
+                    break;
+                default:
+                    return NngResult<ISendReceiveAsyncContext<IMessage>>.Err(NngErrno.EINVAL);
+            }
+            return NngResult<ISendReceiveAsyncContext<IMessage>>.Ok(res);
         }
 
         public NngResult<ISubAsyncContext<IMessage>> CreateSubAsyncContext(ISocket socket)

@@ -120,7 +120,8 @@ namespace nng
         {
             System.Diagnostics.Debug.Assert(State == AsyncState.Wait);
             asyncMessage.response = message;
-            // Save response TCS here to avoid race where send completes and asyncMessage replaced
+            // Save response TCS here to avoid race where send completes and asyncMessage replaced before we 
+            // can return it
             var ret = asyncMessage.replyTcs.Task;
             // Move from wait to send state
             callback(IntPtr.Zero);

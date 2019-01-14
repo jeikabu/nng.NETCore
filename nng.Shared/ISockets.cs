@@ -72,40 +72,55 @@ namespace nng
     /// Represents nng listener
     /// </summary>
     public interface IListener : IStart, IHasOpts
-    {}
+    { }
 
     /// <summary>
     /// Represents nng dialer
     /// </summary>
     public interface IDialer : IStart, IHasOpts
-    {}
+    { }
 
     /// <summary>
     /// Represents publish half of publish/subscribe protocol
     /// </summary>
-    public interface IPubSocket : ISocket {}
+    public interface IPubSocket : ISocket { }
     /// <summary>
     /// Represents subscribe half of publish/subscribe protocol
     /// </summary>
-    public interface ISubSocket : ISocket {}
+    public interface ISubSocket : ISocket { }
     /// <summary>
     /// Represents push half of push/pull protocol
     /// </summary>
-    public interface IPushSocket : ISocket {}
+    public interface IPushSocket : ISocket { }
     /// <summary>
     /// Represents pull half of push/pull protocol
     /// </summary>
-    public interface IPullSocket : ISocket {}
+    public interface IPullSocket : ISocket { }
     /// <summary>
     /// Represents request half of request/reply protocol
     /// </summary>
-    public interface IReqSocket : ISocket {}
+    public interface IReqSocket : ISocket { }
     /// <summary>
     /// Represents reply half of request/reply protocol
     /// </summary>
-    public interface IRepSocket : ISocket {}
+    public interface IRepSocket : ISocket { }
     /// <summary>
     /// Represents node of bus protocol
     /// </summary>
-    public interface IBusSocket : ISocket {}
+    public interface IBusSocket : ISocket { }
+
+    /// <summary>
+    /// Represents one side of 1:1 pair protocol
+    /// </summary>
+    public interface IPairSocket : ISocket { }
+
+    /// <summary>
+    /// Represents respondent half of survey protocol
+    /// </summary>
+    public interface IRespondentSocket : ISocket { }
+
+    /// <summary>
+    /// Represents surveyor half of survey protocol
+    /// </summary>
+    public interface ISurveyorSocket : ISocket { }
 }

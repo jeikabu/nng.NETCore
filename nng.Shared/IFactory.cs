@@ -25,12 +25,22 @@ namespace nng
         NngResult<ISubSocket> SubscriberOpen();
         NngResult<IPushSocket> PusherOpen();
         NngResult<IPullSocket> PullerOpen();
+        NngResult<IPairSocket> PairOpen();
+        NngResult<IRespondentSocket> RespondentOpen();
+        NngResult<ISurveyorSocket> SurveyorOpen();
 
         IListener ListenerCreate(ISocket socket, string url);
         IDialer DialerCreate(ISocket socket, string url);
 
         NngResult<TSocket> Dial<TSocket>(NngResult<TSocket> socketRes, string url) where TSocket : ISocket;
         NngResult<TSocket> Listen<TSocket>(NngResult<TSocket> socketRes, string url) where TSocket : ISocket;
+    }
+
+    public enum SendReceiveContextSubtype
+    {
+        Bus,
+        Pair,
+        Survey,
     }
 
     /// <summary>
@@ -40,7 +50,7 @@ namespace nng
     {
         NngResult<ISendAsyncContext<T>> CreateSendAsyncContext(ISocket socket);
         NngResult<IReceiveAsyncContext<T>> CreateReceiveAsyncContext(ISocket socket);
-        NngResult<ISendReceiveAsyncContext<T>> CreateSendReceiveAsyncContext(ISocket socket);
+        NngResult<ISendReceiveAsyncContext<T>> CreateSendReceiveAsyncContext(ISocket socket, SendReceiveContextSubtype subtype);
         NngResult<ISubAsyncContext<T>> CreateSubAsyncContext(ISocket socket);
         NngResult<IReqRepAsyncContext<T>> CreateReqRepAsyncContext(ISocket socket);
         NngResult<IRepReqAsyncContext<T>> CreateRepReqAsyncContext(ISocket socket);
