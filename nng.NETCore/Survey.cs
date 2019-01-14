@@ -16,14 +16,14 @@ namespace nng
         /// Create a respondent socket
         /// </summary>
         /// <returns>The open.</returns>
-        public static INngResult<IRespondentSocket> Open()
+        public static NngResult<IRespondentSocket> Open()
         {
             int res = nng_respondent0_open(out var socket);
             if (res != 0)
             {
-                return NngResult.Fail<IRespondentSocket>(res);
+                return NngResult<IRespondentSocket>.Fail(res);
             }
-            return NngResult.Ok<IRespondentSocket>(new RespondentSocket { NngSocket = socket });
+            return NngResult<IRespondentSocket>.Ok(new RespondentSocket { NngSocket = socket });
         }
 
         private RespondentSocket() { }
@@ -38,14 +38,14 @@ namespace nng
         /// Create a surveyor socket
         /// </summary>
         /// <returns>The open.</returns>
-        public static INngResult<ISurveyorSocket> Open()
+        public static NngResult<ISurveyorSocket> Open()
         {
             int res = nng_surveyor0_open(out var socket);
             if (res != 0)
             {
-                return NngResult.Fail<ISurveyorSocket>(res);
+                return NngResult<ISurveyorSocket>.Fail(res);
             }
-            return NngResult.Ok<ISurveyorSocket>(new SurveyorSocket { NngSocket = socket });
+            return NngResult<ISurveyorSocket>.Ok(new SurveyorSocket { NngSocket = socket });
         }
 
         private SurveyorSocket() { }

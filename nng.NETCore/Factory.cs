@@ -29,55 +29,55 @@ namespace nng.Tests
             msg = null;
         }
 
-        public INngResult<IBusSocket> BusOpen() => BusSocket.Open();
-        public INngResult<IReqSocket> RequesterOpen() => ReqSocket.Open();
-        public INngResult<IRepSocket> ReplierOpen() => RepSocket.Open();
-        public INngResult<IPubSocket> PublisherOpen() => PubSocket.Open();
-        public INngResult<ISubSocket> SubscriberOpen() => SubSocket.Open();
-        public INngResult<IPushSocket> PusherOpen() => PushSocket.Open();
-        public INngResult<IPullSocket> PullerOpen() => PullSocket.Open();
-        public INngResult<IPairSocket> PairOpen() => Pair1Socket.Open();
-        public INngResult<IRespondentSocket> RespondentOpen() => RespondentSocket.Open();
-        public INngResult<ISurveyorSocket> SurveyorOpen() => SurveyorSocket.Open();
+        public NngResult<IBusSocket> BusOpen() => BusSocket.Open();
+        public NngResult<IReqSocket> RequesterOpen() => ReqSocket.Open();
+        public NngResult<IRepSocket> ReplierOpen() => RepSocket.Open();
+        public NngResult<IPubSocket> PublisherOpen() => PubSocket.Open();
+        public NngResult<ISubSocket> SubscriberOpen() => SubSocket.Open();
+        public NngResult<IPushSocket> PusherOpen() => PushSocket.Open();
+        public NngResult<IPullSocket> PullerOpen() => PullSocket.Open();
+        public NngResult<IPairSocket> PairOpen() => Pair1Socket.Open();
+        public NngResult<IRespondentSocket> RespondentOpen() => RespondentSocket.Open();
+        public NngResult<ISurveyorSocket> SurveyorOpen() => SurveyorSocket.Open();
         public IListener ListenerCreate(ISocket socket, string url) => Listener.Create(socket, url);
         public IDialer DialerCreate(ISocket socket, string url) => Dialer.Create(socket, url);
 
-        public INngResult<TSocket> Dial<TSocket>(INngResult<TSocket> socketRes, string url) where TSocket : ISocket
+        public NngResult<TSocket> Dial<TSocket>(NngResult<TSocket> socketRes, string url) where TSocket : ISocket
         {
-            if (socketRes is NngOk<TSocket> ok)
+            if (socketRes.TryOk(out var ok))
             {
-                var res = nng_dial(ok.Result.NngSocket, url, 0);
+                var res = nng_dial(ok.NngSocket, url, 0);
                 if (res != 0)
-                    return NngResult.Fail<TSocket>(res);
+                    return NngResult<TSocket>.Fail(res);
             }
             return socketRes;
         }
 
-        public INngResult<TSocket> Listen<TSocket>(INngResult<TSocket> socketRes, string url) where TSocket : ISocket
+        public NngResult<TSocket> Listen<TSocket>(NngResult<TSocket> socketRes, string url) where TSocket : ISocket
         {
-            if (socketRes is NngOk<TSocket> ok)
+            if (socketRes.TryOk(out var ok))
             {
-                var res = nng_listen(ok.Result.NngSocket, url, 0);
+                var res = nng_listen(ok.NngSocket, url, 0);
                 if (res != 0)
-                    return NngResult.Fail<TSocket>(res);
+                    return NngResult<TSocket>.Fail(res);
             }
             return socketRes;
         }
 
         #region IAsyncContextFactory
-        public INngResult<ISendAsyncContext<IMessage>> CreateSendAsyncContext(ISocket socket)
+        public NngResult<ISendAsyncContext<IMessage>> CreateSendAsyncContext(ISocket socket)
         {
             var ctx = new SendAsyncContext<IMessage>();
             ctx.Init(this, socket, ctx.callback);
-            return NngResult.Ok<ISendAsyncContext<IMessage>>(ctx);
+            return NngResult<ISendAsyncContext<IMessage>>.Ok(ctx);
         }
-        public INngResult<IReceiveAsyncContext<IMessage>> CreateReceiveAsyncContext(ISocket socket)
+        public NngResult<IReceiveAsyncContext<IMessage>> CreateReceiveAsyncContext(ISocket socket)
         {
             var ctx = new ResvAsyncContext<IMessage>();
             ctx.Init(this, socket, ctx.callback);
-            return NngResult.Ok<IReceiveAsyncContext<IMessage>>(ctx);
+            return NngResult<IReceiveAsyncContext<IMessage>>.Ok(ctx);
         }
-        public INngResult<ISendReceiveAsyncContext<IMessage>> CreateSendReceiveAsyncContext(ISocket socket, SendReceiveContextSubtype subtype)
+        public NngResult<ISendReceiveAsyncContext<IMessage>> CreateSendReceiveAsyncContext(ISocket socket, SendReceiveContextSubtype subtype)
         {
             ISendReceiveAsyncContext<IMessage> res = null;
             switch (subtype)
@@ -99,33 +99,33 @@ namespace nng.Tests
                     }
                     break;
                 default:
-                    return NngResult.Fail<ISendReceiveAsyncContext<IMessage>>(NngErrno.EINVAL);
+                    return NngResult<ISendReceiveAsyncContext<IMessage>>.Err(NngErrno.EINVAL);
             }
-            return NngResult.Ok<ISendReceiveAsyncContext<IMessage>>(res);
+            return NngResult<ISendReceiveAsyncContext<IMessage>>.Ok(res);
         }
 
-        public INngResult<ISubAsyncContext<IMessage>> CreateSubAsyncContext(ISocket socket)
+        public NngResult<ISubAsyncContext<IMessage>> CreateSubAsyncContext(ISocket socket)
         {
             var ctx = new SubAsyncContext<IMessage>();
             ctx.Init(this, socket, ctx.callback);
-            return NngResult.Ok<ISubAsyncContext<IMessage>>(ctx);
+            return NngResult<ISubAsyncContext<IMessage>>.Ok(ctx);
         }
 
-        public INngResult<IReqRepAsyncContext<IMessage>> CreateReqRepAsyncContext(ISocket socket)
+        public NngResult<IReqRepAsyncContext<IMessage>> CreateReqRepAsyncContext(ISocket socket)
         {
             var ctx = new ReqAsyncCtx<IMessage>();
             ctx.Init(this, socket, ctx.callback);
-            return NngResult.Ok<IReqRepAsyncContext<IMessage>>(ctx);
+            return NngResult<IReqRepAsyncContext<IMessage>>.Ok(ctx);
         }
 
-        public INngResult<IRepReqAsyncContext<IMessage>> CreateRepReqAsyncContext(ISocket socket)
+        public NngResult<IRepReqAsyncContext<IMessage>> CreateRepReqAsyncContext(ISocket socket)
         {
             return RepAsyncCtx<IMessage>.Create(this, socket);
         }
         #endregion
 
         #region IMiscFactory
-        public INngResult<IStatRoot> GetStatSnapshot()
+        public NngResult<IStatRoot> GetStatSnapshot()
         {
             return Stat.GetStatSnapshot();
         }

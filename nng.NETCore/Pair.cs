@@ -16,14 +16,14 @@ namespace nng
         /// Create a pair socket
         /// </summary>
         /// <returns>The open.</returns>
-        public static INngResult<IPairSocket> Open()
+        public static NngResult<IPairSocket> Open()
         {
             int res = nng_pair0_open(out var socket);
             if (res != 0)
             {
-                return NngResult.Fail<IPairSocket>(res);
+                return NngResult<IPairSocket>.Fail(res);
             }
-            return NngResult.Ok<IPairSocket>(new Pair0Socket { NngSocket = socket });
+            return NngResult<IPairSocket>.Ok(new Pair0Socket { NngSocket = socket });
         }
 
         private Pair0Socket() { }
@@ -38,14 +38,14 @@ namespace nng
         /// Create a pair socket
         /// </summary>
         /// <returns>The open.</returns>
-        public static INngResult<IPairSocket> Open()
+        public static NngResult<IPairSocket> Open()
         {
             int res = nng_pair1_open(out var socket);
             if (res != 0)
             {
-                return NngResult.Fail<IPairSocket>(res);
+                return NngResult<IPairSocket>.Fail(res);
             }
-            return NngResult.Ok<IPairSocket>(new Pair1Socket { NngSocket = socket });
+            return NngResult<IPairSocket>.Ok(new Pair1Socket { NngSocket = socket });
         }
 
         private Pair1Socket() { }

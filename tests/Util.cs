@@ -177,12 +177,13 @@ namespace nng.Tests
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    class TransportsNoTcpWsClassData : IEnumerable<object[]>
+    class TransportsNoTcpClassData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
             yield return new object[] { Util.UrlIpc() };
             yield return new object[] { Util.UrlInproc() };
+            yield return new object[] { Util.UrlWs() };
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

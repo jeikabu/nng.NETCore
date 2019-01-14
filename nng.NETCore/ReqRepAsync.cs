@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 namespace nng
 {
     using static nng.Native.Aio.UnsafeNativeMethods;
-    using static nng.Native.Basic.UnsafeNativeMethods;
     using static nng.Native.Ctx.UnsafeNativeMethods;
-    using static nng.Native.Msg.UnsafeNativeMethods;
 
     struct AsyncReqRespMsg<T>
     {
@@ -88,7 +86,7 @@ namespace nng
 
     public class RepAsyncCtx<T> : AsyncCtx<T>, IRepReqAsyncContext<T>
     {
-        public static INngResult<IRepReqAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
+        public static NngResult<IRepReqAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
         {
             var ctx = new RepAsyncCtx<T>();
             var res = ctx.Init(factory, socket, ctx.callback);
@@ -96,11 +94,11 @@ namespace nng
             {
                 // Start receive loop
                 ctx.callback(IntPtr.Zero);
-                return NngResult.Ok<IRepReqAsyncContext<T>>(ctx);
+                return NngResult<IRepReqAsyncContext<T>>.Ok(ctx);
             }
             else
             {
-                return NngResult.Fail<IRepReqAsyncContext<T>>(res);
+                return NngResult<IRepReqAsyncContext<T>>.Fail(res);
             }
         }
 

@@ -1,214 +1,161 @@
 using static nng.Native.Defines;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace nng
 {
     /// <summary>
-    /// Represents a result.
+    /// Result of an operation that succeeds with one value or fails with another.
     /// </summary>
-    public interface IResult<Err, Val>
+    public struct Result<TOk, TErr>
     {
-    }
-
-    /// <summary>
-    /// Represents a successful result
-    /// </summary>
-    public interface IOk<Err, Val> : IResult<Err, Val>
-    {
-        /// <summary>
-        /// Gets the result.
-        /// </summary>
-        /// <value>The result.</value>
-        Val Result { get; }
-    }
-
-    /// <summary>
-    /// Represents a failed result
-    /// </summary>
-    public interface IErr<Err, Val> : IResult<Err, Val>
-    {
-        /// <summary>
-        /// Gets the error.
-        /// </summary>
-        /// <value>The error.</value>
-        Err Error { get; }
-    }
-
-    
-
-    public static class ResultExt
-    {
-        // public static void Deconstruct<Err, Val>(this IResult<Err, Val> self, out Err error, out Val value)
-        // {
-        //     error = self.Error;
-        //     value = self.Result;
-        // }
-
-        /// <summary>
-        /// Determine if the result is success
-        /// </summary>
-        /// <returns><c>true</c>, if success, <c>false</c> otherwise.</returns>
-        /// <param name="self">Self.</param>
-        /// <typeparam name="Err">The 1st type parameter.</typeparam>
-        /// <typeparam name="Val">The 2nd type parameter.</typeparam>
-        public static bool IsOk<Err, Val>(this IResult<Err, Val> self)
-        {
-            return self is IOk<Err, Val>;
-        }
-
-        /// <summary>
-        /// Determine if the result is failure
-        /// </summary>
-        /// <returns><c>true</c>, if failure, <c>false</c> otherwise.</returns>
-        /// <param name="self">Self.</param>
-        /// <typeparam name="Err">The 1st type parameter.</typeparam>
-        /// <typeparam name="Val">The 2nd type parameter.</typeparam>
-        public static bool IsErr<Err, Val>(this IResult<Err, Val> self)
-        {
-            return self is IErr<Err, Val>;
-        }
-
-        /// <summary>
-        /// Treats result as a success and gets result, throws exception if actually failure
-        /// </summary>
-        /// <returns>The result</returns>
-        /// <param name="self">Self.</param>
-        /// <typeparam name="Err">The 1st type parameter.</typeparam>
-        /// <typeparam name="Val">The 2nd type parameter.</typeparam>
-        public static Val Unwrap<Err, Val>(this IResult<Err, Val> self)
-        {
-            if (self is IOk<Err,Val> ok)
-            {
-                return ok.Result;
-            }
-            else if (self is IErr<Err,Val> err)
-            {
-                throw new System.InvalidOperationException(err.Error.ToString());
-            }
-            throw new System.NotSupportedException();
-        }
-
-        /// <summary>
-        /// Treats result as a failure and gets the error, throws exception if actually success
-        /// </summary>
-        /// <returns>The error.</returns>
-        /// <param name="self">Self.</param>
-        /// <typeparam name="Err">The 1st type parameter.</typeparam>
-        /// <typeparam name="Val">The 2nd type parameter.</typeparam>
-        public static Err Error<Err, Val>(this IResult<Err, Val> self)
-        {
-            if (self is IErr<Err,Val> error)
-            {
-                return error.Error;
-            }
-            else if (self is IOk<Err,Val> ok)
-            {
-                throw new System.InvalidOperationException(ok.Result.ToString());
-            }
-            throw new System.NotSupportedException();
-        }
-    }
-
-    /// <summary>
-    /// Success result
-    /// </summary>
-    public struct Ok<Err, Val> : IOk<Err, Val>
-    {
-        public Ok(Val value)
-        {
-            this.value = value;
-        }
-
-        public Val Result => value;
-
-        Val value;
-    }
-
-    /// <summary>
-    /// Fail result
-    /// </summary>
-    public struct Err<TErr, Val> : IErr<TErr, Val>
-    {
-        public Err(TErr error)
-        {
-            this.error = error;
-        }
-
-        public TErr Error => error;
-
         TErr error;
-    }
+        TOk ok;
+        bool isOk;
 
-    /// <summary>
-    /// Represents result returned by nng
-    /// </summary>
-    public interface INngResult<Val> : IResult<NngErrno, Val>
-    {}
-
-    /// <summary>
-    /// Nng success result
-    /// </summary>
-    public struct NngOk<Val> : IOk<NngErrno, Val>, INngResult<Val>
-    {
-        public NngOk(Val value)
-        {
-            this.value = value;
-        }
-
-        public Val Result => value;
-
-        Val value;
-    }
-
-    /// <summary>
-    /// Nng fail result
-    /// </summary>
-    public struct NngErr<Val> : IErr<NngErrno, Val>, INngResult<Val>
-    {
-        public NngErr(NngErrno error)
-        {
-            if (error == 0)
-                throw new System.InvalidOperationException();
-            this.error = error;
-        }
-
-        public NngErrno Error => error;
-
-        NngErrno error;
-    }
-
-    public static class NngResult
-    {
         /// <summary>
-        /// Create nng success result
+        /// Create a success result.
         /// </summary>
-        /// <returns>The ok.</returns>
-        /// <param name="value">Value.</param>
-        /// <typeparam name="Val">The 1st type parameter.</typeparam>
-        public static NngOk<Val> Ok<Val>(Val value)
+        /// <param name="ok"></param>
+        /// <returns></returns>
+        public static Result<TOk, TErr> Ok(TOk ok)
         {
-            return new NngOk<Val>(value);
+            return new Result<TOk, TErr> { ok = ok, isOk = true };
         }
 
         /// <summary>
-        /// Create nng fail result
+        /// Create a fail result.
         /// </summary>
-        /// <returns>The fail.</returns>
-        /// <param name="error">Error.</param>
-        /// <typeparam name="Val">The 1st type parameter.</typeparam>
-        public static NngErr<Val> Fail<Val>(int error)
+        /// <param name="err"></param>
+        /// <returns></returns>
+        public static Result<TOk, TErr> Err(TErr err)
         {
-            return new NngErr<Val>((NngErrno)error);
+            return new Result<TOk, TErr> { error = err, isOk = false };
+        }
+
+        public bool IsOk() => isOk;
+
+        public bool TryOk(out TOk okValue)
+        {
+            if (isOk)
+                okValue = ok;
+            else
+                okValue = default;
+            return isOk;
+        }
+
+        public bool TryError(out TErr errorValue)
+        {
+            if (isOk)
+                errorValue = default;
+            else
+                errorValue = error;
+            return !isOk;
+        }
+
+        public TErr Err()
+        {
+            if (!IsOk())
+                return error;
+            throw null;
+        }
+
+        public TOk Unwrap()
+        {
+            if (isOk)
+                return ok;
+            throw null;
+        }
+
+        public void Deconstruct(out bool isOk, out TErr errorValue, out TOk okValue)
+        {
+            isOk = this.isOk;
+            errorValue = error;
+            okValue = ok;
+        }
+    }
+
+    /// <summary>
+    /// Result of an operation that succeeds with a value or fails with an NngErrno.
+    /// </summary>
+    public struct NngResult<TOk>
+    {
+        Result<TOk, NngErrno> result;
+
+        public static NngResult<TOk> Ok(TOk ok)
+        {
+            var res = Result<TOk, NngErrno>.Ok(ok);
+            return new NngResult<TOk> { result = res };
+        }
+
+        public static NngResult<TOk> Err(NngErrno err)
+        {
+            var res = Result<TOk, NngErrno>.Err(err);
+            return new NngResult<TOk> { result = res };
         }
 
         /// <summary>
-        /// Create nng fail result
+        /// If errno is 0, return success otherwise return fail.
         /// </summary>
-        /// <returns>The fail.</returns>
-        /// <param name="error">Error.</param>
-        /// <typeparam name="Val">The 1st type parameter.</typeparam>
-        public static NngErr<Val> Fail<Val>(NngErrno error)
+        /// <param name="errno"></param>
+        /// <param name="ok"></param>
+        /// <returns></returns>
+        public static NngResult<TOk> OkIfZero(int errno, TOk ok)
         {
-            return new NngErr<Val>(error);
+            if (errno == 0)
+                return Ok(ok);
+            else
+                return Err((NngErrno)errno);
         }
+
+        /// <summary>
+        /// If errno is 0, return success initialized with value returned by func, otherwise fail.
+        /// </summary>
+        /// <param name="errno"></param>
+        /// <param name="func"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static NngResult<TOk> OkThen(int errno, Func<TOk> func)
+        {
+            if (errno == 0)
+                return Ok(func());
+            else
+                return Err((NngErrno)errno);
+        }
+
+        /// <summary>
+        /// Create fail result using non-zero errno.
+        /// </summary>
+        /// <param name="errno"></param>
+        /// <returns></returns>
+        public static NngResult<TOk> Fail(int errno)
+        {
+            if (errno == 0)
+                throw null;
+            return Err((NngErrno)errno);
+        }
+
+        public bool IsOk() => result.IsOk();
+        public bool IsErr() => !IsOk();
+
+        public bool TryOk(out TOk okValue) => result.TryOk(out okValue);
+
+        public bool TryError(out NngErrno errorValue) => result.TryError(out errorValue);
+
+        /// <summary>
+        /// Returns success value.  If this is a fail result throws an exception.
+        /// </summary>
+        /// <returns></returns>
+        public TOk Ok() => result.Unwrap();
+
+        /// <summary>
+        /// Returns fail value.  If this is a success result throws an exception.
+        /// </summary>
+        /// <returns></returns>
+        public NngErrno Err() => result.Err();
+
+        public TOk Unwrap() => result.Unwrap();
+
+        public void Deconstruct(out bool isOk, out NngErrno errorValue, out TOk okValue) => result.Deconstruct(out isOk, out errorValue, out okValue);
     }
 }

@@ -10,7 +10,7 @@ namespace nng
         /// <param name="url">URL.</param>
         /// <param name="isListener">If set to <c>true</c> is listener.</param>
         /// <typeparam name="T">The 1st type parameter.</typeparam>
-        public static INngResult<IBusSocket> BusCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.BusOpen(), url, isListener);
+        public static NngResult<IBusSocket> BusCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.BusOpen(), url, isListener);
         /// <summary>
         /// Create request node for request/reply protocol
         /// </summary>
@@ -18,7 +18,7 @@ namespace nng
         /// <param name="factory">Factory.</param>
         /// <param name="url">URL.</param>
         /// <typeparam name="T">The 1st type parameter.</typeparam>
-        public static INngResult<IReqSocket> RequesterCreate<T>(this IAPIFactory<T> factory, string url) => factory.Dial(factory.RequesterOpen(), url);
+        public static NngResult<IReqSocket> RequesterCreate<T>(this IAPIFactory<T> factory, string url) => factory.Dial(factory.RequesterOpen(), url);
         /// <summary>
         /// Create reply node for request/reply protocol
         /// </summary>
@@ -26,7 +26,7 @@ namespace nng
         /// <param name="factory">Factory.</param>
         /// <param name="url">URL.</param>
         /// <typeparam name="T">The 1st type parameter.</typeparam>
-        public static INngResult<IRepSocket> ReplierCreate<T>(this IAPIFactory<T> factory, string url) => factory.Listen(factory.ReplierOpen(), url);
+        public static NngResult<IRepSocket> ReplierCreate<T>(this IAPIFactory<T> factory, string url) => factory.Listen(factory.ReplierOpen(), url);
         /// <summary>
         /// Create publish node for publish/subscribe protocol
         /// </summary>
@@ -34,7 +34,7 @@ namespace nng
         /// <param name="factory">Factory.</param>
         /// <param name="url">URL.</param>
         /// <typeparam name="T">The 1st type parameter.</typeparam>
-        public static INngResult<IPubSocket> PublisherCreate<T>(this IAPIFactory<T> factory, string url) => factory.Listen(factory.PublisherOpen(), url);
+        public static NngResult<IPubSocket> PublisherCreate<T>(this IAPIFactory<T> factory, string url) => factory.Listen(factory.PublisherOpen(), url);
         /// <summary>
         /// Create subscribe node for publish/subscribe protocol
         /// </summary>
@@ -42,7 +42,7 @@ namespace nng
         /// <param name="factory">Factory.</param>
         /// <param name="url">URL.</param>
         /// <typeparam name="T">The 1st type parameter.</typeparam>
-        public static INngResult<ISubSocket> SubscriberCreate<T>(this IAPIFactory<T> factory, string url) => factory.Dial(factory.SubscriberOpen(), url);
+        public static NngResult<ISubSocket> SubscriberCreate<T>(this IAPIFactory<T> factory, string url) => factory.Dial(factory.SubscriberOpen(), url);
         /// <summary>
         /// Create push node for push/pull protocol
         /// </summary>
@@ -51,7 +51,7 @@ namespace nng
         /// <param name="url">URL.</param>
         /// <param name="isListener">If set to <c>true</c> is listener.</param>
         /// <typeparam name="T">The 1st type parameter.</typeparam>
-        public static INngResult<IPushSocket> PusherCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.PusherOpen(), url, isListener);
+        public static NngResult<IPushSocket> PusherCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.PusherOpen(), url, isListener);
         /// <summary>
         /// Create pull node for push/pull protocol
         /// </summary>
@@ -60,7 +60,7 @@ namespace nng
         /// <param name="url">URL.</param>
         /// <param name="isListener">If set to <c>true</c> is listener.</param>
         /// <typeparam name="T">The 1st type parameter.</typeparam>
-        public static INngResult<IPullSocket> PullerCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.PullerOpen(), url, isListener);
+        public static NngResult<IPullSocket> PullerCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.PullerOpen(), url, isListener);
 
         /// <summary>
         /// Create pair socket for pair protocol
@@ -70,7 +70,7 @@ namespace nng
         /// <param name="isListener"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static INngResult<IPairSocket> PairCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.PairOpen(), url, isListener);
+        public static NngResult<IPairSocket> PairCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.PairOpen(), url, isListener);
 
         /// <summary>
         /// Create respondent socket for survey protocol
@@ -80,7 +80,7 @@ namespace nng
         /// <param name="isListener"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static INngResult<IRespondentSocket> RespondentCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.RespondentOpen(), url, isListener);
+        public static NngResult<IRespondentSocket> RespondentCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.RespondentOpen(), url, isListener);
 
         /// <summary>
         /// Create surveyor socket for survey protocol
@@ -90,7 +90,7 @@ namespace nng
         /// <param name="isListener"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static INngResult<ISurveyorSocket> SurveyorCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.SurveyorOpen(), url, isListener);
+        public static NngResult<ISurveyorSocket> SurveyorCreate<T>(this IAPIFactory<T> factory, string url, bool isListener) => factory.DialOrListen(factory.SurveyorOpen(), url, isListener);
 
         /// <summary>
         /// Creates a dialer or listener associated with a socket and starts it.
@@ -102,10 +102,10 @@ namespace nng
         /// <param name="isListener">If set to <c>true</c> is listener, else is dialer</param>
         /// <typeparam name="TSocket">The 1st type parameter.</typeparam>
         /// <typeparam name="TMsg">The 2nd type parameter.</typeparam>
-        public static INngResult<TSocket> DialOrListen<TSocket, TMsg>(this IAPIFactory<TMsg> factory, INngResult<TSocket> socketRes, string url, bool isListener)
+        public static NngResult<TSocket> DialOrListen<TSocket, TMsg>(this IAPIFactory<TMsg> factory, NngResult<TSocket> socketRes, string url, bool isListener)
             where TSocket : ISocket
         {
-            if (socketRes is NngOk<TSocket> ok)
+            if (socketRes.IsOk())
             {
                 if (isListener)
                 {

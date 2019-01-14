@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace nng
 {
-    using static nng.Native.Basic.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
     /// <summary>
