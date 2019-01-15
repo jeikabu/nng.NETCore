@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="system.memory" Version="4.5.1" />
+    <PackageReference Include="system.valuetuple" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup Condition="$(DefineConstants.Contains('FEATURE_NETSTANDARD1_5_AND_UP'))">

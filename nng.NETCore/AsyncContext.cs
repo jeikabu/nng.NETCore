@@ -8,10 +8,7 @@ using System.Threading.Tasks;
 namespace nng
 {
     using static nng.Native.Aio.UnsafeNativeMethods;
-    using static nng.Native.Basic.UnsafeNativeMethods;
     using static nng.Native.Ctx.UnsafeNativeMethods;
-    using static nng.Native.Msg.UnsafeNativeMethods;
-    using static nng.Native.Socket.UnsafeNativeMethods;
 
     public abstract class AsyncBase<T> : IAsyncContext
     {
@@ -61,7 +58,7 @@ namespace nng
         AioCallback aioCallback;
         // FIXME: TODO: callbacks still getting GC'd
         static List<AioCallback> callbacks = new List<AioCallback>();
-        
+
         #region IDisposable
         public void Dispose()
         {
@@ -118,7 +115,7 @@ namespace nng
         // {
         //     return nng_ctx_getopt_uint64(NngCtx, name, out data);
         // }
-        
+
         public int SetCtxOpt(string name, byte[] data)
         {
             return nng_ctx_setopt(NngCtx, name, data);

@@ -101,6 +101,25 @@ namespace nng.Tests
             Assert.Equal(newSize, nextSize);
         }
 
+        public static async Task<Exception> AssertThrowsNng(Func<Task> func, Defines.NngErrno errno)
+        {
+            try
+            {
+                await func();
+                Assert.True(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex is NngException nngException)
+                {
+                    Assert.Equal((int)errno, nngException.ErrorCode);
+                    return nngException;
+                }
+                return ex;
+            }
+            return null;
+        }
+
         public static readonly Random rng = new Random();
     }
 
@@ -158,12 +177,13 @@ namespace nng.Tests
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    class TransportsNoTcpWsClassData : IEnumerable<object[]>
+    class TransportsNoTcpClassData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
             yield return new object[] { Util.UrlIpc() };
             yield return new object[] { Util.UrlInproc() };
+            yield return new object[] { Util.UrlWs() };
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

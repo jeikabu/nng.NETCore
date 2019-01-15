@@ -6,9 +6,6 @@ using System.Threading.Tasks;
 namespace nng
 {
     using static nng.Native.Aio.UnsafeNativeMethods;
-    using static nng.Native.Basic.UnsafeNativeMethods;
-    using static nng.Native.Ctx.UnsafeNativeMethods;
-    using static nng.Native.Msg.UnsafeNativeMethods;
 
     struct AsyncSendMsg<T>
     {
@@ -89,7 +86,7 @@ namespace nng
         public async Task<T> Receive(CancellationToken token)
         {
             CheckState();
-            
+
             asyncMessage = new AsyncResvMsg<T>(token);
             // Trigger the async read
             callback(IntPtr.Zero);
@@ -105,7 +102,7 @@ namespace nng
                     State = AsyncState.Recv;
                     nng_recv_aio(Socket.NngSocket, aioHandle);
                     break;
-                
+
                 case AsyncState.Recv:
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
