@@ -64,13 +64,9 @@ namespace nng.Tests
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
-        public async Task PubSub(string url)
+        public Task PubSub(string url)
         {
-            // FAILS
-            for (int i = 0; i < Fixture.Iterations; ++i)
-            {
-                await DoPubSub(url);
-            }
+            return Fixture.TestIterate(() => DoPubSub(url));
         }
 
         Task DoPubSub(string url)
@@ -126,12 +122,12 @@ namespace nng.Tests
         }
     }
 
-    
+
     class PubSubBrokerImpl : IBrokerImpl<IMessage>
     {
         public IAPIFactory<IMessage> Factory { get; private set; }
 
-        public PubSubBrokerImpl(IAPIFactory<IMessage>  factory)
+        public PubSubBrokerImpl(IAPIFactory<IMessage> factory)
         {
             Factory = factory;
             topic = TopicRandom();

@@ -22,7 +22,23 @@ namespace nng.Tests
 
         public IAPIFactory<IMessage> Factory { get; private set; }
 
-        public int Iterations => 10; 
+        int Iterations { get; } = 10;
+
+        public void TestIterate(Action testFunction)
+        {
+            for (int i = 0; i < Iterations; ++i)
+            {
+                testFunction();
+            }
+        }
+
+        public async Task TestIterate(Func<Task> testFunction)
+        {
+            for (int i = 0; i < Iterations; ++i)
+            {
+                await testFunction();
+            }
+        }
     }
 
     [CollectionDefinition("nng")]

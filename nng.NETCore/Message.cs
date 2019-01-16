@@ -40,10 +40,7 @@ namespace nng
         public Message(uint messageBytes = 0)
         {
             int res = nng_msg_alloc(out message, messageBytes);
-            if (res != 0)
-            {
-                throw new NngException(res);
-            }
+            NngException.AssertZero(res);
             _header = new NngMessageHeader(message);
         }
 

@@ -37,7 +37,18 @@ namespace nng
         /// </summary>
         public Task<T> Task { get; private set; }
 
-        public TaskCompletionSource<T> Tcs { get; private set; }
+        TaskCompletionSource<T> Tcs { get; set; }
+
+        public bool TrySetResult(T result)
+        {
+            // Using the TrySet functions won't throw exceptions if TrySet has already been called (e.g. cancelled via CancellationToken)
+            return Tcs.TrySetResult(result);
+        }
+
+        public bool TrySetException(Exception exception)
+        {
+            return Tcs.TrySetException(exception);
+        }
 
         /// <summary>
         /// Disposes the cancellation token registration, if any. Note that this may cause <see cref="Task"/> to never complete.

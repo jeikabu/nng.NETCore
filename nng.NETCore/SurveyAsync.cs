@@ -53,7 +53,7 @@ namespace nng
             return receiveTcs.Task;
         }
 
-        internal void callback(IntPtr arg)
+        protected override void AioCallback(IntPtr argument)
         {
             var res = 0;
             switch (State)
@@ -79,13 +79,13 @@ namespace nng
                     if (res != 0)
                     {
                         State = AsyncState.Init;
-                        receiveTcs.Tcs.TrySetNngError(res);
+                        receiveTcs.TrySetNngError(res);
                         return;
                     }
                     State = AsyncState.Init;
                     nng_msg msg = nng_aio_get_msg(aioHandle);
                     var message = Factory.CreateMessage(msg);
-                    receiveTcs.Tcs.SetResult(message);
+                    receiveTcs.TrySetResult(message);
                     break;
 
                 default:

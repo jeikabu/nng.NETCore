@@ -25,7 +25,7 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task Basic(string url)
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
+            Fixture.TestIterate(() =>
             {
                 using (var bus0 = Factory.SurveyorCreate(url, true).Unwrap())
                 using (var bus1 = Factory.RespondentCreate(url, false).Unwrap())
@@ -42,17 +42,14 @@ namespace nng.Tests
 
                     }
                 }
-            }
+            });
         }
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
         public async Task SurveyorFail(string url)
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
-            {
-                await DoSurveyorFail(url);
-            }
+            await Fixture.TestIterate(() => DoSurveyorFail(url));
         }
 
         async Task DoSurveyorFail(string url)
@@ -81,10 +78,7 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task RespondentFail(string url)
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
-            {
-                await DoRespondentFail(url);
-            }
+            await Fixture.TestIterate(() => DoRespondentFail(url));
         }
 
         async Task DoRespondentFail(string url)
@@ -104,10 +98,7 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task Advanced(string url)
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
-            {
-                await DoAdvanced(url);
-            }
+            await Fixture.TestIterate(() => DoAdvanced(url));
         }
 
         async Task DoAdvanced(string url)

@@ -68,13 +68,13 @@ namespace nng.Tests
         public NngResult<ISendAsyncContext<IMessage>> CreateSendAsyncContext(ISocket socket)
         {
             var ctx = new SendAsyncContext<IMessage>();
-            ctx.Init(this, socket, ctx.callback);
+            ctx.Init(this, socket);
             return NngResult<ISendAsyncContext<IMessage>>.Ok(ctx);
         }
         public NngResult<IReceiveAsyncContext<IMessage>> CreateReceiveAsyncContext(ISocket socket)
         {
             var ctx = new ResvAsyncContext<IMessage>();
-            ctx.Init(this, socket, ctx.callback);
+            ctx.Init(this, socket);
             return NngResult<IReceiveAsyncContext<IMessage>>.Ok(ctx);
         }
         public NngResult<ISendReceiveAsyncContext<IMessage>> CreateSendReceiveAsyncContext(ISocket socket, SendReceiveContextSubtype subtype)
@@ -86,7 +86,7 @@ namespace nng.Tests
                 case SendReceiveContextSubtype.Pair:
                     {
                         var ctx = new SendReceiveAsyncContext<IMessage>();
-                        ctx.Init(this, socket, ctx.callback);
+                        ctx.Init(this, socket);
                         res = ctx;
                     }
 
@@ -94,7 +94,7 @@ namespace nng.Tests
                 case SendReceiveContextSubtype.Survey:
                     {
                         var ctx = new SurveyAsyncContext<IMessage>();
-                        ctx.Init(this, socket, ctx.callback);
+                        ctx.Init(this, socket);
                         res = ctx;
                     }
                     break;
@@ -107,14 +107,14 @@ namespace nng.Tests
         public NngResult<ISubAsyncContext<IMessage>> CreateSubAsyncContext(ISocket socket)
         {
             var ctx = new SubAsyncContext<IMessage>();
-            ctx.Init(this, socket, ctx.callback);
+            ctx.Init(this, socket);
             return NngResult<ISubAsyncContext<IMessage>>.Ok(ctx);
         }
 
         public NngResult<IReqRepAsyncContext<IMessage>> CreateReqRepAsyncContext(ISocket socket)
         {
             var ctx = new ReqAsyncCtx<IMessage>();
-            ctx.Init(this, socket, ctx.callback);
+            ctx.Init(this, socket);
             return NngResult<IReqRepAsyncContext<IMessage>>.Ok(ctx);
         }
 

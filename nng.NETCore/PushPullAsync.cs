@@ -39,11 +39,11 @@ namespace nng
             CheckState();
 
             asyncMessage = new AsyncSendMsg<T>(message);
-            callback(IntPtr.Zero);
+            AioCallback(IntPtr.Zero);
             return asyncMessage.tcs.Task;
         }
 
-        internal void callback(IntPtr arg)
+        protected override void AioCallback(IntPtr argument)
         {
             var res = 0;
             switch (State)
@@ -89,11 +89,11 @@ namespace nng
 
             asyncMessage = new AsyncResvMsg<T>(token);
             // Trigger the async read
-            callback(IntPtr.Zero);
+            AioCallback(IntPtr.Zero);
             return await asyncMessage.Source.Task;
         }
 
-        internal void callback(IntPtr arg)
+        protected override void AioCallback(IntPtr argument)
         {
             var res = 0;
             switch (State)
@@ -108,17 +108,17 @@ namespace nng
                     if (res != 0)
                     {
                         State = AsyncState.Init;
-                        asyncMessage.Source.Tcs.TrySetNngError(res);
+                        asyncMessage.Source.TrySetNngError(res);
                         return;
                     }
                     State = AsyncState.Init;
                     nng_msg msg = nng_aio_get_msg(aioHandle);
                     var message = Factory.CreateMessage(msg);
-                    asyncMessage.Source.Tcs.SetResult(message);
+                    asyncMessage.Source.TrySetResult(message);
                     break;
 
                 default:
-                    asyncMessage.Source.Tcs.SetException(new Exception(State.ToString()));
+                    asyncMessage.Source.TrySetException(new Exception(State.ToString()));
                     break;
             }
         }

@@ -154,7 +154,12 @@ namespace nng
         /// <returns></returns>
         public NngErrno Err() => result.Err();
 
-        public TOk Unwrap() => result.Unwrap();
+        public TOk Unwrap()
+        {
+            if (result.IsOk())
+                return Ok();
+            throw new NngException(Err());
+        }
 
         public void Deconstruct(out bool isOk, out NngErrno errorValue, out TOk okValue) => result.Deconstruct(out isOk, out errorValue, out okValue);
     }

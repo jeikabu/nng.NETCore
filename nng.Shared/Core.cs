@@ -3,6 +3,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+using static nng.Native.Defines;
+
 namespace nng
 {
     public class NngException : Exception
@@ -14,11 +16,29 @@ namespace nng
         public NngException(int errorCode)
         {
             ErrorCode = errorCode;
+            try
+            {
+                Error = (NngErrno)ErrorCode;
+            }
+            catch
+            { }
+        }
+        public NngException(NngErrno error)
+            : base(error.ToString())
+        {
+            ErrorCode = (int)error;
+        }
+
+        public static void AssertZero(int errorCode)
+        {
+            if (errorCode != 0)
+                throw new NngException(errorCode);
         }
 
         public override string Message => string.Empty;//nng_strerror(error);
 
         public int ErrorCode { get; } = 0;
+        public NngErrno Error { get; }
     }
 
     /// <summary>
@@ -94,6 +114,14 @@ namespace nng
     public static class Extensions
     {
         public static void TrySetNngError<T>(this TaskCompletionSource<T> socket, int error)
+        {
+            if (error == 0)
+            {
+                return;
+            }
+            socket.TrySetException(new NngException(error));
+        }
+        public static void TrySetNngError<T>(this CancellationTokenTaskSource<T> socket, int error)
         {
             if (error == 0)
             {

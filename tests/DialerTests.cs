@@ -23,9 +23,9 @@ namespace nng.Tests
         }
 
         [Fact]
-        public async Task Basic()
+        public void Basic()
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
+            Fixture.TestIterate(() =>
             {
                 var url = UrlIpc();
                 using (var pub = Factory.PublisherCreate(url).Unwrap())
@@ -37,7 +37,7 @@ namespace nng.Tests
                         Assert.Equal(0, dialer.Start());
                     }
                 }
-            }
+            });
         }
     }
 }

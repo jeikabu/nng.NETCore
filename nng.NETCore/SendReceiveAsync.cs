@@ -11,27 +11,33 @@ namespace nng
     {
         public Task<bool> Send(T message)
         {
-            CheckState();
+            lock (sync)
+            {
+                CheckState();
 
-            sendTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            sendMessage = message;
-            State = AsyncState.Send;
-            nng_aio_set_msg(aioHandle, Factory.Borrow(sendMessage));
-            nng_send_aio(Socket.NngSocket, aioHandle);
-            return sendTcs.Task;
+                sendTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                sendMessage = message;
+                State = AsyncState.Send;
+                nng_aio_set_msg(aioHandle, Factory.Borrow(sendMessage));
+                nng_send_aio(Socket.NngSocket, aioHandle);
+                return sendTcs.Task;
+            }
         }
 
         public Task<T> Receive(CancellationToken token)
         {
-            CheckState();
+            lock (sync)
+            {
+                CheckState();
 
-            receiveTcs = new CancellationTokenTaskSource<T>(token);
-            State = AsyncState.Recv;
-            nng_recv_aio(Socket.NngSocket, aioHandle);
-            return receiveTcs.Task;
+                receiveTcs = new CancellationTokenTaskSource<T>(token);
+                State = AsyncState.Recv;
+                nng_recv_aio(Socket.NngSocket, aioHandle);
+                return receiveTcs.Task;
+            }
         }
 
-        internal void callback(IntPtr arg)
+        protected override void AioCallback(IntPtr argument)
         {
             var res = 0;
             switch (State)
@@ -49,7 +55,7 @@ namespace nng
                         return;
                     }
                     State = AsyncState.Init;
-                    sendTcs.SetResult(true);
+                    sendTcs.TrySetResult(true);
                     break;
 
                 case AsyncState.Recv:
@@ -57,13 +63,13 @@ namespace nng
                     if (res != 0)
                     {
                         State = AsyncState.Init;
-                        receiveTcs.Tcs.TrySetNngError(res);
+                        receiveTcs.TrySetNngError(res);
                         return;
                     }
                     State = AsyncState.Init;
                     nng_msg msg = nng_aio_get_msg(aioHandle);
                     var message = Factory.CreateMessage(msg);
-                    receiveTcs.Tcs.SetResult(message);
+                    receiveTcs.TrySetResult(message);
                     break;
 
                 default:

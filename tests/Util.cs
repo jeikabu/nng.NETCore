@@ -22,8 +22,8 @@ namespace nng.Tests
 
         public static string UrlIpc() => "ipc://" + Guid.NewGuid().ToString();
         public static string UrlInproc() => "inproc://" + Guid.NewGuid().ToString();
-        public static string UrlTcp() => "tcp://localhost:" + rng.Next(1000, 60000);
-        public static string UrlWs() => "ws://localhost:" + rng.Next(1000, 60000);
+        public static string UrlTcp() => "tcp://localhost:" + rng.Next(1025, 65535);
+        public static string UrlWs() => "ws://localhost:" + rng.Next(1025, 65535) + "/" + rng.Next();
 
         public static byte[] TopicRandom() => Guid.NewGuid().ToByteArray();
 
@@ -36,7 +36,7 @@ namespace nng.Tests
             Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
         }
 
-        public static async Task CancelAndWait(CancellationTokenSource cts, int timeoutMs, params Task[] tasks)
+        public static async Task CancelAndWait(CancellationTokenSource cts, int timeoutMs, IEnumerable<Task> tasks)
         {
             cts.Cancel();
             try
@@ -48,6 +48,32 @@ namespace nng.Tests
                 if (ex is TaskCanceledException)
                 {
                     // ok
+                }
+                else
+                {
+                    throw ex;
+                }
+            }
+        }
+
+        public static Task CancelAfterAndWait(CancellationTokenSource cts, int timeoutMs, params Task[] tasks)
+        {
+            return CancelAfterAndWait(tasks, cts, timeoutMs);
+        }
+
+        public static async Task CancelAfterAndWait(IEnumerable<Task> tasks, CancellationTokenSource cts, int timeoutMs)
+        {
+            cts.CancelAfter(timeoutMs);
+            try
+            {
+                var timeout = Task.Delay(timeoutMs + 10);
+                Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
+            }
+            catch (Exception ex)
+            {
+                if (ex is TaskCanceledException)
+                {
+                    // Timedout
                 }
                 else
                 {

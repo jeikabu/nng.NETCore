@@ -34,7 +34,7 @@ namespace nng
             nng_aio_cancel(aioHandle);
         }
 
-        internal int Init(IMessageFactory<T> factory, ISocket socket, Action<IntPtr> callback)
+        internal int Init(IMessageFactory<T> factory, ISocket socket)
         {
             Factory = factory;
             Socket = socket;
@@ -47,6 +47,22 @@ namespace nng
             return nng_aio_alloc(out aioHandle, aioCallback, IntPtr.Zero);
         }
 
+        protected abstract void AioCallback(IntPtr argument);
+        void callback(IntPtr argument)
+        {
+            try
+            {
+                lock (sync)
+                {
+                    AioCallback(argument);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex.ToString());
+            }
+        }
+
         protected void CheckState()
         {
             if (State != AsyncState.Init)
@@ -55,6 +71,8 @@ namespace nng
             }
         }
 
+        // Synchronization object used for aio callbacks
+        protected object sync = new object();
         AioCallback aioCallback;
         // FIXME: TODO: callbacks still getting GC'd
         static List<AioCallback> callbacks = new List<AioCallback>();
@@ -145,9 +163,9 @@ namespace nng
         //     return nng_ctx_setopt_uint64(NngCtx, name, data);
         // }
 
-        internal new int Init(IMessageFactory<T> factory, ISocket socket, Action<IntPtr> callback)
+        internal new int Init(IMessageFactory<T> factory, ISocket socket)
         {
-            var res = base.Init(factory, socket, callback);
+            var res = base.Init(factory, socket);
             if (res != 0)
             {
                 return res;

@@ -23,12 +23,9 @@ namespace nng.Tests
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
-        public async Task Pair(string url)
+        public Task Pair(string url)
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
-            {
-                await DoPair(url);
-            }
+            return Fixture.TestIterate(() => DoPair(url));
         }
 
         Task DoPair(string url)
@@ -56,5 +53,83 @@ namespace nng.Tests
             return Task.WhenAll(pull, push);
         }
 
+        [Theory]
+        [ClassData(typeof(TransportsNoWsClassData))]
+        public Task PairShared(string url)
+        {
+            // FIXME: stress-testing this fails with an exception
+            //return Fixture.TestIterate(() => DoPairShared(url));
+            return DoPairShared(url);
+        }
+
+        async Task DoPairShared(string url)
+        {
+            int numListeners = 2;
+            int numDialers = 2;
+
+            var listenerReady = new AsyncBarrier(numListeners + 1);
+            var dialerReady = new AsyncBarrier(numListeners + numDialers);
+            var cts = new CancellationTokenSource();
+
+            using (var listenSocket = Factory.PairCreate(url, true).Unwrap())
+            using (var dialerSocket = Factory.PairCreate(url, false).Unwrap())
+            {
+                var tasks = new List<Task>();
+
+                // On listening socket create send/receive AIO
+                {
+                    var task = Task.Run(async () =>
+                    {
+                        var ctx = listenSocket.CreateAsyncContext(Factory).Unwrap();
+                        await listenerReady.SignalAndWait();
+                        await dialerReady.SignalAndWait();
+                        while (!cts.IsCancellationRequested)
+                        {
+                            var msg = await ctx.Receive(cts.Token);
+                        }
+                    });
+                    tasks.Add(task);
+                    task = Task.Run(async () =>
+                    {
+                        var ctx = listenSocket.CreateAsyncContext(Factory).Unwrap();
+                        await listenerReady.SignalAndWait();
+                        await dialerReady.SignalAndWait();
+                        while (!cts.IsCancellationRequested)
+                        {
+                            var _ = await ctx.Send(Factory.CreateMessage());
+                        }
+                    });
+                    tasks.Add(task);
+                }
+
+                await listenerReady.SignalAndWait();
+
+                // On dialing socket create send/receive AIO
+                {
+                    var task = Task.Run(async () =>
+                    {
+                        var ctx = dialerSocket.CreateAsyncContext(Factory).Unwrap();
+                        await dialerReady.SignalAndWait();
+                        while (!cts.IsCancellationRequested)
+                        {
+                            var msg = await ctx.Receive(cts.Token);
+                        }
+                    });
+                    tasks.Add(task);
+                    task = Task.Run(async () =>
+                    {
+                        var ctx = dialerSocket.CreateAsyncContext(Factory).Unwrap();
+                        await dialerReady.SignalAndWait();
+                        while (!cts.IsCancellationRequested)
+                        {
+                            var _ = await ctx.Send(Factory.CreateMessage());
+                        }
+                    });
+                    tasks.Add(task);
+                }
+
+                await Util.CancelAfterAndWait(tasks, cts, DefaultTimeoutMs);
+            }
+        }
     }
 }

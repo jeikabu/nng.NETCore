@@ -36,18 +36,16 @@ namespace nng.Tests
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
-        public async Task ReqRepTasks(string url)
+        public Task ReqRepTasks(string url)
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
-            {
-                await DoReqRep(url);
-            }
+            return Fixture.TestIterate(() => DoReqRep(url));
         }
 
         Task DoReqRep(string url)
         {
             var barrier = new AsyncBarrier(2);
-            var rep = Task.Run(async () => {
+            var rep = Task.Run(async () =>
+            {
                 using (var repAioCtx = Factory.ReplierCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await barrier.SignalAndWait();
@@ -57,7 +55,8 @@ namespace nng.Tests
                     await WaitShort();
                 }
             });
-            var req = Task.Run(async () => {
+            var req = Task.Run(async () =>
+            {
                 await barrier.SignalAndWait();
                 using (var reqAioCtx = Factory.RequesterCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
