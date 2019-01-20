@@ -57,9 +57,7 @@ namespace nng.Tests
         [ClassData(typeof(TransportsNoWsClassData))]
         public Task PairShared(string url)
         {
-            // FIXME: stress-testing this fails with an exception
-            //return Fixture.TestIterate(() => DoPairShared(url));
-            return DoPairShared(url);
+            return Fixture.TestIterate(() => DoPairShared(url));
         }
 
         async Task DoPairShared(string url)

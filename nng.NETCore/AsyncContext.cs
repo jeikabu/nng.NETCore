@@ -42,9 +42,14 @@ namespace nng
             // is still using it:
             // https://stackoverflow.com/questions/6193711/call-has-been-made-on-garbage-collected-delegate-in-c
             aioCallback = new AioCallback(callback);
-            // FIXME: TODO: callbacks still getting GC'd.  Maybe I need to move nng_aio_free() out of Dispose()?
-            callbacks.Add(aioCallback);
-            return nng_aio_alloc(out aioHandle, aioCallback, IntPtr.Zero);
+            var res = nng_aio_alloc(out aioHandle, aioCallback, IntPtr.Zero);
+            if (res == 0)
+            {
+                // FIXME: TODO: callbacks still getting GC'd.  Maybe I need to move nng_aio_free() out of Dispose()?
+                var added = callbacks.TryAdd(aioCallback, true);
+                System.Diagnostics.Debug.Assert(added);
+            }
+            return res;
         }
 
         protected abstract void AioCallback(IntPtr argument);
@@ -75,7 +80,7 @@ namespace nng
         protected object sync = new object();
         AioCallback aioCallback;
         // FIXME: TODO: callbacks still getting GC'd
-        static List<AioCallback> callbacks = new List<AioCallback>();
+        static ConcurrentDictionary<AioCallback, bool> callbacks = new ConcurrentDictionary<AioCallback, bool>();
 
         #region IDisposable
         public void Dispose()
@@ -92,6 +97,8 @@ namespace nng
             {
                 nng_aio_cancel(aioHandle);
                 nng_aio_free(aioHandle);
+                var removed = callbacks.TryRemove(aioCallback, out var _);
+                System.Diagnostics.Debug.Assert(removed);
                 Socket.Dispose();
             }
             disposed = true;
