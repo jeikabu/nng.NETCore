@@ -32,6 +32,18 @@ namespace nng
             Task = Tcs.Task;
         }
 
+        public CancellationTokenTaskSource(CancellationToken cancellationToken, TaskCreationOptions options)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                Task = System.Threading.Tasks.Task.FromCanceled<T>(cancellationToken);
+                return;
+            }
+            Tcs = new TaskCompletionSource<T>(options);
+            _registration = cancellationToken.Register(() => Tcs.TrySetCanceled(cancellationToken), useSynchronizationContext: false);
+            Task = Tcs.Task;
+        }
+
         /// <summary>
         /// Gets the task for the source cancellation token.
         /// </summary>

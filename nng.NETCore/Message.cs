@@ -50,6 +50,14 @@ namespace nng
             _header = new NngMessageHeader(message);
         }
 
+        public nng_msg Take()
+        {
+            var msg = message;
+            _header = null;
+            message = default;
+            return msg;
+        }
+
         public nng_msg NngMsg => message;
         public IMessagePart Header => _header;
         public IMessage Dup()
@@ -77,8 +85,8 @@ namespace nng
         public int Trim(out uint data) => nng_msg_trim_u32(NngMsg, out data);
         public Span<byte> AsSpan() => nng_msg_body_span(NngMsg);
 
-        readonly nng_msg message;
-        readonly NngMessageHeader _header;
+        nng_msg message;
+        NngMessageHeader _header;
         Pipe _pipe;
 
         #region IDisposable

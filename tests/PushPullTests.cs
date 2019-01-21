@@ -37,7 +37,7 @@ namespace nng.Tests
                 using (var pushSocket = Factory.PusherCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await barrier.SignalAndWait();
-                    Assert.True(await pushSocket.Send(Factory.CreateMessage()));
+                    (await pushSocket.Send(Factory.CreateMessage())).Unwrap();
                     await WaitShort();
                 }
             });
@@ -49,8 +49,7 @@ namespace nng.Tests
                     await pullSocket.Receive(cts.Token);
                 }
             });
-            cts.CancelAfter(DefaultTimeoutMs);
-            return Task.WhenAll(pull, push);
+            return CancelAfterAssertwait(cts, pull, push);
         }
 
         [Fact]
@@ -69,8 +68,8 @@ namespace nng.Tests
             var broker = new Broker(new PushPullBrokerImpl(Factory));
             var tasks = await broker.RunAsync(numPushers, numPullers, numMessagesPerPusher, counter, cts.Token);
 
-            await AssertWait(msTimeout, counter.WaitAsync());
-            await CancelAndWait(cts, msTimeout, tasks.ToArray());
+            await AssertWait(new[] { counter.WaitAsync() }, msTimeout);
+            await CancelAndWait(tasks, cts, msTimeout);
         }
     }
 

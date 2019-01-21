@@ -47,7 +47,7 @@ namespace nng.Tests
             pull.Cancel();
             // Cancel happens asynchronously.  Give callback a chance to happen
             await WaitReady();
-            await Assert.ThrowsAsync<NngException>(async () => await pullTask);
+            Assert.Equal((await pullTask).Err(), NngErrno.ECANCELED);
         }
 
         // [Fact]
@@ -71,10 +71,10 @@ namespace nng.Tests
         public async Task Timeout()
         {
             var (push, pull) = await CreatePusherAndPuller();
-            
+
             // Immediate timeout
             pull.SetTimeout(NNG_DURATION_ZERO);
-            await Assert.ThrowsAsync<NngException>(() => pull.Receive(CancellationToken.None));
+            Assert.Equal((await pull.Receive(CancellationToken.None)).Err(), NngErrno.ETIMEDOUT);
 
             // Infinite timeout
             pull.SetTimeout(NNG_DURATION_INFINITE);

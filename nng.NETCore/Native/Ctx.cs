@@ -12,7 +12,7 @@ namespace nng.Native.Ctx
     public sealed class UnsafeNativeMethods
     {
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_ctx_open(ref nng_ctx ctx, nng_socket socket);
+        public static extern Int32 nng_ctx_open(out nng_ctx ctx, nng_socket socket);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern Int32 nng_ctx_close(nng_ctx ctx);

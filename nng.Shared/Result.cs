@@ -5,6 +5,11 @@ using System.Runtime.CompilerServices;
 namespace nng
 {
     /// <summary>
+    /// Unit type containing now value.  Similar to `()` in F#, Rust, etc.
+    /// </summary>
+    public struct Unit { }
+
+    /// <summary>
     /// Result of an operation that succeeds with one value or fails with another.
     /// </summary>
     public struct Result<TOk, TErr>

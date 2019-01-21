@@ -89,8 +89,7 @@ namespace nng.Tests
                     messageReceipt.Signal();
                 }
             });
-            cts.CancelAfter(DefaultTimeoutMs);
-            await Task.WhenAll(bus0Task, bus1Task, bus2Task);
+            await CancelAfterAssertwait(cts, bus0Task, bus1Task, bus2Task);
             Assert.Equal(0, messageReceipt.Count);
         }
     }

@@ -18,6 +18,7 @@ namespace nng.Tests
     }
     static class Util
     {
+        public const int ShortTestMs = 100;
         public const int DefaultTimeoutMs = 1000;
 
         public static string UrlIpc() => "ipc://" + Guid.NewGuid().ToString();
@@ -30,18 +31,35 @@ namespace nng.Tests
         public static Task WaitReady() => Task.Delay(100);
         public static Task WaitShort() => Task.Delay(25);
 
-        public static async Task AssertWait(int timeoutMs, params Task[] tasks)
+        public static Task AssertWait(params Task[] tasks)
+        {
+            return AssertWait(tasks, DefaultTimeoutMs);
+        }
+
+        public static async Task AssertWait(IEnumerable<Task> tasks, int timeoutMs = DefaultTimeoutMs)
         {
             var timeout = Task.Delay(timeoutMs);
             Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
         }
 
-        public static async Task CancelAndWait(CancellationTokenSource cts, int timeoutMs, IEnumerable<Task> tasks)
+        public static Task CancelAfterAssertwait(CancellationTokenSource cts, params Task[] tasks)
+        {
+            return CancelAfterAssertwait(tasks, cts, DefaultTimeoutMs);
+        }
+
+        public static Task CancelAfterAssertwait(IEnumerable<Task> tasks, CancellationTokenSource cts, int timeoutMs = DefaultTimeoutMs)
+        {
+            cts.CancelAfter(timeoutMs);
+            return AssertWait(tasks, timeoutMs);
+        }
+
+        public static async Task CancelAndWait(IEnumerable<Task> tasks, CancellationTokenSource cts, int timeoutMs)
         {
             cts.Cancel();
             try
             {
-                await Task.WhenAny(Task.Delay(timeoutMs), Task.WhenAll(tasks));
+                var timeout = Task.Delay(timeoutMs);
+                Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
             }
             catch (Exception ex)
             {
@@ -63,10 +81,12 @@ namespace nng.Tests
 
         public static async Task CancelAfterAndWait(IEnumerable<Task> tasks, CancellationTokenSource cts, int timeoutMs)
         {
+            if (timeoutMs > DefaultTimeoutMs)
+                throw new ArgumentException();
             cts.CancelAfter(timeoutMs);
             try
             {
-                var timeout = Task.Delay(timeoutMs + 10);
+                var timeout = Task.Delay(DefaultTimeoutMs);
                 Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
             }
             catch (Exception ex)
@@ -92,7 +112,7 @@ namespace nng.Tests
             return BytesEqual(lhs.AsSpan(), rhs.AsSpan()) && BytesEqual(lhs.Header.AsSpan(), rhs.Header.AsSpan());
         }
 
-        public static void AssertGetSetOpts(IHasOpts options, string name)
+        public static void AssertGetSetOpts(IOptions options, string name)
         {
             Assert.Equal(0, options.GetOpt(name, out bool isSet));
             Assert.Equal(0, options.SetOpt(name, !isSet));
@@ -100,7 +120,7 @@ namespace nng.Tests
             Assert.NotEqual(isSet, isSetNow);
         }
 
-        public static void AssertGetSetOpts(IHasOpts options, string name, Func<int, int> newValueFunc)
+        public static void AssertGetSetOpts(IOptions options, string name, Func<int, int> newValueFunc)
         {
             Assert.Equal(0, options.GetOpt(name, out int data));
             var newData = newValueFunc(data);
@@ -109,7 +129,7 @@ namespace nng.Tests
             Assert.Equal(newData, nextData);
         }
 
-        public static void AssertGetSetOpts(IHasOpts options, string name, Func<nng_duration, nng_duration> newDataFunc)
+        public static void AssertGetSetOpts(IOptions options, string name, Func<nng_duration, nng_duration> newDataFunc)
         {
             Assert.Equal(0, options.GetOpt(name, out nng_duration data));
             var newData = newDataFunc(data);
@@ -118,7 +138,7 @@ namespace nng.Tests
             Assert.Equal(newData, nextData);
         }
 
-        public static void AssertGetSetOpts(IHasOpts options, string name, Func<UIntPtr, UIntPtr> newDataFunc)
+        public static void AssertGetSetOpts(IOptions options, string name, Func<UIntPtr, UIntPtr> newDataFunc)
         {
             Assert.Equal(0, options.GetOpt(name, out UIntPtr size));
             var newSize = newDataFunc(size);
@@ -179,8 +199,8 @@ namespace nng.Tests
     {
         public IEnumerator<object[]> GetEnumerator()
         {
-            yield return new object[] { Util.UrlIpc() };
             yield return new object[] { Util.UrlInproc() };
+            yield return new object[] { Util.UrlIpc() };
             yield return new object[] { Util.UrlTcp() };
             yield return new object[] { Util.UrlWs() };
         }

@@ -8,7 +8,7 @@ namespace nng
     /// <summary>
     /// Represents an nng socket
     /// </summary>
-    public interface ISocket : IHasOpts, IDisposable
+    public interface ISocket : IOptions, IDisposable
     {
         nng_socket NngSocket { get; }
 
@@ -19,26 +19,9 @@ namespace nng
         int SetOpt(string name, UInt64 data);
     }
 
-    /// <summary>
-    /// Represents options to get/set
-    /// </summary>
-    public interface IHasOpts
-    {
-        int GetOpt(string name, out bool data);
-        int GetOpt(string name, out int data);
-        int GetOpt(string name, out nng_duration data);
-        int GetOpt(string name, out UIntPtr data);
-
-        int SetOpt(string name, byte[] data);
-        int SetOpt(string name, bool data);
-        int SetOpt(string name, int data);
-        int SetOpt(string name, nng_duration data);
-        int SetOpt(string name, UIntPtr data);
-    }
-
     public static class OptionsExt
     {
-        public static int SetOpt<T>(this IHasOpts socket, string name, T data)
+        public static int SetOpt<T>(this ISetOptions socket, string name, T data)
         {
             switch (data)
             {
@@ -71,13 +54,13 @@ namespace nng
     /// <summary>
     /// Represents nng listener
     /// </summary>
-    public interface IListener : IStart, IHasOpts
+    public interface IListener : IStart, IOptions
     { }
 
     /// <summary>
     /// Represents nng dialer
     /// </summary>
-    public interface IDialer : IStart, IHasOpts
+    public interface IDialer : IStart, IOptions
     { }
 
     /// <summary>

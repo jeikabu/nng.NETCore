@@ -37,7 +37,7 @@ namespace nng.Tests
                 using (var socket = Factory.PairCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await barrier.SignalAndWait();
-                    Assert.True(await socket.Send(Factory.CreateMessage()));
+                    (await socket.Send(Factory.CreateMessage())).Unwrap();
                     await WaitShort();
                 }
             });
@@ -49,12 +49,11 @@ namespace nng.Tests
                     await socket.Receive(cts.Token);
                 }
             });
-            cts.CancelAfter(DefaultTimeoutMs);
-            return Task.WhenAll(pull, push);
+            return CancelAfterAssertwait(cts, pull, push);
         }
 
         [Theory]
-        [ClassData(typeof(TransportsNoWsClassData))]
+        [ClassData(typeof(TransportsClassData))]
         public Task PairShared(string url)
         {
             return Fixture.TestIterate(() => DoPairShared(url));
@@ -126,7 +125,7 @@ namespace nng.Tests
                     tasks.Add(task);
                 }
 
-                await Util.CancelAfterAndWait(tasks, cts, DefaultTimeoutMs);
+                await Util.CancelAfterAndWait(tasks, cts, ShortTestMs);
             }
         }
     }

@@ -7,40 +7,32 @@ namespace nng
 {
     using static nng.Native.Aio.UnsafeNativeMethods;
 
-    struct AsyncSendMsg<T>
-    {
-        public AsyncSendMsg(T message)
-        {
-            this.message = message;
-            tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        }
-        internal T message;
-        internal readonly TaskCompletionSource<bool> tcs;
-    }
-
-    struct AsyncResvMsg<T>
-    {
-        public AsyncResvMsg(CancellationToken token)
-        {
-            Source = new CancellationTokenTaskSource<T>(token);
-        }
-        public CancellationTokenTaskSource<T> Source;
-    }
-
     public class SendAsyncContext<T> : AsyncBase<T>, ISendAsyncContext<T>
     {
+        public static NngResult<ISendAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
+        {
+            var context = new SendAsyncContext<T> { Factory = factory, Socket = socket };
+            var res = context.InitAio();
+            return NngResult<ISendAsyncContext<T>>.OkIfZero(res, context);
+        }
+
         /// <summary>
         /// Send the specified message.
         /// </summary>
         /// <returns>The send.</returns>
         /// <param name="message">Message.</param>
-        public Task<bool> Send(T message)
+        public Task<NngResult<Unit>> Send(T message)
         {
-            CheckState();
+            lock (sync)
+            {
+                CheckState();
 
-            asyncMessage = new AsyncSendMsg<T>(message);
-            AioCallback(IntPtr.Zero);
-            return asyncMessage.tcs.Task;
+                tcs = Extensions.CreateSendResultSource();
+                State = AsyncState.Send;
+                nng_aio_set_msg(aioHandle, Factory.Take(ref message));
+                nng_send_aio(Socket.NngSocket, aioHandle);
+                return tcs.Task;
+            }
         }
 
         protected override void AioCallback(IntPtr argument)
@@ -48,49 +40,53 @@ namespace nng
             var res = 0;
             switch (State)
             {
-                case AsyncState.Init:
-                    State = AsyncState.Send;
-                    nng_aio_set_msg(aioHandle, Factory.Borrow(asyncMessage.message));
-                    nng_send_aio(Socket.NngSocket, aioHandle);
-                    break;
-
                 case AsyncState.Send:
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
                     {
+                        HandleFailedSend();
                         State = AsyncState.Init;
-                        Factory.Destroy(ref asyncMessage.message);
-                        asyncMessage.tcs.TrySetNngError(res);
+                        tcs.TrySetNngError(res);
                         return;
                     }
                     State = AsyncState.Init;
-                    asyncMessage.tcs.SetResult(true);
+                    tcs.SetNngResult();
                     break;
+                case AsyncState.Init:
                 default:
-                    asyncMessage.tcs.SetException(new Exception(State.ToString()));
+                    tcs.SetException(new Exception(State.ToString()));
                     break;
             }
         }
 
-        AsyncSendMsg<T> asyncMessage;
+        TaskCompletionSource<NngResult<Unit>> tcs;
     }
-
 
     public class ResvAsyncContext<T> : AsyncBase<T>, IReceiveAsyncContext<T>
     {
+        public static NngResult<IReceiveAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
+        {
+            var context = new ResvAsyncContext<T> { Factory = factory, Socket = socket };
+            var res = context.InitAio();
+            return NngResult<IReceiveAsyncContext<T>>.OkIfZero(res, context);
+        }
+
         /// <summary>
         /// Receive a message.
         /// </summary>
         /// <returns>The receive.</returns>
         /// <param name="token">Token.</param>
-        public async Task<T> Receive(CancellationToken token)
+        public Task<NngResult<T>> Receive(CancellationToken token)
         {
-            CheckState();
+            lock (sync)
+            {
+                CheckState();
 
-            asyncMessage = new AsyncResvMsg<T>(token);
-            // Trigger the async read
-            AioCallback(IntPtr.Zero);
-            return await asyncMessage.Source.Task;
+                tcs = Extensions.CreateReceiveSource<T>(token);
+                State = AsyncState.Recv;
+                nng_recv_aio(Socket.NngSocket, aioHandle);
+                return tcs.Task;
+            }
         }
 
         protected override void AioCallback(IntPtr argument)
@@ -98,31 +94,27 @@ namespace nng
             var res = 0;
             switch (State)
             {
-                case AsyncState.Init:
-                    State = AsyncState.Recv;
-                    nng_recv_aio(Socket.NngSocket, aioHandle);
-                    break;
-
                 case AsyncState.Recv:
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
                     {
                         State = AsyncState.Init;
-                        asyncMessage.Source.TrySetNngError(res);
+                        tcs.TrySetNngError(res);
                         return;
                     }
                     State = AsyncState.Init;
                     nng_msg msg = nng_aio_get_msg(aioHandle);
                     var message = Factory.CreateMessage(msg);
-                    asyncMessage.Source.TrySetResult(message);
+                    tcs.TrySetResult(NngResult<T>.Ok(message));
                     break;
 
+                case AsyncState.Init:
                 default:
-                    asyncMessage.Source.TrySetException(new Exception(State.ToString()));
+                    tcs.TrySetException(new Exception(State.ToString()));
                     break;
             }
         }
 
-        AsyncResvMsg<T> asyncMessage;
+        CancellationTokenTaskSource<NngResult<T>> tcs;
     }
 }

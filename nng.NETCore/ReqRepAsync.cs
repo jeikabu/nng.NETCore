@@ -8,31 +8,45 @@ namespace nng
     using static nng.Native.Aio.UnsafeNativeMethods;
     using static nng.Native.Ctx.UnsafeNativeMethods;
 
-    struct AsyncReqRespMsg<T>
+    public class ReqAsyncCtx<T> : AsyncBase<T>, IReqRepAsyncContext<T>, ICtx
     {
-        public AsyncReqRespMsg(T message)
-        {
-            this.message = message;
-            tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-        }
-        internal T message;
-        internal readonly TaskCompletionSource<T> tcs;
-    }
+        public INngCtx Ctx { get; protected set; }
 
-    public class ReqAsyncCtx<T> : AsyncCtx<T>, IReqRepAsyncContext<T>
-    {
+        public static NngResult<IReqRepAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
+        {
+            var context = new ReqAsyncCtx<T> { Factory = factory, Socket = socket };
+            var res = context.InitAio();
+            if (res == 0)
+            {
+                //TODO: when get default interface methods in C#8 move this to ICtx
+                var ctx = AsyncCtx.Create(socket);
+                if (ctx.IsOk())
+                {
+                    context.Ctx = ctx.Ok();
+                    return NngResult<IReqRepAsyncContext<T>>.Ok(context);
+                }
+                return NngResult<IReqRepAsyncContext<T>>.Err(ctx.Err());
+            }
+            return NngResult<IReqRepAsyncContext<T>>.Fail(res);
+        }
+
         /// <summary>
         /// Send the specified message.
         /// </summary>
         /// <returns>The send.</returns>
         /// <param name="message">Message.</param>
-        public Task<T> Send(T message)
+        public Task<NngResult<T>> Send(T message)
         {
-            CheckState();
-            asyncMessage = new AsyncReqRespMsg<T>(message);
-            // Trigger the async send
-            AioCallback(IntPtr.Zero);
-            return asyncMessage.tcs.Task;
+            lock (sync)
+            {
+                CheckState();
+
+                State = AsyncState.Send;
+                tcs = Extensions.CreateSource<T>();
+                nng_aio_set_msg(aioHandle, Factory.Take(ref message));
+                nng_ctx_send(Ctx.NngCtx, aioHandle);
+                return tcs.Task;
+            }
         }
 
         protected override void AioCallback(IntPtr argument)
@@ -40,75 +54,81 @@ namespace nng
             var res = 0;
             switch (State)
             {
-                case AsyncState.Init:
-                    State = AsyncState.Send;
-                    nng_aio_set_msg(aioHandle, Factory.Borrow(asyncMessage.message));
-                    nng_ctx_send(ctxHandle, aioHandle);
-                    break;
-
                 case AsyncState.Send:
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
                     {
-                        Factory.Destroy(ref asyncMessage.message);
-                        asyncMessage.tcs.TrySetNngError(res);
+                        HandleFailedSend();
                         State = AsyncState.Init;
+                        tcs.TrySetNngError(res);
                         return;
                     }
                     State = AsyncState.Recv;
-                    nng_ctx_recv(ctxHandle, aioHandle);
+                    nng_ctx_recv(Ctx.NngCtx, aioHandle);
                     break;
                 case AsyncState.Recv:
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
                     {
-                        asyncMessage.tcs.TrySetNngError(res);
                         State = AsyncState.Init;
+                        tcs.TrySetNngError(res);
                         return;
                     }
                     nng_msg msg = nng_aio_get_msg(aioHandle);
                     var message = Factory.CreateMessage(msg);
-                    asyncMessage.tcs.SetResult(message);
                     State = AsyncState.Init;
+                    tcs.SetNngResult(message);
+                    break;
+                case AsyncState.Init:
+                default:
+                    tcs.SetException(new Exception(State.ToString()));
                     break;
             }
         }
 
-        AsyncReqRespMsg<T> asyncMessage;
+        TaskCompletionSource<NngResult<T>> tcs;
     }
 
     class Request<T>
     {
-        public T response;
-        public readonly TaskCompletionSource<T> requestTcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
-        public readonly TaskCompletionSource<bool> replyTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        public readonly TaskCompletionSource<NngResult<T>> requestTcs = Extensions.CreateSource<T>();
+        public readonly TaskCompletionSource<NngResult<Unit>> replyTcs = Extensions.CreateSendResultSource();
     }
 
-    public class RepAsyncCtx<T> : AsyncCtx<T>, IRepReqAsyncContext<T>
+    public class RepAsyncCtx<T> : AsyncBase<T>, IRepReqAsyncContext<T>, ICtx
     {
         public static NngResult<IRepReqAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
         {
-            var ctx = new RepAsyncCtx<T>();
-            var res = ctx.Init(factory, socket);
+            var context = new RepAsyncCtx<T> { Factory = factory, Socket = socket };
+            var res = context.InitAio();
             if (res == 0)
             {
-                // Start receive loop
-                ctx.AioCallback(IntPtr.Zero);
-                return NngResult<IRepReqAsyncContext<T>>.Ok(ctx);
+                //TODO: when get default interface methods in C#8 move this to ICtx
+                var ctx = AsyncCtx.Create(socket);
+                if (ctx.IsOk())
+                {
+                    context.Ctx = ctx.Ok();
+                    // Start receive loop
+                    context.AioCallback(IntPtr.Zero);
+                    return NngResult<IRepReqAsyncContext<T>>.Ok(context);
+                }
+                return NngResult<IRepReqAsyncContext<T>>.Err(ctx.Err());
             }
-            else
-            {
-                return NngResult<IRepReqAsyncContext<T>>.Fail(res);
-            }
+            return NngResult<IRepReqAsyncContext<T>>.Fail(res);
         }
+
+        public INngCtx Ctx { get; protected set; }
 
         /// <summary>
         /// Receive a message.
         /// </summary>
         /// <returns>The receive.</returns>
-        public Task<T> Receive()
+        public Task<NngResult<T>> Receive()
         {
-            return asyncMessage.requestTcs.Task;
+            lock (sync)
+            {
+                return asyncMessage.requestTcs.Task;
+            }
         }
 
         /// <summary>
@@ -116,16 +136,19 @@ namespace nng
         /// </summary>
         /// <returns>The reply.</returns>
         /// <param name="message">Message.</param>
-        public Task<bool> Reply(T message)
+        public Task<NngResult<Unit>> Reply(T message)
         {
-            System.Diagnostics.Debug.Assert(State == AsyncState.Wait);
-            asyncMessage.response = message;
-            // Save response TCS here to avoid race where send completes and asyncMessage replaced before we 
-            // can return it
-            var ret = asyncMessage.replyTcs.Task;
-            // Move from wait to send state
-            AioCallback(IntPtr.Zero);
-            return ret;
+            lock (sync)
+            {
+                System.Diagnostics.Debug.Assert(State == AsyncState.Wait);
+                State = AsyncState.Send;
+                // Save response TCS here to avoid race where send completes and asyncMessage replaced before we 
+                // can return it
+                var ret = asyncMessage.replyTcs.Task;
+                nng_aio_set_msg(aioHandle, Factory.Take(ref message));
+                nng_ctx_send(Ctx.NngCtx, aioHandle);
+                return ret;
+            }
         }
 
         protected override void AioCallback(IntPtr argument)
@@ -147,24 +170,20 @@ namespace nng
                     State = AsyncState.Wait;
                     nng_msg msg = nng_aio_get_msg(aioHandle);
                     var message = Factory.CreateMessage(msg);
-                    asyncMessage.requestTcs.SetResult(message);
+                    asyncMessage.requestTcs.SetNngResult(message);
                     break;
                 case AsyncState.Wait:
-                    nng_aio_set_msg(aioHandle, Factory.Borrow(asyncMessage.response));
-                    State = AsyncState.Send;
-                    nng_ctx_send(ctxHandle, aioHandle);
                     break;
                 case AsyncState.Send:
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
                     {
-                        Console.WriteLine("CB: send failed");
-                        Factory.Destroy(ref asyncMessage.response);
+                        HandleFailedSend();
                         asyncMessage.replyTcs.TrySetNngError(res);
                     }
                     var currentReq = asyncMessage;
                     init();
-                    currentReq.replyTcs.SetResult(true);
+                    currentReq.replyTcs.SetNngResult();
                     break;
             }
         }
@@ -173,7 +192,7 @@ namespace nng
         {
             asyncMessage = new Request<T>();
             State = AsyncState.Recv;
-            nng_ctx_recv(ctxHandle, aioHandle);
+            nng_ctx_recv(Ctx.NngCtx, aioHandle);
         }
 
         private RepAsyncCtx() { }

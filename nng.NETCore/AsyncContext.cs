@@ -9,11 +9,12 @@ namespace nng
 {
     using static nng.Native.Aio.UnsafeNativeMethods;
     using static nng.Native.Ctx.UnsafeNativeMethods;
+    using static nng.Native.Msg.UnsafeNativeMethods;
 
     public abstract class AsyncBase<T> : IAsyncContext
     {
-        public IMessageFactory<T> Factory { get; private set; }
-        public ISocket Socket { get; private set; }
+        public IMessageFactory<T> Factory { get; protected set; }
+        public ISocket Socket { get; protected set; }
 
         protected nng_aio aioHandle = nng_aio.Null;
         protected enum AsyncState
@@ -34,10 +35,8 @@ namespace nng
             nng_aio_cancel(aioHandle);
         }
 
-        internal int Init(IMessageFactory<T> factory, ISocket socket)
+        protected int InitAio()
         {
-            Factory = factory;
-            Socket = socket;
             // Make a copy to ensure an auto-matically created delegate doesn't get GC'd while native code 
             // is still using it:
             // https://stackoverflow.com/questions/6193711/call-has-been-made-on-garbage-collected-delegate-in-c
@@ -76,6 +75,12 @@ namespace nng
             }
         }
 
+        protected void HandleFailedSend()
+        {
+            var unsentMsg = nng_aio_get_msg(aioHandle);
+            nng_msg_free(unsentMsg);
+        }
+
         // Synchronization object used for aio callbacks
         protected object sync = new object();
         AioCallback aioCallback;
@@ -107,91 +112,95 @@ namespace nng
         #endregion
     }
 
-    public abstract class AsyncCtx<T> : AsyncBase<T>, ICtx
+    public class AsyncCtx : INngCtx, IDisposable
     {
-        public nng_ctx NngCtx { get { return ctxHandle; } }
-        protected nng_ctx ctxHandle;
+        public nng_ctx NngCtx { get; protected set; }
 
-        // public int GetCtxOpt(string name, out Span<byte> data)
+        public static NngResult<INngCtx> Create(ISocket socket)
+        {
+            var res = nng_ctx_open(out var ctx, socket.NngSocket);
+            if (res != 0)
+                return NngResult<INngCtx>.Fail(res);
+            return NngResult<INngCtx>.Ok(new AsyncCtx { NngCtx = ctx });
+        }
+        private AsyncCtx() { }
+
+        // public int GetOpt(string name, out Span<byte> data)
         // {
         //     return nng_ctx_getopt(NngCtx, name, out data);
         // }
-        public int GetCtxOpt(string name, out bool data)
+        public int GetOpt(string name, out bool data)
         {
             return nng_ctx_getopt_bool(NngCtx, name, out data);
         }
-        public int GetCtxOpt(string name, out int data)
+        public int GetOpt(string name, out int data)
         {
             return nng_ctx_getopt_int(NngCtx, name, out data);
         }
-        public int GetCtxOpt(string name, out nng_duration data)
+        public int GetOpt(string name, out nng_duration data)
         {
             return nng_ctx_getopt_ms(NngCtx, name, out data);
         }
-        public int GetCtxOpt(string name, out UIntPtr data)
+        public int GetOpt(string name, out UIntPtr data)
         {
             return nng_ctx_getopt_size(NngCtx, name, out data);
         }
-        // public int GetCtxOpt(string name, out string data)
+        // public int GetOpt(string name, out string data)
         // {
         //     return nng_ctx_getopt_string(NngCtx, name, out data);
         // }
-        // public int GetCtxOpt(string name, out UInt64 data)
+        // public int GetOpt(string name, out UInt64 data)
         // {
         //     return nng_ctx_getopt_uint64(NngCtx, name, out data);
         // }
 
-        public int SetCtxOpt(string name, byte[] data)
+        public int SetOpt(string name, byte[] data)
         {
             return nng_ctx_setopt(NngCtx, name, data);
         }
-        public int SetCtxOpt(string name, bool data)
+        public int SetOpt(string name, bool data)
         {
             return nng_ctx_setopt_bool(NngCtx, name, data);
         }
-        public int SetCtxOpt(string name, int data)
+        public int SetOpt(string name, int data)
         {
             return nng_ctx_setopt_int(NngCtx, name, data);
         }
-        public int SetCtxOpt(string name, nng_duration data)
+        public int SetOpt(string name, nng_duration data)
         {
             return nng_ctx_setopt_ms(NngCtx, name, data);
         }
-        public int SetCtxOpt(string name, UIntPtr data)
+        public int SetOpt(string name, UIntPtr data)
         {
             return nng_ctx_setopt_size(NngCtx, name, data);
         }
-        // public int SetCtxOpt(string name, string data)
+        // public int SetOpt(string name, string data)
         // {
         //     return nng_ctx_setopt_string(NngCtx, name, data);
         // }
-        // public int SetCtxOpt(string name, UInt64 data)
+        // public int SetOpt(string name, UInt64 data)
         // {
         //     return nng_ctx_setopt_uint64(NngCtx, name, data);
         // }
 
-        internal new int Init(IMessageFactory<T> factory, ISocket socket)
+        #region IDisposable
+        public void Dispose()
         {
-            var res = base.Init(factory, socket);
-            if (res != 0)
-            {
-                return res;
-            }
-            return nng_ctx_open(ref ctxHandle, socket.NngSocket);
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
-
-        protected override void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (disposed)
                 return;
             if (disposing)
             {
-                var _ = nng_ctx_close(ctxHandle);
+                var _ = nng_ctx_close(NngCtx);
             }
             disposed = true;
-            base.Dispose(disposing);
         }
         bool disposed = false;
+        #endregion
     }
 
 }

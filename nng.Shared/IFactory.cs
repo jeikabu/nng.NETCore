@@ -9,8 +9,7 @@ namespace nng
     {
         T CreateMessage();
         T CreateMessage(nng_msg message);
-        nng_msg Borrow(T message);
-        void Destroy(ref T message);
+        nng_msg Take(ref T message);
     }
 
     /// <summary>

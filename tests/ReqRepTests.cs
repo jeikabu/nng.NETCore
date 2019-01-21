@@ -29,7 +29,7 @@ namespace nng.Tests
                 var receiveTask = repAioCtx.Receive();
                 var asyncReq = reqAioCtx.Send(Factory.CreateMessage());
                 var _receivedReq = await receiveTask;
-                Assert.True(await repAioCtx.Reply(Factory.CreateMessage()));
+                (await repAioCtx.Reply(Factory.CreateMessage())).Unwrap();
                 var _response = await asyncReq;
             }
         }
@@ -51,7 +51,7 @@ namespace nng.Tests
                     await barrier.SignalAndWait();
 
                     var msg = await repAioCtx.Receive();
-                    Assert.True(await repAioCtx.Reply(Factory.CreateMessage()));
+                    (await repAioCtx.Reply(Factory.CreateMessage())).Unwrap();
                     await WaitShort();
                 }
             });
@@ -63,7 +63,7 @@ namespace nng.Tests
                     var _response = await reqAioCtx.Send(Factory.CreateMessage());
                 }
             });
-            return Util.AssertWait(1000, req, rep);
+            return Util.AssertWait(req, rep);
         }
     }
 }
