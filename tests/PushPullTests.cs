@@ -23,35 +23,33 @@ namespace nng.Tests
 
         [Theory]
         [ClassData(typeof(TransportsNoWsClassData))]
-        public async Task PushPull(string url)
+        public Task PushPull(string url)
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
-            {
-                await DoPushPull(url);
-            }
+            return Fixture.TestIterate(() => DoPushPull(url));
         }
 
         Task DoPushPull(string url)
         {
             var barrier = new AsyncBarrier(2);
             var cts = new CancellationTokenSource();
-            var push = Task.Run(async () => {
-                using(var pushSocket = Factory.PusherCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+            var push = Task.Run(async () =>
+            {
+                using (var pushSocket = Factory.PusherCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await barrier.SignalAndWait();
-                    Assert.True(await pushSocket.Send(Factory.CreateMessage()));
+                    (await pushSocket.Send(Factory.CreateMessage())).Unwrap();
                     await WaitShort();
                 }
             });
-            var pull = Task.Run(async () => {
+            var pull = Task.Run(async () =>
+            {
                 await barrier.SignalAndWait();
                 using (var pullSocket = Factory.PullerCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await pullSocket.Receive(cts.Token);
                 }
             });
-            cts.CancelAfter(DefaultTimeoutMs);
-            return Task.WhenAll(pull, push);
+            return CancelAfterAssertwait(cts, pull, push);
         }
 
         [Fact]
@@ -66,20 +64,20 @@ namespace nng.Tests
             int numTotalMessages = numPushers * numMessagesPerPusher;
             var counter = new AsyncCountdownEvent(numTotalMessages);
             var cts = new CancellationTokenSource();
-            
+
             var broker = new Broker(new PushPullBrokerImpl(Factory));
             var tasks = await broker.RunAsync(numPushers, numPullers, numMessagesPerPusher, counter, cts.Token);
 
-            await AssertWait(msTimeout, counter.WaitAsync());
-            await CancelAndWait(cts, msTimeout, tasks.ToArray());
+            await AssertWait(new[] { counter.WaitAsync() }, msTimeout);
+            await CancelAndWait(tasks, cts, msTimeout);
         }
     }
 
     class PushPullBrokerImpl : IBrokerImpl<IMessage>
     {
-        public IAPIFactory<IMessage>  Factory { get; private set; }
+        public IAPIFactory<IMessage> Factory { get; private set; }
 
-        public PushPullBrokerImpl(IAPIFactory<IMessage>  factory)
+        public PushPullBrokerImpl(IAPIFactory<IMessage> factory)
         {
             Factory = factory;
         }

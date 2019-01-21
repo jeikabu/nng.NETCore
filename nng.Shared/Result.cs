@@ -5,6 +5,11 @@ using System.Runtime.CompilerServices;
 namespace nng
 {
     /// <summary>
+    /// Unit type containing now value.  Similar to `()` in F#, Rust, etc.
+    /// </summary>
+    public struct Unit { }
+
+    /// <summary>
     /// Result of an operation that succeeds with one value or fails with another.
     /// </summary>
     public struct Result<TOk, TErr>
@@ -154,7 +159,12 @@ namespace nng
         /// <returns></returns>
         public NngErrno Err() => result.Err();
 
-        public TOk Unwrap() => result.Unwrap();
+        public TOk Unwrap()
+        {
+            if (result.IsOk())
+                return Ok();
+            throw new NngException(Err());
+        }
 
         public void Deconstruct(out bool isOk, out NngErrno errorValue, out TOk okValue) => result.Deconstruct(out isOk, out errorValue, out okValue);
     }

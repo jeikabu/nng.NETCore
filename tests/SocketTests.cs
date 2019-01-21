@@ -59,10 +59,7 @@ namespace nng.Tests
         [ClassData(typeof(TransportsNoTcpClassData))]
         public void DuplicateUrl(string url)
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
-            {
-                DoDuplicateUrl(url);
-            }
+            Fixture.TestIterate(() => DoDuplicateUrl(url));
         }
 
         void DoDuplicateUrl(string url)
@@ -137,15 +134,12 @@ namespace nng.Tests
 
         [Theory]
         [ClassData(typeof(TransportsNoWsClassData))]
-        public async void GetSetOpt(string url)
+        public void GetSetOpt(string url)
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
-            {
-                await DoGetSetOpt(url);
-            }
+            Fixture.TestIterate(() => DoGetSetOpt(url));
         }
 
-        async Task DoGetSetOpt(string url)
+        void DoGetSetOpt(string url)
         {
             using (var rep = Factory.ReplierCreate(url).Unwrap())
             using (var req = Factory.RequesterCreate(url).Unwrap())

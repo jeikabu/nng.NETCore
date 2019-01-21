@@ -55,7 +55,7 @@ namespace nng
     /// <typeparam name="T"></typeparam>
     public interface ISendAsyncContext<T> : IAsyncContext
     {
-        Task<bool> Send(T message);
+        Task<NngResult<Unit>> Send(T message);
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ namespace nng
     /// <typeparam name="T"></typeparam>
     public interface IReceiveAsyncContext<T> : IAsyncContext
     {
-        Task<T> Receive(CancellationToken token);
+        Task<NngResult<T>> Receive(CancellationToken token);
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ namespace nng
     /// <typeparam name="T"></typeparam>
     public interface IReqRepAsyncContext<T> : IAsyncContext
     {
-        Task<T> Send(T message);
+        Task<NngResult<T>> Send(T message);
     }
 
     /// <summary>
@@ -90,31 +90,8 @@ namespace nng
     /// <typeparam name="T"></typeparam>
     public interface IRepReqAsyncContext<T> : IAsyncContext
     {
-        Task<T> Receive();
-        Task<bool> Reply(T message);
-    }
-
-    /// <summary>
-    /// Context supporting nng_ctx
-    /// </summary>
-    public interface ICtx : IAsyncContext
-    {
-        nng_ctx NngCtx { get; }
-
-        int GetCtxOpt(string name, out bool data);
-        int GetCtxOpt(string name, out int data);
-        int GetCtxOpt(string name, out nng_duration data);
-        int GetCtxOpt(string name, out UIntPtr data);
-        // int GetCtxOpt(string name, out string data);
-        // int GetCtxOpt(string name, out UInt64 data);
-
-        int SetCtxOpt(string name, byte[] data);
-        int SetCtxOpt(string name, bool data);
-        int SetCtxOpt(string name, int data);
-        int SetCtxOpt(string name, nng_duration data);
-        int SetCtxOpt(string name, UIntPtr data);
-        // int SetCtxOpt(string name, string data);
-        // int SetCtxOpt(string name, UInt64 data);
+        Task<NngResult<T>> Receive();
+        Task<NngResult<Unit>> Reply(T message);
     }
 
     /// <summary>

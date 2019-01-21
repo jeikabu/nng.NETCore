@@ -25,7 +25,7 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task Basic(string url)
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
+            Fixture.TestIterate(() =>
             {
                 using (var bus0 = Factory.BusCreate(url, true).Unwrap())
                 using (var bus1 = Factory.BusCreate(url, false).Unwrap())
@@ -42,17 +42,14 @@ namespace nng.Tests
 
                     }
                 }
-            }
+            });
         }
 
         [Theory]
         [ClassData(typeof(TransportsNoWsClassData))]
         public async Task Advanced(string url)
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
-            {
-                await DoAdvanced(url);
-            }
+            await Fixture.TestIterate(() => DoAdvanced(url));
         }
 
         async Task DoAdvanced(string url)
@@ -61,7 +58,8 @@ namespace nng.Tests
             var readyToSend = new AsyncBarrier(3);
             var messageReceipt = new AsyncCountdownEvent(2);
             var cts = new CancellationTokenSource();
-            var bus0Task = Task.Run(async () => {
+            var bus0Task = Task.Run(async () =>
+            {
                 using (var ctx = Factory.BusCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await readyToDial.SignalAndWait();
@@ -71,7 +69,8 @@ namespace nng.Tests
                     await WaitShort();
                 }
             });
-            var bus1Task = Task.Run(async () => {
+            var bus1Task = Task.Run(async () =>
+            {
                 await readyToDial.SignalAndWait();
                 using (var ctx = Factory.BusCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
@@ -80,7 +79,8 @@ namespace nng.Tests
                     messageReceipt.Signal();
                 }
             });
-            var bus2Task = Task.Run(async () => {
+            var bus2Task = Task.Run(async () =>
+            {
                 await readyToDial.SignalAndWait();
                 using (var ctx = Factory.BusCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
@@ -89,8 +89,7 @@ namespace nng.Tests
                     messageReceipt.Signal();
                 }
             });
-            cts.CancelAfter(DefaultTimeoutMs);
-            await Task.WhenAll(bus0Task, bus1Task, bus2Task);
+            await CancelAfterAssertwait(cts, bus0Task, bus1Task, bus2Task);
             Assert.Equal(0, messageReceipt.Count);
         }
     }

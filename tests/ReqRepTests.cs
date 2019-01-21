@@ -29,42 +29,41 @@ namespace nng.Tests
                 var receiveTask = repAioCtx.Receive();
                 var asyncReq = reqAioCtx.Send(Factory.CreateMessage());
                 var _receivedReq = await receiveTask;
-                Assert.True(await repAioCtx.Reply(Factory.CreateMessage()));
+                (await repAioCtx.Reply(Factory.CreateMessage())).Unwrap();
                 var _response = await asyncReq;
             }
         }
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
-        public async Task ReqRepTasks(string url)
+        public Task ReqRepTasks(string url)
         {
-            for (int i = 0; i < Fixture.Iterations; ++i)
-            {
-                await DoReqRep(url);
-            }
+            return Fixture.TestIterate(() => DoReqRep(url));
         }
 
         Task DoReqRep(string url)
         {
             var barrier = new AsyncBarrier(2);
-            var rep = Task.Run(async () => {
+            var rep = Task.Run(async () =>
+            {
                 using (var repAioCtx = Factory.ReplierCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     await barrier.SignalAndWait();
 
                     var msg = await repAioCtx.Receive();
-                    Assert.True(await repAioCtx.Reply(Factory.CreateMessage()));
+                    (await repAioCtx.Reply(Factory.CreateMessage())).Unwrap();
                     await WaitShort();
                 }
             });
-            var req = Task.Run(async () => {
+            var req = Task.Run(async () =>
+            {
                 await barrier.SignalAndWait();
                 using (var reqAioCtx = Factory.RequesterCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
                 {
                     var _response = await reqAioCtx.Send(Factory.CreateMessage());
                 }
             });
-            return Util.AssertWait(1000, req, rep);
+            return Util.AssertWait(req, rep);
         }
     }
 }

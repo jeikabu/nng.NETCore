@@ -3,22 +3,32 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
+using static nng.Native.Defines;
+
 namespace nng
 {
     public class NngException : Exception
     {
-        public NngException(string message)
-        : base(message)
-        {
-        }
         public NngException(int errorCode)
         {
             ErrorCode = errorCode;
         }
+        public NngException(NngErrno errno)
+        {
+            ErrorCode = (int)errno;
+        }
 
-        public override string Message => string.Empty;//nng_strerror(error);
+        public static void AssertZero(int errorCode)
+        {
+            if (errorCode != 0)
+                throw new NngException(errorCode);
+        }
+
+        public override string Message => Error.ToString();//nng_strerror(error);
+        //public override string ToString() => Message;
 
         public int ErrorCode { get; } = 0;
+        public NngErrno Error => (NngErrno)ErrorCode;
     }
 
     /// <summary>
@@ -52,6 +62,12 @@ namespace nng
         /// <value></value>
         nng_msg NngMsg { get; }
         /// <summary>
+        /// Take ownership of he underlying nng_msg
+        /// </summary>
+        /// <returns></returns>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
+        nng_msg Take();
+        /// <summary>
         /// Get the header portion of the message
         /// </summary>
         /// <value></value>
@@ -70,7 +86,7 @@ namespace nng
     /// <summary>
     /// Handle to a "pipe", which can be thought of as a single connection.
     /// </summary>
-    public interface IPipe
+    public interface IPipe : IGetOptions
     {
         /// <summary>
         /// Get the underlying nng_pipe.
@@ -82,24 +98,60 @@ namespace nng
         /// </summary>
         int Id { get; }
 
-        int GetOpt(string name, out bool data);
-        int GetOpt(string name, out int data);
-        int GetOpt(string name, out nng_duration data);
         int GetOpt(string name, out IntPtr data);
         int GetOpt(string name, out string data);
-        int GetOpt(string name, out UIntPtr data);
         int GetOpt(string name, out ulong data);
     }
 
     public static class Extensions
     {
-        public static void TrySetNngError<T>(this TaskCompletionSource<T> socket, int error)
+        public static TaskCompletionSource<NngResult<T>> CreateSource<T>()
+        {
+            return new TaskCompletionSource<NngResult<T>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        }
+        public static CancellationTokenTaskSource<NngResult<T>> CreateReceiveSource<T>(CancellationToken token)
+        {
+            return new CancellationTokenTaskSource<NngResult<T>>(token);
+        }
+        public static TaskCompletionSource<NngResult<Unit>> CreateSendResultSource()
+        {
+            return new TaskCompletionSource<NngResult<Unit>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        }
+        public static void SetNngResult(this TaskCompletionSource<NngResult<Unit>> socket)
+        {
+            socket.SetResult(NngResult<Unit>.Ok(new Unit { }));
+        }
+        public static void SetNngResult<T>(this TaskCompletionSource<NngResult<T>> socket, T message)
+        {
+            socket.SetResult(NngResult<T>.Ok(message));
+        }
+        public static void TrySetNngResult<T>(this TaskCompletionSource<NngResult<T>> socket, T message)
+        {
+            socket.TrySetResult(NngResult<T>.Ok(message));
+        }
+        public static void TrySetNngResult(this TaskCompletionSource<NngResult<Unit>> socket)
+        {
+            socket.TrySetResult(NngResult<Unit>.Ok(new Unit { }));
+        }
+        public static void TrySetNngResult<T>(this CancellationTokenTaskSource<NngResult<T>> socket, T message)
+        {
+            socket.TrySetResult(NngResult<T>.Ok(message));
+        }
+        public static void TrySetNngError<T>(this TaskCompletionSource<NngResult<T>> socket, int error)
         {
             if (error == 0)
             {
                 return;
             }
-            socket.TrySetException(new NngException(error));
+            socket.TrySetResult(NngResult<T>.Fail(error));
+        }
+        public static void TrySetNngError<T>(this CancellationTokenTaskSource<NngResult<T>> socket, int error)
+        {
+            if (error == 0)
+            {
+                return;
+            }
+            socket.TrySetResult(NngResult<T>.Fail(error));
         }
     }
 }

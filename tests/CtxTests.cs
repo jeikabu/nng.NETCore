@@ -26,14 +26,15 @@ namespace nng.Tests
         public void GetSetOpt()
         {
             var url = UrlIpc();
-            using (var rep = Factory.ReplierCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap() as ICtx)
+            using (var rep = Factory.ReplierCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
             {
+                var ctx = (rep as ICtx).Ctx;
                 // Get a value, set a new value, get back the new value
-                Assert.Equal(0, rep.GetCtxOpt(NNG_OPT_RECVTIMEO, out nng_duration recvTimeout));
+                Assert.Equal(0, ctx.GetOpt(NNG_OPT_RECVTIMEO, out nng_duration recvTimeout));
                 var newResvTimeout = new nng_duration(recvTimeout);
                 ++newResvTimeout.TimeMs;
-                Assert.Equal(0, rep.SetCtxOpt(NNG_OPT_RECVTIMEO, newResvTimeout));
-                rep.GetCtxOpt(NNG_OPT_RECVTIMEO, out nng_duration nextRecvTimeout);
+                Assert.Equal(0, ctx.SetOpt(NNG_OPT_RECVTIMEO, newResvTimeout));
+                ctx.GetOpt(NNG_OPT_RECVTIMEO, out nng_duration nextRecvTimeout);
                 Assert.Equal(newResvTimeout.TimeMs, nextRecvTimeout.TimeMs);
             }
         }

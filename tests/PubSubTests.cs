@@ -53,7 +53,7 @@ namespace nng.Tests
                 msg.Append(topic);
                 var sendTask = pub.Send(msg);
                 var resvTask = sub.Receive(CancellationToken.None);
-                await AssertWait(DefaultTimeoutMs, sendTask, resvTask);
+                await AssertWait(sendTask, resvTask);
             }
             finally
             {
@@ -64,13 +64,9 @@ namespace nng.Tests
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
-        public async Task PubSub(string url)
+        public Task PubSub(string url)
         {
-            // FAILS
-            for (int i = 0; i < Fixture.Iterations; ++i)
-            {
-                await DoPubSub(url);
-            }
+            return Fixture.TestIterate(() => DoPubSub(url));
         }
 
         Task DoPubSub(string url)
@@ -86,7 +82,7 @@ namespace nng.Tests
                     await serverReady.SignalAndWait();
                     await clientReady.SignalAndWait();
                     await WaitReady();
-                    Assert.True(await pubSocket.Send(Factory.CreateTopicMessage(topic)));
+                    (await pubSocket.Send(Factory.CreateTopicMessage(topic))).Unwrap();
                     await WaitShort();
                 }
             });
@@ -100,8 +96,8 @@ namespace nng.Tests
                     await sub.Receive(cts.Token);
                 }
             });
-            cts.CancelAfter(DefaultTimeoutMs);
-            return Task.WhenAll(pubTask, subTask);
+            cts.CancelAfter(ShortTestMs);
+            return AssertWait(pubTask, subTask);
         }
 
         [Theory]
@@ -121,17 +117,17 @@ namespace nng.Tests
             var broker = new Broker(new PubSubBrokerImpl(Factory));
             var tasks = await broker.RunAsync(numPublishers, numSubscribers, numMessagesPerSender, counter, cts.Token);
 
-            await AssertWait(msTimeout, counter.WaitAsync());
-            await CancelAndWait(cts, msTimeout, tasks.ToArray());
+            await AssertWait(new[] { counter.WaitAsync() }, msTimeout);
+            await CancelAndWait(tasks, cts, msTimeout);
         }
     }
 
-    
+
     class PubSubBrokerImpl : IBrokerImpl<IMessage>
     {
         public IAPIFactory<IMessage> Factory { get; private set; }
 
-        public PubSubBrokerImpl(IAPIFactory<IMessage>  factory)
+        public PubSubBrokerImpl(IAPIFactory<IMessage> factory)
         {
             Factory = factory;
             topic = TopicRandom();

@@ -32,12 +32,35 @@ namespace nng
             Task = Tcs.Task;
         }
 
+        public CancellationTokenTaskSource(CancellationToken cancellationToken, TaskCreationOptions options)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                Task = System.Threading.Tasks.Task.FromCanceled<T>(cancellationToken);
+                return;
+            }
+            Tcs = new TaskCompletionSource<T>(options);
+            _registration = cancellationToken.Register(() => Tcs.TrySetCanceled(cancellationToken), useSynchronizationContext: false);
+            Task = Tcs.Task;
+        }
+
         /// <summary>
         /// Gets the task for the source cancellation token.
         /// </summary>
         public Task<T> Task { get; private set; }
 
-        public TaskCompletionSource<T> Tcs { get; private set; }
+        TaskCompletionSource<T> Tcs { get; set; }
+
+        public bool TrySetResult(T result)
+        {
+            // Using the TrySet functions won't throw exceptions if TrySet has already been called (e.g. cancelled via CancellationToken)
+            return Tcs.TrySetResult(result);
+        }
+
+        public bool TrySetException(Exception exception)
+        {
+            return Tcs.TrySetException(exception);
+        }
 
         /// <summary>
         /// Disposes the cancellation token registration, if any. Note that this may cause <see cref="Task"/> to never complete.

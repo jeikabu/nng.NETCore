@@ -36,7 +36,8 @@ namespace nng.Tests
             var tasks = new List<Task>();
             for (var i = 0; i < numBrokers; ++i)
             {
-                var task = Task.Run(async () => {
+                var task = Task.Run(async () =>
+                {
                     using (var pullSocket = implementation.CreateInSocket(inUrl))
                     using (var pushSocket = implementation.CreateOutSocket(outUrl))
                     {
@@ -45,19 +46,20 @@ namespace nng.Tests
                         while (!token.IsCancellationRequested)
                         {
                             var msg = await pullSocket.Receive(token);
-                            await pushSocket.Send(msg);
+                            await pushSocket.Send(msg.Unwrap());
                             ++numForwarded;
                         }
                     }
                 });
                 tasks.Add(task);
             }
-            
+
             await brokersReady.SignalAndWait();
 
             for (var i = 0; i < numPushers; ++i)
             {
-                var task = Task.Run(async () => {
+                var task = Task.Run(async () =>
+                {
                     using (var pushSocket = implementation.Factory.PusherCreate(inUrl, false).Unwrap().CreateAsyncContext(implementation.Factory).Unwrap())
                     {
                         await clientsReady.SignalAndWait(); // This client ready, wait for rest
@@ -67,14 +69,15 @@ namespace nng.Tests
                             await WaitShort();
                         }
                     }
-                    
+
                 });
                 tasks.Add(task);
             }
-            
+
             for (var i = 0; i < numPullers; ++i)
             {
-                var task = Task.Run(async () => {
+                var task = Task.Run(async () =>
+                {
                     using (var pullSocket = implementation.CreateClient(outUrl))
                     {
                         await clientsReady.SignalAndWait(); // This client ready, wait for rest
@@ -87,7 +90,7 @@ namespace nng.Tests
                 });
                 tasks.Add(task);
             }
-            
+
             return tasks;
         }
 

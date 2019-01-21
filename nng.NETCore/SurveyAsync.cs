@@ -15,24 +15,46 @@ namespace nng
     /// There can only be one survey at a time.  Responses received when there is no outstanding survey are discarded.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class SurveyAsyncContext<T> : AsyncCtx<T>, ISendReceiveAsyncContext<T>
+    public class SurveyAsyncContext<T> : AsyncBase<T>, ISendReceiveAsyncContext<T>, ICtx
     {
+        public INngCtx Ctx { get; protected set; }
+
+        public static NngResult<ISendReceiveAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
+        {
+            var context = new SurveyAsyncContext<T> { Factory = factory, Socket = socket };
+            var res = context.InitAio();
+            if (res == 0)
+            {
+                //TODO: when get default interface methods in C#8 move this to ICtx
+                var ctx = AsyncCtx.Create(socket);
+                if (ctx.IsOk())
+                {
+                    context.Ctx = ctx.Ok();
+                    return NngResult<ISendReceiveAsyncContext<T>>.Ok(context);
+                }
+                return NngResult<ISendReceiveAsyncContext<T>>.Err(ctx.Err());
+            }
+            return NngResult<ISendReceiveAsyncContext<T>>.Fail(res);
+        }
+
         /// <summary>
         /// Broadcast survey to all peer respondents.
         /// Only one survey can be outstanding at a time; sending another survey will cancel the previous one
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public Task<bool> Send(T message)
+        public Task<NngResult<Unit>> Send(T message)
         {
-            CheckState();
+            lock (sync)
+            {
+                CheckState();
 
-            sendTcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            sendMessage = message;
-            State = AsyncState.Send;
-            nng_aio_set_msg(aioHandle, Factory.Borrow(sendMessage));
-            nng_ctx_send(ctxHandle, aioHandle);
-            return sendTcs.Task;
+                sendTcs = Extensions.CreateSendResultSource();
+                State = AsyncState.Send;
+                nng_aio_set_msg(aioHandle, Factory.Take(ref message));
+                nng_ctx_send(Ctx.NngCtx, aioHandle);
+                return sendTcs.Task;
+            }
         }
 
         /// <summary>
@@ -43,35 +65,35 @@ namespace nng
         /// <c>NNG_ESTATE</c>- attempted to receive with no outstanding survey.
         /// <c>NNG_ETIMEDOUT</c>- survey timed out while waiting for replies.
         /// </returns>
-        public Task<T> Receive(CancellationToken token)
+        public Task<NngResult<T>> Receive(CancellationToken token)
         {
-            CheckState();
+            lock (sync)
+            {
+                CheckState();
 
-            receiveTcs = new CancellationTokenTaskSource<T>(token);
-            State = AsyncState.Recv;
-            nng_ctx_recv(ctxHandle, aioHandle);
-            return receiveTcs.Task;
+                receiveTcs = Extensions.CreateReceiveSource<T>(token);
+                State = AsyncState.Recv;
+                nng_ctx_recv(Ctx.NngCtx, aioHandle);
+                return receiveTcs.Task;
+            }
         }
 
-        internal void callback(IntPtr arg)
+        protected override void AioCallback(IntPtr argument)
         {
             var res = 0;
             switch (State)
             {
-                case AsyncState.Init:
-                    break;
-
                 case AsyncState.Send:
                     res = nng_aio_result(aioHandle);
                     if (res != 0)
                     {
+                        HandleFailedSend();
                         State = AsyncState.Init;
-                        Factory.Destroy(ref sendMessage);
                         sendTcs.TrySetNngError(res);
                         return;
                     }
                     State = AsyncState.Init;
-                    sendTcs.SetResult(true);
+                    sendTcs.TrySetNngResult();
                     break;
 
                 case AsyncState.Recv:
@@ -79,22 +101,24 @@ namespace nng
                     if (res != 0)
                     {
                         State = AsyncState.Init;
-                        receiveTcs.Tcs.TrySetNngError(res);
+                        receiveTcs.TrySetNngError(res);
                         return;
                     }
                     State = AsyncState.Init;
                     nng_msg msg = nng_aio_get_msg(aioHandle);
                     var message = Factory.CreateMessage(msg);
-                    receiveTcs.Tcs.SetResult(message);
+                    receiveTcs.TrySetNngResult(message);
                     break;
 
+                case AsyncState.Init:
                 default:
+                    Console.Error.WriteLine("Survey::AioCallback: " + State);
+                    State = AsyncState.Init;
                     break;
             }
         }
 
-        protected TaskCompletionSource<bool> sendTcs;
-        protected T sendMessage;
-        protected CancellationTokenTaskSource<T> receiveTcs;
+        protected TaskCompletionSource<NngResult<Unit>> sendTcs;
+        protected CancellationTokenTaskSource<NngResult<T>> receiveTcs;
     }
 }

@@ -4,6 +4,18 @@
 
 > NNG, like its predecessors nanomsg (and to some extent ZeroMQ), is a lightweight, broker-less library, offering a simple API to solve common recurring messaging problems, such as publish/subscribe, RPC-style request/reply, or service discovery. The API frees the programmer from worrying about details like connection management, retries, and other common considerations, so that they can focus on the application instead of the plumbing.
 
+__Status__:
+
+Beta-ish.  Using latest [NNG release](https://github.com/nanomsg/nng/releases) (currently v1.1.1).  Once this is a bit farther along will track NNG version numbers.
+
+[![NuGet](https://img.shields.io/nuget/v/Subor.nng.NETCore.svg?colorB=brightgreen)](https://www.nuget.org/packages/Subor.nng.NETCore)
+[![Build status](https://ci.appveyor.com/api/projects/status/ohpurtgoq42wauan/branch/master?svg=true)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
+[![Build status](https://img.shields.io/appveyor/tests/jake-ruyi/nng-netcore/master.svg)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
+[![codecov](https://codecov.io/gh/subor/nng.NETCore/branch/master/graph/badge.svg)](https://codecov.io/gh/subor/nng.NETCore)
+
+For list of missing APIs/features see [`is:issue is:open label:enhancement`](https://github.com/subor/nng.NETCore/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
+
+
 __Goals of nng.NETCore__:
 
 - __Async first__: async/await access to [nng_aio](https://nanomsg.github.io/nng/man/v1.0.0/nng_aio.5.html) and [nng_ctx](https://nanomsg.github.io/nng/man/v1.0.0/nng_ctx.5.html)
@@ -59,17 +71,6 @@ You should be able to build the NNG native shared library for any [platform supp
     ninja
     ```
 1. Copy library to appropriate `nng.NETCore/runtimes/XXX/native/` directory
-
-## Status
-
-Very alpha.  Using latest [NNG release](https://github.com/nanomsg/nng/releases) (currently v1.1.1).  Once this is a bit farther along will track NNG version numbers.
-
-[![NuGet](https://img.shields.io/nuget/v/Subor.nng.NETCore.svg?colorB=brightgreen)](https://www.nuget.org/packages/Subor.nng.NETCore)
-[![Build status](https://ci.appveyor.com/api/projects/status/ohpurtgoq42wauan/branch/master?svg=true)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
-[![Build status](https://img.shields.io/appveyor/tests/jake-ruyi/nng-netcore/master.svg)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
-[![codecov](https://codecov.io/gh/subor/nng.NETCore/branch/master/graph/badge.svg)](https://codecov.io/gh/subor/nng.NETCore)
-
-For list of missing APIs/features see [`is:issue is:open label:enhancement`](https://github.com/subor/nng.NETCore/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
 
 ## .NET Framework
 
