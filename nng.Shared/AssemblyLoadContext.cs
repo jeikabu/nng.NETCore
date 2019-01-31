@@ -68,7 +68,13 @@ namespace nng
 #else
                 bool is64bit = (IntPtr.Size == 8);
 #endif
-                string arch = is64bit ? "-x64" : "-x86";
+                string arch = string.Empty;
+                switch (RuntimeInformation.ProcessArchitecture)
+                {
+                    case Architecture.Arm64: arch = "-arm64"; break;
+                    case Architecture.Arm: arch = "-arm"; break;
+                    default: arch = is64bit ? "-x64" : "-x86"; break;
+                }
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     var fullPath = Path.Combine(assemblyPath, "runtimes", "osx" + arch, "native", "libnng.dylib");
