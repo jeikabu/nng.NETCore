@@ -71,6 +71,9 @@ namespace nng.Tests
             using (var listenSocket = Factory.PairCreate(url, true).Unwrap())
             using (var dialerSocket = Factory.PairCreate(url, false).Unwrap())
             {
+                // Make sure sends can timeout since they aren't canceleable
+                listenSocket.SetOpt(nng.Native.Defines.NNG_OPT_SENDTIMEO, new nng_duration{TimeMs = 50});
+                dialerSocket.SetOpt(nng.Native.Defines.NNG_OPT_SENDTIMEO, new nng_duration{TimeMs = 50});
                 var tasks = new List<Task>();
 
                 // On listening socket create send/receive AIO
