@@ -8,6 +8,11 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     icu-devtools
 
+# https://docs.microsoft.com/en-us/nuget/tools/cli-ref-environment-variables
+ENV NUGET_XMLDOC_MODE skip
+ENV DOTNET_SKIP_FIRST_TIME_EXPERIENCE 1
+ENV DOTNET_CLI_TELEMETRY_OPTOUT 1
+
 # .NET Core 3.0
 # From:
 # https://github.com/dotnet/dotnet-docker/blob/master/3.0/sdk/stretch/arm64v8/Dockerfile

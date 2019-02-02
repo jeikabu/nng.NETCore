@@ -200,6 +200,24 @@ namespace nng.Native
             TimeMs = copy.TimeMs;
         }
 
+        
+        ///<sumary>
+        /// a context-specific default value should be used.  See `NNG_DURATION_INFINITE`.
+        ///</summary>
+        public static ref readonly nng_duration Infinite => ref infinite;
+        ///<sumary>
+        /// a context-specific default value should be used.  See `NNG_DURATION_DEFAULT`.
+        ///</summary>
+        public static ref readonly nng_duration Default => ref defaultDuration;
+        ///<sumary>
+        /// a context-specific default value should be used.  See `NNG_DURATION_ZERO`.
+        ///</summary>
+        public static ref readonly nng_duration Zero => ref zero;
+        
+        static readonly nng_duration infinite = new nng_duration { TimeMs = Defines.NNG_DURATION_INFINITE };
+        static readonly nng_duration defaultDuration = new nng_duration { TimeMs = Defines.NNG_DURATION_DEFAULT };
+        static readonly nng_duration zero = new nng_duration { TimeMs = Defines.NNG_DURATION_ZERO };
+
         public static nng_duration operator +(nng_duration lhs, nng_duration rhs) =>
             new nng_duration { TimeMs = lhs.TimeMs + rhs.TimeMs };
 

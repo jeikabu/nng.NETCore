@@ -111,7 +111,7 @@ namespace nng
         }
         public static CancellationTokenTaskSource<NngResult<T>> CreateReceiveSource<T>(CancellationToken token)
         {
-            return new CancellationTokenTaskSource<NngResult<T>>(token);
+            return new CancellationTokenTaskSource<NngResult<T>>(token, TaskCreationOptions.RunContinuationsAsynchronously);
         }
         public static TaskCompletionSource<NngResult<Unit>> CreateSendResultSource()
         {

@@ -1,6 +1,7 @@
 using nng.Native;
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,23 +31,29 @@ namespace nng.Tests
 
         Task DoPushPull(string url)
         {
-            var barrier = new AsyncBarrier(2);
+            var serverReady = new AsyncBarrier(2);
+            var clientReady = new AsyncBarrier(2);
             var cts = new CancellationTokenSource();
             var push = Task.Run(async () =>
             {
-                using (var pushSocket = Factory.PusherCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var socket = Factory.PusherCreate(url, true).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
-                    await barrier.SignalAndWait();
-                    (await pushSocket.Send(Factory.CreateMessage())).Unwrap();
+                    await serverReady.SignalAndWait();
+                    await clientReady.SignalAndWait();
+                    // Make sure receiver is actually receiving before start sending
                     await WaitShort();
+                    (await ctx.Send(Factory.CreateMessage())).Unwrap();
                 }
             });
             var pull = Task.Run(async () =>
             {
-                await barrier.SignalAndWait();
-                using (var pullSocket = Factory.PullerCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                await serverReady.SignalAndWait();
+                using (var socket = Factory.PullerCreate(url, false).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
-                    await pullSocket.Receive(cts.Token);
+                    await clientReady.SignalAndWait();
+                    await ctx.Receive(cts.Token);
                 }
             });
             return CancelAfterAssertwait(cts, pull, push);
@@ -64,12 +71,12 @@ namespace nng.Tests
             int numTotalMessages = numPushers * numMessagesPerPusher;
             var counter = new AsyncCountdownEvent(numTotalMessages);
             var cts = new CancellationTokenSource();
-
-            var broker = new Broker(new PushPullBrokerImpl(Factory));
-            var tasks = await broker.RunAsync(numPushers, numPullers, numMessagesPerPusher, counter, cts.Token);
-
-            await AssertWait(new[] { counter.WaitAsync() }, msTimeout);
-            await CancelAndWait(tasks, cts, msTimeout);
+            using (var broker = new Broker(new PushPullBrokerImpl(Factory)))
+            {
+                var tasks = await broker.RunAsync(numPushers, numPullers, numMessagesPerPusher, counter, cts.Token);
+                tasks.Add(counter.WaitAsync());
+                await CancelAfterAssertwait(tasks, cts);
+            }
         }
     }
 
@@ -84,20 +91,42 @@ namespace nng.Tests
 
         public IReceiveAsyncContext<IMessage> CreateInSocket(string url)
         {
-            return Factory.PullerCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap();
+            var socket = Factory.PullerCreate(url, true).Unwrap();
+            var ctx = socket.CreateAsyncContext(Factory).Unwrap();
+            disposable.Add(socket);
+            disposable.Add(ctx);
+            return ctx;
         }
         public ISendAsyncContext<IMessage> CreateOutSocket(string url)
         {
-            return Factory.PusherCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap();
+            var socket = Factory.PusherCreate(url, true).Unwrap();
+            var ctx = socket.CreateAsyncContext(Factory).Unwrap();
+            disposable.Add(socket);
+            disposable.Add(ctx);
+            return ctx;
         }
         public IReceiveAsyncContext<IMessage> CreateClient(string url)
         {
-            return Factory.PullerCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap();
+            var socket = Factory.PullerCreate(url, false).Unwrap();
+            var ctx = socket.CreateAsyncContext(Factory).Unwrap();
+            disposable.Add(socket);
+            disposable.Add(ctx);
+            return ctx;
         }
 
         public IMessage CreateMessage()
         {
             return Factory.CreateMessage();
         }
+
+        public void Dispose()
+        {
+            foreach (var obj in disposable)
+            {
+                obj.Dispose();
+            }
+        }
+
+        ConcurrentBag<IDisposable> disposable = new ConcurrentBag<IDisposable>();
     }
 }
