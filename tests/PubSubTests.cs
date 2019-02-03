@@ -41,25 +41,20 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task BasicPubSub(string url)
         {
-            ISendAsyncContext<IMessage> pub = null;
-            ISubAsyncContext<IMessage> sub = null;
-            try
+            using (var pubSocket = Factory.PublisherCreate(url).Unwrap())
+            using (var pub = pubSocket.CreateAsyncContext(Factory).Unwrap())
+            using (var subSocket = Factory.SubscriberCreate(url).Unwrap())
+            using (var sub = subSocket.CreateAsyncContext(Factory).Unwrap())
             {
-                pub = Factory.PublisherCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap();
-                await WaitReady();
-                sub = Factory.SubscriberCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap();
+                var resvTask = sub.Receive(CancellationToken.None);
+                await WaitShort(); // Give socket a chance to actually start receiving
                 var topic = TopicRandom();
                 Assert.Equal(0, sub.Subscribe(topic));
                 var msg = Factory.CreateMessage();
                 msg.Append(topic);
                 var sendTask = pub.Send(msg);
-                var resvTask = sub.Receive(CancellationToken.None);
+                
                 await AssertWait(sendTask, resvTask);
-            }
-            finally
-            {
-                sub?.Dispose();
-                pub?.Dispose();
             }
         }
 
