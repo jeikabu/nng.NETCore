@@ -1,6 +1,7 @@
 using nng.Native;
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -77,27 +78,28 @@ namespace nng.Tests
             var cts = new CancellationTokenSource();
             var pubTask = Task.Run(async () =>
             {
-                using (var pubSocket = Factory.PublisherCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var socket = Factory.PublisherCreate(url).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     await serverReady.SignalAndWait();
                     await clientReady.SignalAndWait();
-                    await WaitReady();
-                    (await pubSocket.Send(Factory.CreateTopicMessage(topic))).Unwrap();
+                    // Give receivers a chance to actually start receiving
                     await WaitShort();
+                    (await ctx.Send(Factory.CreateTopicMessage(topic))).Unwrap();
                 }
             });
             var subTask = Task.Run(async () =>
             {
                 await serverReady.SignalAndWait();
-                using (var sub = Factory.SubscriberCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var socket = Factory.SubscriberCreate(url).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
-                    sub.Subscribe(topic);
+                    ctx.Subscribe(topic);
                     await clientReady.SignalAndWait();
-                    await sub.Receive(cts.Token);
+                    await ctx.Receive(cts.Token);
                 }
             });
-            cts.CancelAfter(ShortTestMs);
-            return AssertWait(pubTask, subTask);
+            return CancelAfterAssertwait(cts, pubTask, subTask);
         }
 
         [Theory]
@@ -107,18 +109,19 @@ namespace nng.Tests
             await PubSubBrokerAsync(1, 1, 1);
         }
 
-        async Task PubSubBrokerAsync(int numPublishers, int numSubscribers, int numMessagesPerSender, int msTimeout = DefaultTimeoutMs)
+        async Task PubSubBrokerAsync(int numPublishers, int numSubscribers, int numMessagesPerSender)
         {
             // In pub/sub pattern, each message is sent to every receiver
             int numTotalMessages = numPublishers * numSubscribers * numMessagesPerSender;
             var counter = new AsyncCountdownEvent(numTotalMessages);
             var cts = new CancellationTokenSource();
 
-            var broker = new Broker(new PubSubBrokerImpl(Factory));
-            var tasks = await broker.RunAsync(numPublishers, numSubscribers, numMessagesPerSender, counter, cts.Token);
-
-            await AssertWait(new[] { counter.WaitAsync() }, msTimeout);
-            await CancelAndWait(tasks, cts, msTimeout);
+            using(var broker = new Broker(new PubSubBrokerImpl(Factory)))
+            {
+                var tasks = await broker.RunAsync(numPublishers, numSubscribers, numMessagesPerSender, counter, cts.Token);
+                tasks.Add(counter.WaitAsync());
+                await CancelAfterAssertwait(tasks, cts);
+            }
         }
     }
 
@@ -135,17 +138,30 @@ namespace nng.Tests
 
         public IReceiveAsyncContext<IMessage> CreateInSocket(string url)
         {
-            return Factory.PullerCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap();
+            var socket = Factory.PullerCreate(url, true).Unwrap();
+            var ctx = socket.CreateAsyncContext(Factory).Unwrap();
+            disposable.Add(socket);
+            disposable.Add(ctx);
+            return ctx;
         }
+
         public ISendAsyncContext<IMessage> CreateOutSocket(string url)
         {
-            return Factory.PublisherCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap();
+            var socket = Factory.PublisherCreate(url).Unwrap();
+            var ctx = socket.CreateAsyncContext(Factory).Unwrap();
+            disposable.Add(socket);
+            disposable.Add(ctx);
+            return ctx;
         }
+
         public IReceiveAsyncContext<IMessage> CreateClient(string url)
         {
-            var sub = Factory.SubscriberCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap();
-            sub.Subscribe(topic);
-            return sub;
+            var socket = Factory.SubscriberCreate(url).Unwrap();
+            var ctx = socket.CreateAsyncContext(Factory).Unwrap();
+            ctx.Subscribe(topic);
+            disposable.Add(socket);
+            disposable.Add(ctx);
+            return ctx;
         }
 
         public IMessage CreateMessage()
@@ -153,6 +169,15 @@ namespace nng.Tests
             return Factory.CreateTopicMessage(topic);
         }
 
+        public void Dispose()
+        {
+            foreach (var obj in disposable)
+            {
+                obj.Dispose();
+            }
+        }
+
         byte[] topic;
+        ConcurrentBag<IDisposable> disposable = new ConcurrentBag<IDisposable>();
     }
 }

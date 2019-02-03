@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace nng.Tests
 {
@@ -44,5 +45,41 @@ namespace nng.Tests
     [CollectionDefinition("nng")]
     public class NngCollection : ICollectionFixture<NngCollectionFixture>
     {
+    }
+
+    // using Xunit.Abstractions;
+    // [Collection("nng")]
+    // public class PubSubTests
+    // {
+    //     public PubSubTests(ITestOutputHelper outputHelper)
+    //     {
+    //         Converter.Register(outputHelper);
+    //     }
+    //https://stackoverflow.com/questions/7138935/xunit-net-does-not-capture-console-output/47529356#47529356
+    internal class Converter : TextWriter
+    {
+        public static void Register(ITestOutputHelper outputHelper)
+        {
+            var converter = new Converter(outputHelper ?? throw new ArgumentNullException(nameof(outputHelper)));
+            System.Console.SetOut(converter);
+        }
+
+        ITestOutputHelper _output;
+        public Converter(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+        public override System.Text.Encoding Encoding
+        {
+            get { return System.Text.Encoding.UTF8; }
+        }
+        public override void WriteLine(string message)
+        {
+            _output.WriteLine(message);
+        }
+        public override void WriteLine(string format, params object[] args)
+        {
+            _output.WriteLine(format, args);
+        }
     }
 }

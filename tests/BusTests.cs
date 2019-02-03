@@ -60,11 +60,11 @@ namespace nng.Tests
             var cts = new CancellationTokenSource();
             var bus0Task = Task.Run(async () =>
             {
-                using (var ctx = Factory.BusCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var socket = Factory.BusCreate(url, true).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     await readyToDial.SignalAndWait();
                     await readyToSend.SignalAndWait();
-                    await WaitShort();
                     await ctx.Send(Factory.CreateMessage());
                     await WaitShort();
                 }
@@ -72,20 +72,28 @@ namespace nng.Tests
             var bus1Task = Task.Run(async () =>
             {
                 await readyToDial.SignalAndWait();
-                using (var ctx = Factory.BusCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var socket = Factory.BusCreate(url, false).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
+                    // Make sure receive has started before signalling ready
+                    var recvFuture = ctx.Receive(cts.Token);
+                    await WaitShort();
                     await readyToSend.SignalAndWait();
-                    var _ = await ctx.Receive(cts.Token);
+                    var _ = await recvFuture;
                     messageReceipt.Signal();
                 }
             });
             var bus2Task = Task.Run(async () =>
             {
                 await readyToDial.SignalAndWait();
-                using (var ctx = Factory.BusCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var socket = Factory.BusCreate(url, false).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
+                    // Make sure receive has started before signalling ready
+                    var recvFuture = ctx.Receive(cts.Token);
+                    await WaitShort();
                     await readyToSend.SignalAndWait();
-                    var _ = await ctx.Receive(cts.Token);
+                    var _ = await recvFuture;
                     messageReceipt.Signal();
                 }
             });

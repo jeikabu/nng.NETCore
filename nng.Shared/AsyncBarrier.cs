@@ -40,6 +40,11 @@ namespace nng
             return tcs.Task;
         }
 
+        ///<summary>
+        /// SignalAndWait() may create a new TaskCompletionSource() for the next barrier and you may wait on the wrong one.
+        ///</summary>
+        public Task WaitAsync() => m_tcs.Task;
+
         private readonly int m_participantCount;
         private TaskCompletionSource<bool> m_tcs = new TaskCompletionSource<bool>();
         private int m_remainingParticipants;

@@ -18,8 +18,8 @@ namespace nng.Tests
     }
     static class Util
     {
-        public const int ShortTestMs = 100;
-        public const int DefaultTimeoutMs = 1000;
+        public const int ShortTestMs = 250;
+        public const int DefaultTimeoutMs = 5000;
 
         public static string UrlIpc() => "ipc://" + Guid.NewGuid().ToString();
         public static string UrlInproc() => "inproc://" + Guid.NewGuid().ToString();
@@ -44,62 +44,13 @@ namespace nng.Tests
 
         public static Task CancelAfterAssertwait(CancellationTokenSource cts, params Task[] tasks)
         {
-            return CancelAfterAssertwait(tasks, cts, DefaultTimeoutMs);
+            return CancelAfterAssertwait(tasks, cts);
         }
 
-        public static Task CancelAfterAssertwait(IEnumerable<Task> tasks, CancellationTokenSource cts, int timeoutMs = DefaultTimeoutMs)
+        public static Task CancelAfterAssertwait(IEnumerable<Task> tasks, CancellationTokenSource cts, int cancelAfterMs = ShortTestMs, int timeoutMs = DefaultTimeoutMs)
         {
-            cts.CancelAfter(timeoutMs);
+            cts.CancelAfter(cancelAfterMs);
             return AssertWait(tasks, timeoutMs);
-        }
-
-        public static async Task CancelAndWait(IEnumerable<Task> tasks, CancellationTokenSource cts, int timeoutMs)
-        {
-            cts.Cancel();
-            try
-            {
-                var timeout = Task.Delay(timeoutMs);
-                Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
-            }
-            catch (Exception ex)
-            {
-                if (ex is TaskCanceledException)
-                {
-                    // ok
-                }
-                else
-                {
-                    throw ex;
-                }
-            }
-        }
-
-        public static Task CancelAfterAndWait(CancellationTokenSource cts, int timeoutMs, params Task[] tasks)
-        {
-            return CancelAfterAndWait(tasks, cts, timeoutMs);
-        }
-
-        public static async Task CancelAfterAndWait(IEnumerable<Task> tasks, CancellationTokenSource cts, int timeoutMs)
-        {
-            if (timeoutMs > DefaultTimeoutMs)
-                throw new ArgumentException();
-            cts.CancelAfter(timeoutMs);
-            try
-            {
-                var timeout = Task.Delay(DefaultTimeoutMs);
-                Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
-            }
-            catch (Exception ex)
-            {
-                if (ex is TaskCanceledException)
-                {
-                    // Timedout
-                }
-                else
-                {
-                    throw ex;
-                }
-            }
         }
 
         public static bool BytesEqual(ReadOnlySpan<byte> lhs, ReadOnlySpan<byte> rhs)

@@ -34,19 +34,21 @@ namespace nng.Tests
             var cts = new CancellationTokenSource();
             var push = Task.Run(async () =>
             {
-                using (var socket = Factory.PairCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var socket = Factory.PairCreate(url, true).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     await barrier.SignalAndWait();
-                    (await socket.Send(Factory.CreateMessage())).Unwrap();
+                    (await ctx.Send(Factory.CreateMessage())).Unwrap();
                     await WaitShort();
                 }
             });
             var pull = Task.Run(async () =>
             {
                 await barrier.SignalAndWait();
-                using (var socket = Factory.PairCreate(url, false).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var socket = Factory.PairCreate(url, false).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
-                    await socket.Receive(cts.Token);
+                    await ctx.Receive(cts.Token);
                 }
             });
             return CancelAfterAssertwait(cts, pull, push);
@@ -97,6 +99,7 @@ namespace nng.Tests
                         while (!cts.IsCancellationRequested)
                         {
                             var _ = await ctx.Send(Factory.CreateMessage());
+                            await WaitShort();
                         }
                     });
                     tasks.Add(task);
@@ -123,12 +126,13 @@ namespace nng.Tests
                         while (!cts.IsCancellationRequested)
                         {
                             var _ = await ctx.Send(Factory.CreateMessage());
+                            await WaitShort();
                         }
                     });
                     tasks.Add(task);
                 }
 
-                await Util.CancelAfterAndWait(tasks, cts, ShortTestMs);
+                await Util.CancelAfterAssertwait(tasks, cts, ShortTestMs);
             }
         }
     }
