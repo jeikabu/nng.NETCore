@@ -82,24 +82,29 @@ namespace nng.Tests
                 {
                     var task = Task.Run(async () =>
                     {
-                        var ctx = listenSocket.CreateAsyncContext(Factory).Unwrap();
-                        await listenerReady.SignalAndWait();
-                        await dialerReady.SignalAndWait();
-                        while (!cts.IsCancellationRequested)
+                        using(var ctx = listenSocket.CreateAsyncContext(Factory).Unwrap())
                         {
-                            var msg = await ctx.Receive(cts.Token);
+                            await listenerReady.SignalAndWait();
+                            await dialerReady.SignalAndWait();
+                            while (!cts.IsCancellationRequested)
+                            {
+                                var msg = await ctx.Receive(cts.Token);
+                            }
                         }
                     });
                     tasks.Add(task);
                     task = Task.Run(async () =>
                     {
-                        var ctx = listenSocket.CreateAsyncContext(Factory).Unwrap();
-                        await listenerReady.SignalAndWait();
-                        await dialerReady.SignalAndWait();
-                        while (!cts.IsCancellationRequested)
+                        using (var ctx = listenSocket.CreateAsyncContext(Factory).Unwrap())
                         {
-                            var _ = await ctx.Send(Factory.CreateMessage());
-                            await WaitShort();
+                            await listenerReady.SignalAndWait();
+                            await dialerReady.SignalAndWait();
+                            await WaitShort(); // Give receiver a chance to start receiving
+                            while (!cts.IsCancellationRequested)
+                            {
+                                var _ = await ctx.Send(Factory.CreateMessage());
+                                await WaitShort();
+                            }
                         }
                     });
                     tasks.Add(task);
@@ -111,28 +116,33 @@ namespace nng.Tests
                 {
                     var task = Task.Run(async () =>
                     {
-                        var ctx = dialerSocket.CreateAsyncContext(Factory).Unwrap();
-                        await dialerReady.SignalAndWait();
-                        while (!cts.IsCancellationRequested)
+                        using (var ctx = dialerSocket.CreateAsyncContext(Factory).Unwrap())
                         {
-                            var msg = await ctx.Receive(cts.Token);
+                            await dialerReady.SignalAndWait();
+                            while (!cts.IsCancellationRequested)
+                            {
+                                var msg = await ctx.Receive(cts.Token);
+                            }
                         }
                     });
                     tasks.Add(task);
                     task = Task.Run(async () =>
                     {
-                        var ctx = dialerSocket.CreateAsyncContext(Factory).Unwrap();
-                        await dialerReady.SignalAndWait();
-                        while (!cts.IsCancellationRequested)
+                        using (var ctx = dialerSocket.CreateAsyncContext(Factory).Unwrap())
                         {
-                            var _ = await ctx.Send(Factory.CreateMessage());
-                            await WaitShort();
+                            await dialerReady.SignalAndWait();
+                            await WaitShort(); // Give receiver a chance to start receiving
+                            while (!cts.IsCancellationRequested)
+                            {
+                                var _ = await ctx.Send(Factory.CreateMessage());
+                                await WaitShort();
+                            }
                         }
                     });
                     tasks.Add(task);
                 }
 
-                await Util.CancelAfterAssertwait(tasks, cts, ShortTestMs);
+                await Util.CancelAfterAssertwait(tasks, cts);
             }
         }
     }
