@@ -46,21 +46,23 @@ namespace nng.Tests
             var barrier = new AsyncBarrier(2);
             var rep = Task.Run(async () =>
             {
-                using (var repAioCtx = Factory.ReplierCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var socket = Factory.ReplierCreate(url).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     await barrier.SignalAndWait();
 
-                    var msg = await repAioCtx.Receive();
-                    (await repAioCtx.Reply(Factory.CreateMessage())).Unwrap();
+                    var msg = await ctx.Receive();
+                    (await ctx.Reply(Factory.CreateMessage())).Unwrap();
                     await WaitShort();
                 }
             });
             var req = Task.Run(async () =>
             {
                 await barrier.SignalAndWait();
-                using (var reqAioCtx = Factory.RequesterCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var socket = Factory.RequesterCreate(url).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
-                    var _response = await reqAioCtx.Send(Factory.CreateMessage());
+                    var _response = await ctx.Send(Factory.CreateMessage());
                 }
             });
             return Util.AssertWait(req, rep);

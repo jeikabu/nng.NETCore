@@ -6,7 +6,9 @@ dotnet: 2.1.403
 os:
   - linux
   - osx
-sudo: false
+sudo: required
+services:
+  - docker
 
 # At least one script line is required:
 # https://docs.travis-ci.com/user/languages/csharp/#net-core
@@ -14,3 +16,6 @@ script:
   - dotnet restore
   - dotnet build
   - dotnet test --filter "platform!=windows" --verbosity normal tests
+
+after_success:
+  - ./scripts/qemu_arm64.sh

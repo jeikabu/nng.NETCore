@@ -7,7 +7,7 @@ namespace nng.Tests
 {
     using static nng.Tests.Util;
 
-    interface IBrokerImpl<T>
+    interface IBrokerImpl<T> : System.IDisposable
     {
         IAPIFactory<T> Factory { get; }
         IReceiveAsyncContext<T> CreateInSocket(string url);
@@ -16,7 +16,7 @@ namespace nng.Tests
         IMessage CreateMessage();
     }
 
-    class Broker
+    class Broker: System.IDisposable
     {
         public Broker(IBrokerImpl<IMessage> implementation)
         {
@@ -38,17 +38,15 @@ namespace nng.Tests
             {
                 var task = Task.Run(async () =>
                 {
-                    using (var pullSocket = implementation.CreateInSocket(inUrl))
-                    using (var pushSocket = implementation.CreateOutSocket(outUrl))
+                    var pullSocket = implementation.CreateInSocket(inUrl);
+                    var pushSocket = implementation.CreateOutSocket(outUrl);
+                    await brokersReady.SignalAndWait(); // Broker is ready
+                    await clientsReady.SignalAndWait(); // Wait for clients
+                    while (!token.IsCancellationRequested)
                     {
-                        await brokersReady.SignalAndWait(); // Broker is ready
-                        await clientsReady.SignalAndWait(); // Wait for clients
-                        while (!token.IsCancellationRequested)
-                        {
-                            var msg = await pullSocket.Receive(token);
-                            await pushSocket.Send(msg.Unwrap());
-                            ++numForwarded;
-                        }
+                        var msg = await pullSocket.Receive(token);
+                        await pushSocket.Send(msg.Unwrap());
+                        ++numForwarded;
                     }
                 });
                 tasks.Add(task);
@@ -60,12 +58,15 @@ namespace nng.Tests
             {
                 var task = Task.Run(async () =>
                 {
-                    using (var pushSocket = implementation.Factory.PusherCreate(inUrl, false).Unwrap().CreateAsyncContext(implementation.Factory).Unwrap())
+                    using (var socket = implementation.Factory.PusherCreate(inUrl, false).Unwrap())
+                    using (var ctx = socket.CreateAsyncContext(implementation.Factory).Unwrap())
                     {
                         await clientsReady.SignalAndWait(); // This client ready, wait for rest
+                        // Give all receivers a chance to actually start receiving
+                        await WaitShort();
                         for (var m = 0; m < numMessagesPerPusher; ++m)
                         {
-                            await pushSocket.Send(implementation.CreateMessage());
+                            await ctx.Send(implementation.CreateMessage());
                             await WaitShort();
                         }
                     }
@@ -78,20 +79,23 @@ namespace nng.Tests
             {
                 var task = Task.Run(async () =>
                 {
-                    using (var pullSocket = implementation.CreateClient(outUrl))
+                    var pullSocket = implementation.CreateClient(outUrl);
+                    await clientsReady.SignalAndWait(); // This client ready, wait for rest
+                    while (!token.IsCancellationRequested)
                     {
-                        await clientsReady.SignalAndWait(); // This client ready, wait for rest
-                        while (!token.IsCancellationRequested)
-                        {
-                            var _ = await pullSocket.Receive(token);
-                            counter.Signal();
-                        }
+                        var _ = await pullSocket.Receive(token);
+                        counter.Signal();
                     }
                 });
                 tasks.Add(task);
             }
 
             return tasks;
+        }
+
+        public void Dispose()
+        {
+            implementation.Dispose();
         }
 
         IBrokerImpl<IMessage> implementation;

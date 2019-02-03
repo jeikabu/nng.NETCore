@@ -104,7 +104,6 @@ namespace nng
                 nng_aio_free(aioHandle);
                 var removed = callbacks.TryRemove(aioCallback, out var _);
                 System.Diagnostics.Debug.Assert(removed);
-                Socket.Dispose();
             }
             disposed = true;
         }
