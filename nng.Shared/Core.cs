@@ -119,7 +119,7 @@ namespace nng
         }
         public static void SetNngResult(this TaskCompletionSource<NngResult<Unit>> socket)
         {
-            socket.SetResult(NngResult<Unit>.Ok(new Unit { }));
+            socket.SetResult(Unit.Ok);
         }
         public static void SetNngResult<T>(this TaskCompletionSource<NngResult<T>> socket, T message)
         {
@@ -131,7 +131,7 @@ namespace nng
         }
         public static void TrySetNngResult(this TaskCompletionSource<NngResult<Unit>> socket)
         {
-            socket.TrySetResult(NngResult<Unit>.Ok(new Unit { }));
+            socket.TrySetResult(Unit.Ok);
         }
         public static void TrySetNngResult<T>(this CancellationTokenTaskSource<NngResult<T>> socket, T message)
         {

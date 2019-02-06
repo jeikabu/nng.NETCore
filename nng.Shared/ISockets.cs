@@ -64,46 +64,63 @@ namespace nng
     { }
 
     /// <summary>
+    /// Represents a socket that can send messages
+    /// </summary>
+    public interface ISendSocket : ISocket
+    {
+        //NngResult<Unit> Send(IMessage message, Defines.NngFlag flags = default);
+        NngResult<Unit> SendMsg(IMessage message, Defines.NngFlag flags = default);
+    }
+
+    /// <summary>
+    /// Represents a socket that can receive messages
+    /// </summary>
+    public interface IRecvSocket : ISocket
+    {
+        NngResult<IMessage> RecvMsg(Defines.NngFlag flags = default);
+    }
+
+    /// <summary>
     /// Represents publish half of publish/subscribe protocol
     /// </summary>
-    public interface IPubSocket : ISocket { }
+    public interface IPubSocket : ISendSocket, ISocket { }
     /// <summary>
     /// Represents subscribe half of publish/subscribe protocol
     /// </summary>
-    public interface ISubSocket : ISocket { }
+    public interface ISubSocket : IRecvSocket, ISocket { }
     /// <summary>
     /// Represents push half of push/pull protocol
     /// </summary>
-    public interface IPushSocket : ISocket { }
+    public interface IPushSocket : ISendSocket, ISocket { }
     /// <summary>
     /// Represents pull half of push/pull protocol
     /// </summary>
-    public interface IPullSocket : ISocket { }
+    public interface IPullSocket : IRecvSocket, ISocket { }
     /// <summary>
     /// Represents request half of request/reply protocol
     /// </summary>
-    public interface IReqSocket : ISocket { }
+    public interface IReqSocket : ISendSocket, IRecvSocket, ISocket { }
     /// <summary>
     /// Represents reply half of request/reply protocol
     /// </summary>
-    public interface IRepSocket : ISocket { }
+    public interface IRepSocket : ISendSocket, IRecvSocket, ISocket { }
     /// <summary>
     /// Represents node of bus protocol
     /// </summary>
-    public interface IBusSocket : ISocket { }
+    public interface IBusSocket : ISendSocket, IRecvSocket, ISocket { }
 
     /// <summary>
     /// Represents one side of 1:1 pair protocol
     /// </summary>
-    public interface IPairSocket : ISocket { }
+    public interface IPairSocket : ISendSocket, IRecvSocket, ISocket { }
 
     /// <summary>
     /// Represents respondent half of survey protocol
     /// </summary>
-    public interface IRespondentSocket : ISocket { }
+    public interface IRespondentSocket : ISendSocket, IRecvSocket, ISocket { }
 
     /// <summary>
     /// Represents surveyor half of survey protocol
     /// </summary>
-    public interface ISurveyorSocket : ISocket { }
+    public interface ISurveyorSocket : ISendSocket, IRecvSocket, ISocket { }
 }

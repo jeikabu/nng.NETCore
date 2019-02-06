@@ -76,6 +76,23 @@ namespace nng
         //     return nng_setopt_ptr(NngSocket, name, data);
         // }
 
+        // public NngResult<Unit> Send(IMessage message, Defines.NngFlag flags = default)
+        // {
+        //     return Unit.OkIfZero(nng_sendmsg(NngSocket, message.NngMsg, flags));
+        // }
+
+        public NngResult<Unit> SendMsg(IMessage message, Defines.NngFlag flags = default)
+        {
+            return Unit.OkIfZero(nng_sendmsg(NngSocket, message.NngMsg, flags));
+        }
+
+        public NngResult<IMessage> RecvMsg(Defines.NngFlag flags = default)
+        {
+            nng_msg message;
+            var res = nng_recvmsg(NngSocket, out message, flags);
+            return NngResult<IMessage>.OkThen(res, () => new Message(message));
+        }
+
         #region IDisposable
         public void Dispose()
         {
