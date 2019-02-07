@@ -70,9 +70,31 @@ namespace nng.Tests
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
-        public Task SendRecvFlags(string url)
+        public void SendRecvAlloc(string url)
         {
-            return Fixture.TestIterate(() => DoSendRecvFlags(url));
+            Fixture.TestIterate(() => DoSendRecvAlloc(url));
+        }
+
+        void DoSendRecvAlloc(string url)
+        {
+            using (var rep = Factory.ReplierCreate(url).Unwrap())
+            using (var req = Factory.RequesterCreate(url).Unwrap())
+            {
+                var msg = Factory.CreateAlloc(128);
+                rng.NextBytes(msg.AsSpan());
+                req.SendZeroCopy(msg).Unwrap();
+                var request = rep.RecvZeroCopy().Unwrap();
+                rep.SendZeroCopy(request).Unwrap();
+                var reply = req.RecvZeroCopy().Unwrap();
+                Util.Equals(msg, reply);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public Task SendRecvNonBlock(string url)
+        {
+            return Fixture.TestIterate(() => DoSendRecvNonBlock(url));
         }
 
         async Task<NngResult<T>> retry<T>(Func<NngResult<T>> func)
@@ -86,7 +108,7 @@ namespace nng.Tests
             return res;
         }
 
-        async Task DoSendRecvFlags(string url)
+        async Task DoSendRecvNonBlock(string url)
         {
             using (var rep = Factory.ReplierCreate(url).Unwrap())
             using (var req = Factory.RequesterCreate(url).Unwrap())

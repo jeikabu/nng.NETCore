@@ -25,6 +25,11 @@ namespace nng.Tests
             return res;
         }
 
+        public IMemory CreateAlloc(int size)
+        {
+            return Alloc.Create(size);
+        }
+
         public NngResult<IBusSocket> BusOpen() => BusSocket.Open();
         public NngResult<IReqSocket> RequesterOpen() => ReqSocket.Open();
         public NngResult<IRepSocket> ReplierOpen() => RepSocket.Open();

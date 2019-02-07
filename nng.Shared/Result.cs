@@ -172,6 +172,35 @@ namespace nng
         /// <returns></returns>
         public NngErrno Err() => result.Err();
 
+        /// <summary>
+        /// Create a result of another type.  If this is a success uses.
+        /// If this is a fail, contains the same fail value.
+        /// </summary>
+        /// <param name="func">Function to convert success value to another type</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public NngResult<T> Into<T>(Func<T> func)
+        {
+            if (IsOk())
+            {
+                return NngResult<T>.Ok(func());
+            }
+            else
+            {
+                return IntoErr<T>();
+            }
+        }
+
+        /// <summary>
+        /// Create a fail result from the fail value.  If this is a success result throws an exception.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public NngResult<T> IntoErr<T>()
+        {
+            return NngResult<T>.Err(Err());
+        }
+
         public TOk Unwrap()
         {
             if (result.IsOk())

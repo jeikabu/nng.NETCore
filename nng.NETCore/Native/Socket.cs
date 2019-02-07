@@ -98,7 +98,7 @@ namespace nng.Native.Socket
 
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_send(nng_socket socket, IntPtr data, UIntPtr size, Defines.NngFlag flags);
+        public static extern unsafe Int32 nng_send(nng_socket socket, IntPtr data, UIntPtr size, Defines.NngFlag flags);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern Int32 nng_recv(nng_socket socket, ref IntPtr data, ref UIntPtr size, Defines.NngFlag flags);

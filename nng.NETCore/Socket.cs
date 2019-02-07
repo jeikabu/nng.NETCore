@@ -1,5 +1,6 @@
 using nng.Native;
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -76,14 +77,59 @@ namespace nng
         //     return nng_setopt_ptr(NngSocket, name, data);
         // }
 
-        // public NngResult<Unit> Send(IMessage message, Defines.NngFlag flags = default)
-        // {
-        //     return Unit.OkIfZero(nng_sendmsg(NngSocket, message.NngMsg, flags));
-        // }
+        public NngResult<Unit> Send(ReadOnlySpan<byte> message, Defines.NngFlag flags = default)
+        {
+            unsafe {
+                fixed (byte* ptr = &message[0])
+                {
+                    var res = nng_send(NngSocket, (IntPtr)ptr, (UIntPtr)message.Length, flags);
+                    return Unit.OkIfZero(res);
+                }
+            }
+        }
+
+        public NngResult<Unit> SendZeroCopy(IMemory message, Defines.NngFlag flags = default)
+        {
+            // Unconditionally set NNG_FLAG_ALLOC for "zero-copy" send
+            flags = flags | Defines.NngFlag.NNG_FLAG_ALLOC;
+            var res = nng_send(NngSocket, message.Ptr, message.Length, flags);
+            return Unit.OkIfZero(res);
+        }
 
         public NngResult<Unit> SendMsg(IMessage message, Defines.NngFlag flags = default)
         {
             return Unit.OkIfZero(nng_sendmsg(NngSocket, message.NngMsg, flags));
+        }
+
+        public NngResult<UIntPtr> Recv(ref IMemory buffer, Defines.NngFlag flags = default)
+        {
+            if (flags.HasFlag(Defines.NngFlag.NNG_FLAG_ALLOC))
+            {
+                var res = RecvZeroCopy(flags);
+                return res.Into<UIntPtr>(() => res.Ok().Length);
+            }
+            else
+            {
+                if (buffer == null || buffer.Length == UIntPtr.Zero)
+                    return NngResult<UIntPtr>.Err(Defines.NngErrno.EMSGSIZE);
+                var ptr = buffer.Ptr;
+                var size = buffer.Length;
+                var res = nng_recv(NngSocket, ref ptr, ref size, flags);
+                return NngResult<UIntPtr>.OkIfZero(res, size);
+            }
+        }
+
+        public NngResult<IMemory> RecvZeroCopy(Defines.NngFlag flags = default)
+        {
+            // Unconditionally set NNG_FLAG_ALLOC for "zero-copy" receive
+            flags = flags | Defines.NngFlag.NNG_FLAG_ALLOC;
+            var ptr = IntPtr.Zero;
+            var size = UIntPtr.Zero;
+            var res = nng_recv(NngSocket, ref ptr, ref size, flags);
+            return NngResult<IMemory>.OkThen(res, () => {
+                System.Diagnostics.Debug.Assert(ptr != default && size != default);
+                return Alloc.Create(ptr, size);
+            });
         }
 
         public NngResult<IMessage> RecvMsg(Defines.NngFlag flags = default)

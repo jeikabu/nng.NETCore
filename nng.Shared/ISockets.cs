@@ -48,7 +48,7 @@ namespace nng
     /// </summary>
     public interface IStart : IDisposable
     {
-        int Start(Defines.NngFlag flags = 0);
+        int Start(Defines.NngFlag flags = default);
     }
 
     /// <summary>
@@ -68,7 +68,20 @@ namespace nng
     /// </summary>
     public interface ISendSocket : ISocket
     {
-        //NngResult<Unit> Send(IMessage message, Defines.NngFlag flags = default);
+        /// <summary>
+        /// Even if <c>NNG_FLAG_ALLOC</c> is specified a copy may be made.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="flags"></param>
+        /// <returns></returns>
+        NngResult<Unit> Send(ReadOnlySpan<byte> message, Defines.NngFlag flags = default);
+        /// <summary>
+        /// .
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="flags"><c>NNG_FLAG_ALLOC</c> is implicit</param>
+        /// <returns></returns>
+        NngResult<Unit> SendZeroCopy(IMemory message, Defines.NngFlag flags = default);
         NngResult<Unit> SendMsg(IMessage message, Defines.NngFlag flags = default);
     }
 
@@ -77,6 +90,20 @@ namespace nng
     /// </summary>
     public interface IRecvSocket : ISocket
     {
+        /// <summary>
+        /// If <c>NNG_FLAG_ALLOC</c> is used buffer will contain newly allocated buffer.
+        /// If <c>NNG_FLAG_ALLOC</c> is not used, buffer must be provided.
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="flags"></param>
+        /// <returns>Number of bytes received and stored in buffer</returns>
+        NngResult<UIntPtr> Recv(ref IMemory buffer, Defines.NngFlag flags = default);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="flags"><c>NNG_FLAG_ALLOC</c> is implicit</param>
+        /// <returns></returns>
+        NngResult<IMemory> RecvZeroCopy(Defines.NngFlag flags = default);
         NngResult<IMessage> RecvMsg(Defines.NngFlag flags = default);
     }
 
