@@ -10,6 +10,7 @@ namespace nng
         T CreateMessage();
         T CreateMessage(nng_msg message);
         nng_msg Take(ref T message);
+        IMemory CreateAlloc(int size);
     }
 
     /// <summary>

@@ -37,7 +37,13 @@ namespace nng.Native.Dialer
         public static extern int nng_dialer_getopt_ms(nng_dialer dialer, string name, out nng_duration data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_dialer_getopt_ptr(nng_dialer dialer, string name, out IntPtr data);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_dialer_getopt_size(nng_dialer dialer, string name, out UIntPtr data);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_dialer_getopt_string(nng_dialer dialer, string name, out IntPtr data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_dialer_getopt_uint64(nng_dialer dialer, string name, out UInt64 data);
@@ -59,6 +65,9 @@ namespace nng.Native.Dialer
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_dialer_setopt_ms(nng_dialer dialer, string name, nng_duration value);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_dialer_setopt_ptr(nng_dialer dialer, string name, IntPtr value);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_dialer_setopt_size(nng_dialer dialer, string name, UIntPtr value);

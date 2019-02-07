@@ -18,7 +18,7 @@ namespace nng.Native.Basic
         public static extern void nng_free(IntPtr ptr, UIntPtr size);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr nng_strdup(string str);
+        public static extern IntPtr nng_strdup(IntPtr str);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern void nng_strfree(IntPtr str);

@@ -123,11 +123,7 @@ namespace nng
         public int Id => nng_pipe_id(NngPipe);
 
         public int GetOpt(string name, out bool data)
-        {
-            int size = nng_pipe_getopt_bool(NngPipe, name, out int val);
-            data = val != 0;
-            return size;
-        }
+            => nng_pipe_getopt_bool(NngPipe, name, out data);
 
         public int GetOpt(string name, out int data)
             => nng_pipe_getopt_int(NngPipe, name, out data);
@@ -139,7 +135,12 @@ namespace nng
             => nng_pipe_getopt_ptr(NngPipe, name, out data);
 
         public int GetOpt(string name, out string data)
-            => nng_pipe_getopt_string(NngPipe, name, out data);
+        {
+            IntPtr ptr;
+            var res = nng_pipe_getopt_string(NngPipe, name, out ptr);
+            data = NngString.Create(ptr).ToManaged();
+            return res;
+        }
 
         public int GetOpt(string name, out UIntPtr data)
             => nng_pipe_getopt_size(NngPipe, name, out data);

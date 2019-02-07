@@ -18,23 +18,23 @@ namespace nng.Native.Socket
         public static extern Int32 nng_close(nng_socket socket);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_dial(nng_socket socket, string url, out nng_dialer dialer, UInt32 flags);
+        public static extern int nng_dial(nng_socket socket, string url, out nng_dialer dialer, Defines.NngFlag flags);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        static extern int nng_dial(nng_socket socket, string url, IntPtr not_used, UInt32 flags);
+        static extern int nng_dial(nng_socket socket, string url, IntPtr not_used, Defines.NngFlag flags);
 
-        public static int nng_dial(nng_socket socket, string url, UInt32 flags)
+        public static int nng_dial(nng_socket socket, string url, Defines.NngFlag flags)
         {
             return nng_dial(socket, url, IntPtr.Zero, flags);
         }
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_listen(nng_socket socket, string url, out nng_listener listener, UInt32 flags);
+        public static extern int nng_listen(nng_socket socket, string url, out nng_listener listener, Defines.NngFlag flags);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        static extern int nng_listen(nng_socket socket, string url, IntPtr not_used, UInt32 flags);
+        static extern int nng_listen(nng_socket socket, string url, IntPtr not_used, Defines.NngFlag flags);
 
-        public static int nng_listen(nng_socket socket, string url, UInt32 flags)
+        public static int nng_listen(nng_socket socket, string url, Defines.NngFlag flags)
         {
             return nng_listen(socket, url, IntPtr.Zero, flags);
         }
@@ -81,32 +81,35 @@ namespace nng.Native.Socket
         public static extern Int32 nng_getopt_bool(nng_socket socket, string name, out bool value);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_getopt_int(nng_socket socket, string name,  out Int32 value);
+        public static extern Int32 nng_getopt_int(nng_socket socket, string name, out Int32 value);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_getopt_ms(nng_socket socket, string name,  out nng_duration value);
+        public static extern Int32 nng_getopt_ms(nng_socket socket, string name, out nng_duration value);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_getopt_size(nng_socket socket, string name,  out UIntPtr value);
+        public static extern Int32 nng_getopt_size(nng_socket socket, string name, out UIntPtr value);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_getopt_uint64(nng_socket socket, string name,  out UInt64 value);
+        public static extern Int32 nng_getopt_string(nng_socket socket, string name, out IntPtr value);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_getopt_ptr(nng_socket socket, string name,  out IntPtr value);
+        public static extern Int32 nng_getopt_uint64(nng_socket socket, string name, out UInt64 value);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern Int32 nng_getopt_ptr(nng_socket socket, string name, out IntPtr value);
 
 
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_send(nng_socket socket, IntPtr data, UIntPtr size, Int32 flags);
+        public static extern unsafe Int32 nng_send(nng_socket socket, IntPtr data, UIntPtr size, Defines.NngFlag flags);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_recv(nng_socket socket, out IntPtr data, out UIntPtr size, Int32 flags);
+        public static extern Int32 nng_recv(nng_socket socket, ref IntPtr data, ref UIntPtr size, Defines.NngFlag flags);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_sendmsg(nng_socket socket, nng_msg message, Int32 flags);
+        public static extern Int32 nng_sendmsg(nng_socket socket, nng_msg message, Defines.NngFlag flags);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern Int32 nng_recvmsg(nng_socket socket, out nng_msg message, Int32 flags);
+        public static extern Int32 nng_recvmsg(nng_socket socket, out nng_msg message, Defines.NngFlag flags);
     }
 }

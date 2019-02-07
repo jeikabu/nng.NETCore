@@ -67,5 +67,60 @@ namespace nng.Tests
             });
             return Util.AssertWait(req, rep);
         }
+
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public void SendRecvAlloc(string url)
+        {
+            Fixture.TestIterate(() => DoSendRecvAlloc(url));
+        }
+
+        void DoSendRecvAlloc(string url)
+        {
+            using (var rep = Factory.ReplierCreate(url).Unwrap())
+            using (var req = Factory.RequesterCreate(url).Unwrap())
+            {
+                var msg = Factory.CreateAlloc(128);
+                rng.NextBytes(msg.AsSpan());
+                req.SendZeroCopy(msg).Unwrap();
+                var request = rep.RecvZeroCopy().Unwrap();
+                rep.SendZeroCopy(request).Unwrap();
+                var reply = req.RecvZeroCopy().Unwrap();
+                Util.Equals(msg, reply);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public Task SendRecvNonBlock(string url)
+        {
+            return Fixture.TestIterate(() => DoSendRecvNonBlock(url));
+        }
+
+        async Task<NngResult<T>> retry<T>(Func<NngResult<T>> func)
+        {
+            NngResult<T> res = func();
+            while (res.IsErr(Defines.NngErrno.EAGAIN))
+            {
+                await Task.Delay(10);
+                res = func();
+            }
+            return res;
+        }
+
+        async Task DoSendRecvNonBlock(string url)
+        {
+            using (var rep = Factory.ReplierCreate(url).Unwrap())
+            using (var req = Factory.RequesterCreate(url).Unwrap())
+            {
+                var msg = Factory.CreateMessage();
+                var res = await retry(() => req.SendMsg(msg, Defines.NngFlag.NNG_FLAG_NONBLOCK));
+                res.Unwrap();
+                var request = (await retry(() => rep.RecvMsg(Defines.NngFlag.NNG_FLAG_NONBLOCK))).Unwrap();
+                res = await retry(() => rep.SendMsg(request, Defines.NngFlag.NNG_FLAG_NONBLOCK));
+                var reply = await retry(() => req.RecvMsg(Defines.NngFlag.NNG_FLAG_NONBLOCK));
+                reply.Unwrap();
+            }
+        }
     }
 }
