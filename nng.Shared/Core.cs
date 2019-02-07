@@ -97,10 +97,6 @@ namespace nng
         /// A positive identifier for the pipe, if it is valid.
         /// </summary>
         int Id { get; }
-
-        int GetOpt(string name, out IntPtr data);
-        int GetOpt(string name, out string data);
-        int GetOpt(string name, out ulong data);
     }
 
     public static class Extensions

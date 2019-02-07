@@ -34,16 +34,19 @@ namespace nng
             => nng_listener_getopt_int(NngListener, name, out data);
         public int GetOpt(string name, out nng_duration data)
             => nng_listener_getopt_ms(NngListener, name, out data);
+        public int GetOpt(string name, out IntPtr data)
+            => nng_listener_getopt_ptr(NngListener, name, out data);
         public int GetOpt(string name, out UIntPtr data)
             => nng_listener_getopt_size(NngListener, name, out data);
-        // public int GetOpt(string name, out string data)
-        // {
-        //     return nng_getopt_string(NngSocket, name, out data);
-        // }
-        // public int GetOpt(string name, out void* data)
-        // {
-        //     return nng_getopt_ptr(NngSocket, name, out data);
-        // }
+        public int GetOpt(string name, out string data)
+        {
+            IntPtr ptr;
+            var res = nng_listener_getopt_string(NngListener, name, out ptr);
+            data = NngString.Create(ptr).ToManaged();
+            return res;
+        }
+        public int GetOpt(string name, out UInt64 data)
+            => nng_listener_getopt_uint64(NngListener, name, out data);
 
         public int SetOpt(string name, byte[] data)
             => nng_listener_setopt(NngListener, name, data);

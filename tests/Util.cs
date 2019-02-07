@@ -98,6 +98,13 @@ namespace nng.Tests
             Assert.Equal(newSize, nextSize);
         }
 
+        public static void AssertGetSetOpts(IOptions options, string name, string value)
+        {
+            Assert.Equal(0, options.SetOpt(name, value));
+            Assert.Equal(0, options.GetOpt(name, out string newValue));
+            Assert.Equal(value, newValue);
+        }
+
         public static async Task<Exception> AssertThrowsNng(Func<Task> func, Defines.NngErrno errno)
         {
             try

@@ -12,7 +12,7 @@ namespace nng
         /// </summary>
         /// <value></value>
         IntPtr Ptr { get; }
-        
+
         /// <summary>
         /// Size of the allocation in bytes
         /// </summary>
@@ -26,7 +26,7 @@ namespace nng
         Span<byte> AsSpan();
 
         /// <summary>
-        /// Take ownership of the memory and responsibility for calling `nng_free`.s
+        /// Take ownership of the memory and responsibility for calling `nng_free`.
         /// </summary>
         void Take();
     }

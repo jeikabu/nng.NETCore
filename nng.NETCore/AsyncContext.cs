@@ -128,59 +128,42 @@ namespace nng
         // {
         //     return nng_ctx_getopt(NngCtx, name, out data);
         // }
-        public int GetOpt(string name, out bool data)
-        {
-            return nng_ctx_getopt_bool(NngCtx, name, out data);
-        }
+        public int GetOpt(string name, out bool data) 
+            => nng_ctx_getopt_bool(NngCtx, name, out data);
         public int GetOpt(string name, out int data)
-        {
-            return nng_ctx_getopt_int(NngCtx, name, out data);
-        }
+            => nng_ctx_getopt_int(NngCtx, name, out data);
         public int GetOpt(string name, out nng_duration data)
-        {
-            return nng_ctx_getopt_ms(NngCtx, name, out data);
-        }
+            => nng_ctx_getopt_ms(NngCtx, name, out data);
+        public int GetOpt(string name, out IntPtr data)
+            => nng_ctx_getopt_ptr(NngCtx, name, out data);
         public int GetOpt(string name, out UIntPtr data)
+            => nng_ctx_getopt_size(NngCtx, name, out data);
+        public int GetOpt(string name, out string data)
         {
-            return nng_ctx_getopt_size(NngCtx, name, out data);
+            IntPtr ptr;
+            var res = nng_ctx_getopt_string(NngCtx, name, out ptr);
+            data = NngString.Create(ptr).ToManaged();
+            return res;
         }
-        // public int GetOpt(string name, out string data)
-        // {
-        //     return nng_ctx_getopt_string(NngCtx, name, out data);
-        // }
-        // public int GetOpt(string name, out UInt64 data)
-        // {
-        //     return nng_ctx_getopt_uint64(NngCtx, name, out data);
-        // }
+        public int GetOpt(string name, out UInt64 data)
+            => nng_ctx_getopt_uint64(NngCtx, name, out data);
 
         public int SetOpt(string name, byte[] data)
-        {
-            return nng_ctx_setopt(NngCtx, name, data);
-        }
+            => nng_ctx_setopt(NngCtx, name, data);
         public int SetOpt(string name, bool data)
-        {
-            return nng_ctx_setopt_bool(NngCtx, name, data);
-        }
+            => nng_ctx_setopt_bool(NngCtx, name, data);
         public int SetOpt(string name, int data)
-        {
-            return nng_ctx_setopt_int(NngCtx, name, data);
-        }
+            => nng_ctx_setopt_int(NngCtx, name, data);
         public int SetOpt(string name, nng_duration data)
-        {
-            return nng_ctx_setopt_ms(NngCtx, name, data);
-        }
+            => nng_ctx_setopt_ms(NngCtx, name, data);
+        public int SetOpt(string name, IntPtr data)
+            => nng_ctx_setopt_ptr(NngCtx, name, data);
         public int SetOpt(string name, UIntPtr data)
-        {
-            return nng_ctx_setopt_size(NngCtx, name, data);
-        }
-        // public int SetOpt(string name, string data)
-        // {
-        //     return nng_ctx_setopt_string(NngCtx, name, data);
-        // }
-        // public int SetOpt(string name, UInt64 data)
-        // {
-        //     return nng_ctx_setopt_uint64(NngCtx, name, data);
-        // }
+            => nng_ctx_setopt_size(NngCtx, name, data);
+        public int SetOpt(string name, string data)
+            => nng_ctx_setopt_string(NngCtx, name, data);
+        public int SetOpt(string name, UInt64 data)
+            => nng_ctx_setopt_uint64(NngCtx, name, data);
 
         #region IDisposable
         public void Dispose()

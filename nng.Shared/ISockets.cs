@@ -11,12 +11,6 @@ namespace nng
     public interface ISocket : IOptions, IDisposable
     {
         nng_socket NngSocket { get; }
-
-        //int GetOpt(string name, out string data);
-        int GetOpt(string name, out UInt64 data);
-
-        int SetOpt(string name, string data);
-        int SetOpt(string name, UInt64 data);
     }
 
     public static class OptionsExt
@@ -25,14 +19,21 @@ namespace nng
         {
             switch (data)
             {
-                case bool boolVal:
-                    return socket.SetOpt(name, boolVal);
-                case int intVal:
-                    return socket.SetOpt(name, intVal);
-                case nng_duration durVal:
-                    return socket.SetOpt(name, durVal);
-                case UIntPtr sizeVal:
-                    return socket.SetOpt(name, sizeVal);
+                case bool value:
+                    return socket.SetOpt(name, value);
+                case int value:
+                    return socket.SetOpt(name, value);
+                case nng_duration value:
+                    return socket.SetOpt(name, value);
+                case IntPtr value:
+                    return socket.SetOpt(name, value);
+                case UIntPtr value:
+                    return socket.SetOpt(name, value);
+                case string value:
+                    return socket.SetOpt(name, value);
+                case UInt64 value:
+                    return socket.SetOpt(name, value);
+                
             }
             return Defines.NNG_EINVAL;
         }

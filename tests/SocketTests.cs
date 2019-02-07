@@ -144,7 +144,6 @@ namespace nng.Tests
             using (var rep = Factory.ReplierCreate(url).Unwrap())
             using (var req = Factory.RequesterCreate(url).Unwrap())
             {
-                //await WaitReady();
                 // bool
                 AssertGetSetOpts(req, NNG_OPT_TCP_NODELAY);
 
@@ -160,6 +159,7 @@ namespace nng.Tests
                 // uint64_t
 
                 // string
+                AssertGetSetOpts(req, NNG_OPT_SOCKNAME, "test");
 
                 // ptr
             }
