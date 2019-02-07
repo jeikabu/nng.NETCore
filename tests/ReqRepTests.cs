@@ -23,8 +23,10 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task ReqRepBasic(string url)
         {
-            using (var repAioCtx = Factory.ReplierCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
-            using (var reqAioCtx = Factory.RequesterCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
+            using (var repSocket = Factory.ReplierOpen().ThenListenAs(out var listener, url).Unwrap())
+            using (var repAioCtx = repSocket.CreateAsyncContext(Factory).Unwrap())
+            using (var reqSocket = Factory.RequesterOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
+            using (var reqAioCtx = reqSocket.CreateAsyncContext(Factory).Unwrap())
             {
                 var receiveTask = repAioCtx.Receive();
                 var asyncReq = reqAioCtx.Send(Factory.CreateMessage());
@@ -44,11 +46,13 @@ namespace nng.Tests
         Task DoReqRep(string url)
         {
             var barrier = new AsyncBarrier(2);
+            var dialUrl = string.Empty;
             var rep = Task.Run(async () =>
             {
-                using (var socket = Factory.ReplierCreate(url).Unwrap())
+                using (var socket = Factory.ReplierOpen().ThenListenAs(out var listener, url).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
+                    dialUrl = GetDialUrl(listener, url);
                     await barrier.SignalAndWait();
 
                     var msg = await ctx.Receive();
@@ -59,7 +63,7 @@ namespace nng.Tests
             var req = Task.Run(async () =>
             {
                 await barrier.SignalAndWait();
-                using (var socket = Factory.RequesterCreate(url).Unwrap())
+                using (var socket = Factory.RequesterOpen().ThenDial(dialUrl).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     var _response = await ctx.Send(Factory.CreateMessage());
@@ -77,8 +81,8 @@ namespace nng.Tests
 
         void DoSendRecvAlloc(string url)
         {
-            using (var rep = Factory.ReplierCreate(url).Unwrap())
-            using (var req = Factory.RequesterCreate(url).Unwrap())
+            using (var rep = Factory.ReplierOpen().ThenListenAs(out var listener, url).Unwrap())
+            using (var req = Factory.RequesterOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
             {
                 var msg = Factory.CreateAlloc(128);
                 rng.NextBytes(msg.AsSpan());
@@ -97,28 +101,17 @@ namespace nng.Tests
             return Fixture.TestIterate(() => DoSendRecvNonBlock(url));
         }
 
-        async Task<NngResult<T>> retry<T>(Func<NngResult<T>> func)
-        {
-            NngResult<T> res = func();
-            while (res.IsErr(Defines.NngErrno.EAGAIN))
-            {
-                await Task.Delay(10);
-                res = func();
-            }
-            return res;
-        }
-
         async Task DoSendRecvNonBlock(string url)
         {
-            using (var rep = Factory.ReplierCreate(url).Unwrap())
-            using (var req = Factory.RequesterCreate(url).Unwrap())
+            using (var rep = Factory.ReplierOpen().ThenListenAs(out var listener, url).Unwrap())
+            using (var req = Factory.RequesterOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
             {
                 var msg = Factory.CreateMessage();
-                var res = await retry(() => req.SendMsg(msg, Defines.NngFlag.NNG_FLAG_NONBLOCK));
+                var res = await RetryAgain(() => req.SendMsg(msg, Defines.NngFlag.NNG_FLAG_NONBLOCK));
                 res.Unwrap();
-                var request = (await retry(() => rep.RecvMsg(Defines.NngFlag.NNG_FLAG_NONBLOCK))).Unwrap();
-                res = await retry(() => rep.SendMsg(request, Defines.NngFlag.NNG_FLAG_NONBLOCK));
-                var reply = await retry(() => req.RecvMsg(Defines.NngFlag.NNG_FLAG_NONBLOCK));
+                var request = (await RetryAgain(() => rep.RecvMsg(Defines.NngFlag.NNG_FLAG_NONBLOCK))).Unwrap();
+                res = await RetryAgain(() => rep.SendMsg(request, Defines.NngFlag.NNG_FLAG_NONBLOCK));
+                var reply = await RetryAgain(() => req.RecvMsg(Defines.NngFlag.NNG_FLAG_NONBLOCK));
                 reply.Unwrap();
             }
         }

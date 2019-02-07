@@ -27,17 +27,19 @@ namespace nng.Tests
         {
             Fixture.TestIterate(() =>
             {
-                using (var bus0 = Factory.BusCreate(url, true).Unwrap())
-                using (var bus1 = Factory.BusCreate(url, false).Unwrap())
+                using (var bus0 = Factory.BusOpen().Unwrap())
+                using (var bus1 = Factory.BusOpen().Unwrap())
                 {
+                    var listener = bus0.ListenWithListener(url).Unwrap();
+                    bus1.Dial(GetDialUrl(listener, url)).Unwrap();
                 }
 
                 // Manually create listener/dialer
                 using (var bus0 = Factory.BusOpen().Unwrap())
-                using (var listener0 = Factory.ListenerCreate(bus0, url))
+                using (var listener0 = bus0.ListenerCreate(url).Unwrap())
                 {
                     using (var bus1 = Factory.BusOpen().Unwrap())
-                    using (var dialer1 = Factory.DialerCreate(bus1, url))
+                    using (var dialer1 = bus1.DialerCreate(GetDialUrl(listener0, url)).Unwrap())
                     {
 
                     }
@@ -58,11 +60,13 @@ namespace nng.Tests
             var readyToSend = new AsyncBarrier(3);
             var messageReceipt = new AsyncCountdownEvent(2);
             var cts = new CancellationTokenSource();
+            var dialUrl = string.Empty;
             var bus0Task = Task.Run(async () =>
             {
-                using (var socket = Factory.BusCreate(url, true).Unwrap())
+                using (var socket = Factory.BusOpen().ThenListenAs(out var listener, url).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
+                    dialUrl = GetDialUrl(listener, url);
                     await readyToDial.SignalAndWait();
                     await readyToSend.SignalAndWait();
                     await ctx.Send(Factory.CreateMessage());
@@ -72,7 +76,7 @@ namespace nng.Tests
             var bus1Task = Task.Run(async () =>
             {
                 await readyToDial.SignalAndWait();
-                using (var socket = Factory.BusCreate(url, false).Unwrap())
+                using (var socket = Factory.BusOpen().ThenDial(dialUrl).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     // Make sure receive has started before signalling ready
@@ -86,7 +90,7 @@ namespace nng.Tests
             var bus2Task = Task.Run(async () =>
             {
                 await readyToDial.SignalAndWait();
-                using (var socket = Factory.BusCreate(url, false).Unwrap())
+                using (var socket = Factory.BusOpen().ThenDial(dialUrl).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     // Make sure receive has started before signalling ready

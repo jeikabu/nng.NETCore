@@ -11,7 +11,49 @@ namespace nng
     public interface ISocket : IOptions, IDisposable
     {
         nng_socket NngSocket { get; }
+        
+        /// <summary>
+        /// Create and start a listener that listens at the specified url for incoming connections from dialers.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="flags"></param>
+        /// <returns></returns>
+        NngResult<Unit> Listen(string url, Defines.NngFlag flags = default);
+        /// <summary>
+        /// Create and start dialer that dials/connects to the specified url where a listener is listening.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="flags"></param>
+        /// <returns></returns>
+        NngResult<Unit> Dial(string url, Defines.NngFlag flags = default);
+        /// <summary>
+        /// Create and start a listener and return it.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="flags"></param>
+        /// <returns></returns>
+        NngResult<IListener> ListenWithListener(string url, Defines.NngFlag flags = default);
+        /// <summary>
+        /// Create and start a dialer and return it.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="flags"></param>
+        /// <returns></returns>
+        NngResult<IDialer> DialWithDialer(string url, Defines.NngFlag flags = default);
+        /// <summary>
+        /// Create a listener.  It must be started to begin listening.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        NngResult<IListener> ListenerCreate(string url);
+        /// <summary>
+        /// Create a dialer.  It must be started to dial and initiate a connection.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        NngResult<IDialer> DialerCreate(string url);
     }
+
 
     public static class OptionsExt
     {
@@ -56,7 +98,9 @@ namespace nng
     /// Represents nng listener
     /// </summary>
     public interface IListener : IStart, IOptions
-    { }
+    {
+        int GetOpt(string name, out nng_sockaddr data);
+    }
 
     /// <summary>
     /// Represents nng dialer

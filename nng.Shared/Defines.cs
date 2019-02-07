@@ -6,6 +6,7 @@ namespace nng.Native
 {
     public sealed partial class Defines
     {
+        public const int NNG_MAXADDRLEN = 128;
 
         public const int NNG_DURATION_INFINITE = -1;
         public const int NNG_DURATION_DEFAULT = -2;
@@ -258,4 +259,116 @@ namespace nng.Native
 
         public bool IsNull => ptr == IntPtr.Zero;
     }
+
+#region sockaddr
+    public enum nng_sockaddr_family : UInt16
+    {
+        NNG_AF_UNSPEC = 0,
+        NNG_AF_INPROC = 1,
+        NNG_AF_IPC = 2,
+        NNG_AF_INET = 3,
+        NNG_AF_INET6 = 4,
+        NNG_AF_ZT = 5 // ZeroTier
+    };
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct nng_sockaddr
+    {
+        [FieldOffset(0)]
+        public nng_sockaddr_family s_family;
+        [FieldOffset(0)]
+        public nng_sockaddr_ipc s_ipc;
+        [FieldOffset(0)]
+        public nng_sockaddr_inproc s_inproc;
+        [FieldOffset(0)]
+        public nng_sockaddr_in6 s_in6;
+        [FieldOffset(0)]
+        public nng_sockaddr_in s_in;
+        [FieldOffset(0)]
+        public nng_sockaddr_zt s_zt;
+    };
+
+    /// <summary>
+    /// In nng this is a typedef:
+    /// typedef struct nng_sockaddr_path nng_sockaddr_ipc;
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_sockaddr_ipc
+    {
+        public nng_sockaddr_path sockaddr_path;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_sockaddr_inproc
+    {
+        public UInt16 sa_family;
+        char_maxaddrlen_blob sa_name;
+    };
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_sockaddr_in6
+    {
+        public nng_sockaddr_family sa_family;
+        public UInt16 sa_port;
+        uint8_16_blob sa_addr;
+    };
+
+    /// <summary>
+    /// In nng this is a typedef:
+    /// typedef struct nng_sockaddr_in6 nng_sockaddr_udp6;
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_sockaddr_udp6
+    {
+        public nng_sockaddr_in6 sockaddr_path;
+    }
+
+    /// <summary>
+    /// In nng this is a typedef:
+    /// typedef struct nng_sockaddr_in6 nng_sockaddr_tcp6;
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_sockaddr_tcp6
+    {
+        public nng_sockaddr_in6 sockaddr_path;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_sockaddr_in
+    {
+        public nng_sockaddr_family sa_family;
+        public UInt16 sa_port;
+        public UInt32 sa_addr;
+    };
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_sockaddr_zt
+    {
+        public nng_sockaddr_family sa_family;
+        public UInt64 sa_nwid;
+        public UInt64 sa_nodeid;
+        public UInt32 sa_port;
+    };
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_sockaddr_path
+    {
+        public nng_sockaddr_family sa_family;
+        char_maxaddrlen_blob sa_path;
+    };
+
+    // Could instead write sa_path member of nng_sockr_path as:
+    // fixed char sa_path[NNG_MAXADDRLEN];
+    // But `fixed` requires turn on unsafe code for whole assembly....
+    [StructLayout(LayoutKind.Sequential, Size = Defines.NNG_MAXADDRLEN)]
+    struct char_maxaddrlen_blob
+    {
+    }
+
+    [StructLayout(LayoutKind.Sequential, Size = 16)]
+    struct uint8_16_blob
+    {
+    }
+
+#endregion
 }

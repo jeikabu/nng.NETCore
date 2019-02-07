@@ -25,6 +25,11 @@ namespace nng
             return new Dialer { NngDialer = dialer };
         }
 
+        public static IDialer Create(nng_dialer dialer)
+        {
+            return new Dialer { NngDialer = dialer };
+        }
+
         public int Start(NngFlag flags)
             => nng_dialer_start(NngDialer, flags);
 

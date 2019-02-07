@@ -86,9 +86,13 @@ namespace nng.Tests
         async Task<(ISendAsyncContext<IMessage>, IReceiveAsyncContext<IMessage>)> CreatePusherAndPuller()
         {
             var url = UrlIpc();
-            var push = factory.PusherCreate(url, true).Unwrap().CreateAsyncContext(factory).Unwrap();
+            var pushSocket = factory.PusherOpen().Unwrap();
+            pushSocket.Listen(url).Unwrap();
+            var push = pushSocket.CreateAsyncContext(factory).Unwrap();
             await WaitReady();
-            var pull = factory.PullerCreate(url, false).Unwrap().CreateAsyncContext(factory).Unwrap();
+            var pullSocket = factory.PullerOpen().Unwrap();
+            pullSocket.Dial(url).Unwrap();
+            var pull = pullSocket.CreateAsyncContext(factory).Unwrap();
             return (push, pull);
         }
     }
