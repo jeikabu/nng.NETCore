@@ -40,30 +40,6 @@ namespace nng.Tests
         public NngResult<IPairSocket> PairOpen() => Pair1Socket.Open();
         public NngResult<IRespondentSocket> RespondentOpen() => RespondentSocket.Open();
         public NngResult<ISurveyorSocket> SurveyorOpen() => SurveyorSocket.Open();
-        public IListener ListenerCreate(ISocket socket, string url) => Listener.Create(socket, url);
-        public IDialer DialerCreate(ISocket socket, string url) => Dialer.Create(socket, url);
-
-        public NngResult<TSocket> Dial<TSocket>(NngResult<TSocket> socketRes, string url) where TSocket : ISocket
-        {
-            if (socketRes.TryOk(out var ok))
-            {
-                var res = nng_dial(ok.NngSocket, url, 0);
-                if (res != 0)
-                    return NngResult<TSocket>.Fail(res);
-            }
-            return socketRes;
-        }
-
-        public NngResult<TSocket> Listen<TSocket>(NngResult<TSocket> socketRes, string url) where TSocket : ISocket
-        {
-            if (socketRes.TryOk(out var ok))
-            {
-                var res = nng_listen(ok.NngSocket, url, 0);
-                if (res != 0)
-                    return NngResult<TSocket>.Fail(res);
-            }
-            return socketRes;
-        }
 
         #region IAsyncContextFactory
         public NngResult<ISendAsyncContext<IMessage>> CreateSendAsyncContext(ISocket socket)

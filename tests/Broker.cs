@@ -58,7 +58,7 @@ namespace nng.Tests
             {
                 var task = Task.Run(async () =>
                 {
-                    using (var socket = implementation.Factory.PusherCreate(inUrl, false).Unwrap())
+                    using (var socket = implementation.Factory.PusherOpen().ThenDial(inUrl).Unwrap())
                     using (var ctx = socket.CreateAsyncContext(implementation.Factory).Unwrap())
                     {
                         await clientsReady.SignalAndWait(); // This client ready, wait for rest

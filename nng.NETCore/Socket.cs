@@ -15,6 +15,25 @@ namespace nng
     {
         public nng_socket NngSocket { get; protected set; }
 
+        public NngResult<Unit> Dial(string url, Defines.NngFlag flags = default)
+            => Unit.OkIfZero(nng_dial(NngSocket, url, flags));
+        public NngResult<Unit> Listen(string url, Defines.NngFlag flags = default)
+            => Unit.OkIfZero(nng_listen(NngSocket, url, flags));
+        public NngResult<IListener> ListenWithListener(string url, Defines.NngFlag flags = default)
+        {
+            var res = nng_listen(NngSocket, url, out var listener, flags);
+            return NngResult<IListener>.OkThen(res, () => Listener.Create(listener));
+        }
+        public NngResult<IDialer> DialWithDialer(string url, Defines.NngFlag flags = default)
+        {
+            var res = nng_dial(NngSocket, url, out var dialer, flags);
+            return NngResult<IDialer>.OkThen(res, () => Dialer.Create(dialer));
+        }
+        public NngResult<IListener> ListenerCreate(string url)
+            => NngResult<IListener>.Ok(Listener.Create(this, url));
+        public NngResult<IDialer> DialerCreate(string url)
+            => NngResult<IDialer>.Ok(Dialer.Create(this, url));
+
         public int GetOpt(string name, out bool data)
             => nng_getopt_bool(NngSocket, name, out data);
         public int GetOpt(string name, out int data)

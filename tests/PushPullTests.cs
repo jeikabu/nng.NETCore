@@ -34,11 +34,13 @@ namespace nng.Tests
             var serverReady = new AsyncBarrier(2);
             var clientReady = new AsyncBarrier(2);
             var cts = new CancellationTokenSource();
+            var dialUrl = string.Empty;
             var push = Task.Run(async () =>
             {
-                using (var socket = Factory.PusherCreate(url, true).Unwrap())
+                using (var socket = Factory.PusherOpen().ThenListenAs(out var listener, url).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
+                    dialUrl = GetDialUrl(listener, url);
                     await serverReady.SignalAndWait();
                     await clientReady.SignalAndWait();
                     // Make sure receiver is actually receiving before start sending
@@ -49,7 +51,7 @@ namespace nng.Tests
             var pull = Task.Run(async () =>
             {
                 await serverReady.SignalAndWait();
-                using (var socket = Factory.PullerCreate(url, false).Unwrap())
+                using (var socket = Factory.PullerOpen().ThenDial(dialUrl).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     await clientReady.SignalAndWait();
@@ -91,7 +93,8 @@ namespace nng.Tests
 
         public IReceiveAsyncContext<IMessage> CreateInSocket(string url)
         {
-            var socket = Factory.PullerCreate(url, true).Unwrap();
+            var socket = Factory.PullerOpen().Unwrap();
+            socket.Listen(url).Unwrap();
             var ctx = socket.CreateAsyncContext(Factory).Unwrap();
             disposable.Add(socket);
             disposable.Add(ctx);
@@ -99,7 +102,8 @@ namespace nng.Tests
         }
         public ISendAsyncContext<IMessage> CreateOutSocket(string url)
         {
-            var socket = Factory.PusherCreate(url, true).Unwrap();
+            var socket = Factory.PusherOpen().Unwrap();
+            socket.Listen(url).Unwrap();
             var ctx = socket.CreateAsyncContext(Factory).Unwrap();
             disposable.Add(socket);
             disposable.Add(ctx);
@@ -107,7 +111,8 @@ namespace nng.Tests
         }
         public IReceiveAsyncContext<IMessage> CreateClient(string url)
         {
-            var socket = Factory.PullerCreate(url, false).Unwrap();
+            var socket = Factory.PullerOpen().Unwrap();
+            socket.Dial(url).Unwrap();
             var ctx = socket.CreateAsyncContext(Factory).Unwrap();
             disposable.Add(socket);
             disposable.Add(ctx);

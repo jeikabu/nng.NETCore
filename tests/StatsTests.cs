@@ -27,9 +27,11 @@ namespace nng.Tests
         {
             // FIXME: Can be removed in nng 1.1.2 or 1.2.0
             // https://github.com/nanomsg/nng/issues/841
-            using (var pushSocket = Factory.PusherCreate("inproc://stats", true).Unwrap())
-            using (var pullSocket = Factory.PullerCreate("inproc://stats", false).Unwrap())
+            using (var pushSocket = Factory.PusherOpen().Unwrap())
+            using (var pullSocket = Factory.PullerOpen().Unwrap())
             {
+                pushSocket.Listen("inproc://stats").Unwrap();
+                pullSocket.Dial("inproc://stats").Unwrap();
                 using (var root = Factory.GetStatSnapshot().Unwrap())
                 {
                     foreach (var child in root.Child())

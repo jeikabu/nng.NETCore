@@ -172,6 +172,20 @@ namespace nng
         /// <returns></returns>
         public NngErrno Err() => result.Err();
 
+        public NngResult<TOk> Then(Func<TOk, NngResult<Unit>> func)
+        {
+            if (IsOk())
+            {
+                var ok = Ok();
+                var res = func(ok);
+                return res.Into(() => ok);
+            }
+            else
+            {
+                return this;
+            }
+        }
+
         /// <summary>
         /// Create a result of another type.  If this is a success uses.
         /// If this is a fail, contains the same fail value.

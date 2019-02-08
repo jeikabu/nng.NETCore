@@ -25,6 +25,11 @@ namespace nng
             return new Listener { NngListener = listener };
         }
 
+        public static IListener Create(nng_listener listener)
+        {
+            return new Listener { NngListener = listener };
+        }
+
         public int Start(NngFlag flags)
             => nng_listener_start(NngListener, flags);
 
@@ -38,6 +43,8 @@ namespace nng
             => nng_listener_getopt_ptr(NngListener, name, out data);
         public int GetOpt(string name, out UIntPtr data)
             => nng_listener_getopt_size(NngListener, name, out data);
+        public int GetOpt(string name, out nng_sockaddr data)
+            => nng_listener_getopt_sockaddr(NngListener, name, out data);
         public int GetOpt(string name, out string data)
         {
             IntPtr ptr;

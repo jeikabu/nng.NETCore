@@ -27,12 +27,32 @@ namespace nng.Tests
         {
             var url = UrlInproc();
             using (var socket = Factory.PublisherOpen().Unwrap())
-            using (var listener = Factory.ListenerCreate(socket, url))
+            using (var listener = socket.ListenerCreate(url).Unwrap())
             {
                 Assert.NotNull(listener);
                 Assert.Equal(0, listener.Start());
                 await WaitReady();
-                Assert.NotNull(Factory.SubscriberCreate(url));
+                var subSocket = Factory.SubscriberOpen().Unwrap();
+                Assert.NotNull(subSocket.DialerCreate(url));
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public Task Nonblock(string url)
+        {
+            return Fixture.TestIterate(() => DoNonblock(url));
+        }
+
+        async Task DoNonblock(string url)
+        {
+            using (var pub = Factory.PublisherOpen().Unwrap())
+            {
+                var listener = await Util.RetryAgain(() => pub.ListenWithListener(url, Defines.NngFlag.NNG_FLAG_NONBLOCK));
+                using (var sub = Factory.SubscriberOpen().ThenDial(GetDialUrl(listener.Unwrap(), url)).Unwrap())
+                {
+
+                }
             }
         }
 
@@ -41,7 +61,7 @@ namespace nng.Tests
         {
             var url = UrlInproc();
             using (var socket = Factory.PublisherOpen().Unwrap())
-            using (var listener = Factory.ListenerCreate(socket, url))
+            using (var listener = socket.ListenerCreate(url).Unwrap())
             {
                 //AssertGetSetOpts(listener, NNG_OPT_RECVBUF, (int data) => data + 16);
                 AssertGetSetOpts(listener, NNG_OPT_RECVMAXSZ, (UIntPtr data) => data + 16);
