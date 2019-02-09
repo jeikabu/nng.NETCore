@@ -26,14 +26,14 @@ namespace nng.Tests
         [ClassData(typeof(BadTransportsClassData))]
         public void BadTransports(string url)
         {
-            Assert.True(Factory.PublisherCreate(url).IsErr());
-            Assert.True(Factory.PullerCreate(url, true).IsErr());
-            Assert.True(Factory.PullerCreate(url, false).IsErr());
-            Assert.True(Factory.PusherCreate(url, true).IsErr());
-            Assert.True(Factory.PusherCreate(url, false).IsErr());
-            Assert.True(Factory.ReplierCreate(url).IsErr());
-            Assert.True(Factory.RequesterCreate(url).IsErr());
-            Assert.True(Factory.SubscriberCreate(url).IsErr());
+            Assert.True(Factory.PublisherOpen().ThenListen(url).IsErr());
+            Assert.True(Factory.PullerOpen().ThenListen(url).IsErr());
+            Assert.True(Factory.PullerOpen().ThenDial(url).IsErr());
+            Assert.True(Factory.PusherOpen().ThenListen(url).IsErr());
+            Assert.True(Factory.PusherOpen().ThenDial(url).IsErr());
+            Assert.True(Factory.ReplierOpen().ThenListen(url).IsErr());
+            Assert.True(Factory.RequesterOpen().ThenDial(url).IsErr());
+            Assert.True(Factory.SubscriberOpen().ThenDial(url).IsErr());
         }
 
         // Test to verify result of constructing two of the same socket:
@@ -67,35 +67,35 @@ namespace nng.Tests
             var tests = new DupeUrlTest[] {
                 new DupeUrlTest (
                     null,
-                    () => Factory.PublisherCreate(url).Unwrap(),
+                    () => Factory.PublisherOpen().ThenListen(url).Unwrap(),
                     false),
                 new DupeUrlTest (
                     null,
-                    () => Factory.PullerCreate(url, true).Unwrap(),
+                    () => Factory.PullerOpen().ThenListen(url).Unwrap(),
                     false),
                 new DupeUrlTest (
-                    () => Factory.PusherCreate(url, true).Unwrap(),
-                    () => Factory.PullerCreate(url, false).Unwrap(),
+                    () => Factory.PusherOpen().ThenListen(url).Unwrap(),
+                    () => Factory.PullerOpen().ThenDial(url).Unwrap(),
                     true),
                 new DupeUrlTest (
                     null,
-                    () => Factory.PusherCreate(url, true).Unwrap(),
+                    () => Factory.PusherOpen().ThenListen(url).Unwrap(),
                     false),
                 new DupeUrlTest (
-                    () => Factory.PullerCreate(url, true).Unwrap(),
-                    () => Factory.PusherCreate(url, false).Unwrap(),
+                    () => Factory.PullerOpen().ThenListen(url).Unwrap(),
+                    () => Factory.PusherOpen().ThenDial(url).Unwrap(),
                     true),
                 new DupeUrlTest (
                     null,
-                    () => Factory.ReplierCreate(url).Unwrap(),
+                    () => Factory.ReplierOpen().ThenListen(url).Unwrap(),
                     false),
                 new DupeUrlTest (
-                    () => Factory.ReplierCreate(url).Unwrap(),
-                    () => Factory.RequesterCreate(url).Unwrap(),
+                    () => Factory.ReplierOpen().ThenListen(url).Unwrap(),
+                    () => Factory.RequesterOpen().ThenDial(url).Unwrap(),
                     true),
                 new DupeUrlTest (
-                    () => Factory.PublisherCreate(url).Unwrap(),
-                    () => Factory.SubscriberCreate(url).Unwrap(),
+                    () => Factory.PublisherOpen().ThenListen(url).Unwrap(),
+                    () => Factory.SubscriberOpen().ThenDial(url).Unwrap(),
                     true),
             };
 
@@ -141,10 +141,9 @@ namespace nng.Tests
 
         void DoGetSetOpt(string url)
         {
-            using (var rep = Factory.ReplierCreate(url).Unwrap())
-            using (var req = Factory.RequesterCreate(url).Unwrap())
+            using (var rep = Factory.ReplierOpen().ThenListenAs(out var listener, url).Unwrap())
+            using (var req = Factory.RequesterOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
             {
-                //await WaitReady();
                 // bool
                 AssertGetSetOpts(req, NNG_OPT_TCP_NODELAY);
 
@@ -160,6 +159,7 @@ namespace nng.Tests
                 // uint64_t
 
                 // string
+                AssertGetSetOpts(req, NNG_OPT_SOCKNAME, "test");
 
                 // ptr
             }

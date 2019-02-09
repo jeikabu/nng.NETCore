@@ -27,17 +27,17 @@ namespace nng.Tests
         {
             Fixture.TestIterate(() =>
             {
-                using (var bus0 = Factory.SurveyorCreate(url, true).Unwrap())
-                using (var bus1 = Factory.RespondentCreate(url, false).Unwrap())
+                using (var bus0 = Factory.SurveyorOpen().ThenListenAs(out var listener, url).Unwrap())
+                using (var bus1 = Factory.RespondentOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
                 {
                 }
 
                 // Manually create listener/dialer
                 using (var bus0 = Factory.SurveyorOpen().Unwrap())
-                using (var listener0 = Factory.ListenerCreate(bus0, url))
+                using (var listener0 = bus0.ListenerCreate(url).Unwrap())
                 {
                     using (var bus1 = Factory.RespondentOpen().Unwrap())
-                    using (var dialer1 = Factory.DialerCreate(bus1, url))
+                    using (var dialer1 = bus1.DialerCreate(GetDialUrl(listener0, url)).Unwrap())
                     {
 
                     }
@@ -57,7 +57,8 @@ namespace nng.Tests
             var cts = new CancellationTokenSource();
             var task = Task.Run(async () =>
             {
-                using (var ctx = Factory.SurveyorCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var socket = Factory.SurveyorOpen().ThenListen(url).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     // Receive with no survey fails
                     await Util.AssertThrowsNng(() => ctx.Receive(cts.Token), Defines.NngErrno.ESTATE);
@@ -84,7 +85,8 @@ namespace nng.Tests
         {
             var task = Task.Run(async () =>
             {
-                using (var ctx = Factory.RespondentCreate(url, true).Unwrap().CreateAsyncContext(Factory).Unwrap())
+                using (var socket = Factory.RespondentOpen().ThenListen(url).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     // Response with no survey fails
                     await Util.AssertThrowsNng(() => ctx.Send(Factory.CreateMessage()), Defines.NngErrno.ESTATE);
@@ -110,11 +112,13 @@ namespace nng.Tests
             var numResponderReceive = new AsyncCountdownEvent(NumResponders);
             var cts = new CancellationTokenSource();
             var tasks = new List<Task>();
+            var dialUrl = string.Empty;
             var task = Task.Run(async () =>
             {
-                using (var socket = Factory.SurveyorCreate(url, true).Unwrap())
+                using (var socket = Factory.SurveyorOpen().ThenListenAs(out var listener, url).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
+                    dialUrl = GetDialUrl(listener, url);
                     await readyToDial.SignalAndWait();
                     await readyToSend.SignalAndWait();
                     // Send survey and receive response
@@ -136,7 +140,7 @@ namespace nng.Tests
                 task = Task.Run(async () =>
                 {
                     await readyToDial.SignalAndWait();
-                    using (var socket = Factory.RespondentCreate(url, false).Unwrap())
+                    using (var socket = Factory.RespondentOpen().ThenDial(dialUrl).Unwrap())
                     using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                     {
                         await readyToSend.SignalAndWait();
@@ -173,8 +177,8 @@ namespace nng.Tests
             var numSurveyorReceive = new AsyncCountdownEvent(NumSurveyors);
             var numResponderReceive = new AsyncCountdownEvent(NumSurveyors);
 
-            using (var surveySocket = Factory.SurveyorCreate(url, true).Unwrap())
-            using (var respondSocket = Factory.RespondentCreate(url, false).Unwrap())
+            using (var surveySocket = Factory.SurveyorOpen().ThenListen(url).Unwrap())
+            using (var respondSocket = Factory.RespondentOpen().ThenDial(url).Unwrap())
             {
                 var duration = new nng_duration { TimeMs = DefaultTimeoutMs };
                 // Send() is not cancelable so need it to timeout

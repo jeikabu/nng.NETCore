@@ -6,7 +6,7 @@
 
 __Status__:
 
-Beta-ish.  Using latest [NNG release](https://github.com/nanomsg/nng/releases) (currently v1.1.1).  Once this is a bit farther along will track NNG version numbers.
+Using latest [NNG release](https://github.com/nanomsg/nng/releases).
 
 [![NuGet](https://img.shields.io/nuget/v/Subor.nng.NETCore.svg?colorB=brightgreen)](https://www.nuget.org/packages/Subor.nng.NETCore)
 [![Build status](https://ci.appveyor.com/api/projects/status/ohpurtgoq42wauan/branch/master?svg=true)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)

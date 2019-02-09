@@ -23,13 +23,39 @@ namespace nng.Tests
 
         public static string UrlIpc() => "ipc://" + Guid.NewGuid().ToString();
         public static string UrlInproc() => "inproc://" + Guid.NewGuid().ToString();
-        public static string UrlTcp() => "tcp://localhost:" + rng.Next(1025, 65535);
+        public static string UrlTcp() => "tcp://localhost:0";
         public static string UrlWs() => "ws://localhost:" + rng.Next(1025, 65535) + "/" + rng.Next();
 
         public static byte[] TopicRandom() => Guid.NewGuid().ToByteArray();
 
         public static Task WaitReady() => Task.Delay(100);
         public static Task WaitShort() => Task.Delay(25);
+
+        public static string GetDialUrl(IListener listener, string url)
+        {
+            if (url.StartsWith("tcp", StringComparison.OrdinalIgnoreCase) && url.EndsWith(":0", StringComparison.OrdinalIgnoreCase))
+            {
+                var res = listener.GetOpt(nng.Native.Defines.NNG_OPT_LOCADDR, out nng_sockaddr addr);
+                if (res == 0)
+                {
+                    ushort port = 0;
+                    switch (addr.s_family)
+                    {
+                        case Native.nng_sockaddr_family.NNG_AF_INET:
+                        port = (ushort)System.Net.IPAddress.NetworkToHostOrder((short)addr.s_in.sa_port);
+                        break;
+                        case Native.nng_sockaddr_family.NNG_AF_INET6:
+                        port = (ushort)System.Net.IPAddress.NetworkToHostOrder((short)addr.s_in6.sa_port);
+                        break;
+                        default:
+                            Assert.True(false);
+                            break;
+                    }
+                    url = url.Substring(0, url.Length - 1) + port; 
+                }
+            }
+            return url;
+        }
 
         public static Task AssertWait(params Task[] tasks)
         {
@@ -98,6 +124,13 @@ namespace nng.Tests
             Assert.Equal(newSize, nextSize);
         }
 
+        public static void AssertGetSetOpts(IOptions options, string name, string value)
+        {
+            Assert.Equal(0, options.SetOpt(name, value));
+            Assert.Equal(0, options.GetOpt(name, out string newValue));
+            Assert.Equal(value, newValue);
+        }
+
         public static async Task<Exception> AssertThrowsNng(Func<Task> func, Defines.NngErrno errno)
         {
             try
@@ -115,6 +148,17 @@ namespace nng.Tests
                 return ex;
             }
             return null;
+        }
+
+        public static async Task<NngResult<T>> RetryAgain<T>(Func<NngResult<T>> func)
+        {
+            NngResult<T> res = func();
+            while (res.IsErr(Defines.NngErrno.EAGAIN))
+            {
+                await Task.Delay(10);
+                res = func();
+            }
+            return res;
         }
 
         public static readonly Random rng = new Random();

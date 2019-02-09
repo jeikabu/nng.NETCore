@@ -10,6 +10,7 @@ namespace nng
         T CreateMessage();
         T CreateMessage(nng_msg message);
         nng_msg Take(ref T message);
+        IMemory CreateAlloc(int size);
     }
 
     /// <summary>
@@ -27,12 +28,6 @@ namespace nng
         NngResult<IPairSocket> PairOpen();
         NngResult<IRespondentSocket> RespondentOpen();
         NngResult<ISurveyorSocket> SurveyorOpen();
-
-        IListener ListenerCreate(ISocket socket, string url);
-        IDialer DialerCreate(ISocket socket, string url);
-
-        NngResult<TSocket> Dial<TSocket>(NngResult<TSocket> socketRes, string url) where TSocket : ISocket;
-        NngResult<TSocket> Listen<TSocket>(NngResult<TSocket> socketRes, string url) where TSocket : ISocket;
     }
 
     public enum SendReceiveContextSubtype

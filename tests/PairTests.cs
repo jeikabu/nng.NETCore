@@ -32,11 +32,13 @@ namespace nng.Tests
         {
             var barrier = new AsyncBarrier(2);
             var cts = new CancellationTokenSource();
+            var dialUrl = string.Empty;
             var push = Task.Run(async () =>
             {
-                using (var socket = Factory.PairCreate(url, true).Unwrap())
+                using (var socket = Factory.PairOpen().ThenListenAs(out var listener, url).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
+                    dialUrl = GetDialUrl(listener, url);
                     await barrier.SignalAndWait();
                     (await ctx.Send(Factory.CreateMessage())).Unwrap();
                     await WaitShort();
@@ -45,7 +47,7 @@ namespace nng.Tests
             var pull = Task.Run(async () =>
             {
                 await barrier.SignalAndWait();
-                using (var socket = Factory.PairCreate(url, false).Unwrap())
+                using (var socket = Factory.PairOpen().ThenDial(dialUrl).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     await ctx.Receive(cts.Token);
@@ -70,8 +72,8 @@ namespace nng.Tests
             var dialerReady = new AsyncBarrier(numListeners + numDialers);
             var cts = new CancellationTokenSource();
 
-            using (var listenSocket = Factory.PairCreate(url, true).Unwrap())
-            using (var dialerSocket = Factory.PairCreate(url, false).Unwrap())
+            using (var listenSocket = Factory.PairOpen().ThenListenAs(out var listener, url).Unwrap())
+            using (var dialerSocket = Factory.PairOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
             {
                 // Make sure sends can timeout since they aren't canceleable
                 listenSocket.SetOpt(nng.Native.Defines.NNG_OPT_SENDTIMEO, new nng_duration{TimeMs = 50});

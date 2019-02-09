@@ -18,9 +18,10 @@ namespace nng
         int GetOpt(string name, out bool data);
         int GetOpt(string name, out int data);
         int GetOpt(string name, out nng_duration data);
+        int GetOpt(string name, out IntPtr data);
         int GetOpt(string name, out UIntPtr data);
-        // int GetOpt(string name, out string data);
-        // int GetOpt(string name, out UInt64 data);
+        int GetOpt(string name, out string data);
+        int GetOpt(string name, out UInt64 data);
     }
 
     /// <summary>
@@ -32,8 +33,9 @@ namespace nng
         int SetOpt(string name, bool data);
         int SetOpt(string name, int data);
         int SetOpt(string name, nng_duration data);
+        int SetOpt(string name, IntPtr data);
         int SetOpt(string name, UIntPtr data);
-        // int SetOpt(string name, string data);
-        // int SetOpt(string name, UInt64 data);
+        int SetOpt(string name, string data);
+        int SetOpt(string name, UInt64 data);
     }
 }

@@ -26,7 +26,8 @@ namespace nng.Tests
         public void GetSetOpt()
         {
             var url = UrlIpc();
-            using (var rep = Factory.ReplierCreate(url).Unwrap().CreateAsyncContext(Factory).Unwrap())
+            using (var socket = Factory.ReplierOpen().ThenListen(url).Unwrap())
+            using (var rep = socket.CreateAsyncContext(Factory).Unwrap())
             {
                 var ctx = (rep as ICtx).Ctx;
                 // Get a value, set a new value, get back the new value

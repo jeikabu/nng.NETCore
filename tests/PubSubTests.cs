@@ -41,9 +41,9 @@ namespace nng.Tests
         [ClassData(typeof(TransportsClassData))]
         public async Task BasicPubSub(string url)
         {
-            using (var pubSocket = Factory.PublisherCreate(url).Unwrap())
+            using (var pubSocket = Factory.PublisherOpen().ThenListenAs(out var listener, url).Unwrap())
             using (var pub = pubSocket.CreateAsyncContext(Factory).Unwrap())
-            using (var subSocket = Factory.SubscriberCreate(url).Unwrap())
+            using (var subSocket = Factory.SubscriberOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
             using (var sub = subSocket.CreateAsyncContext(Factory).Unwrap())
             {
                 var resvTask = sub.Receive(CancellationToken.None);
@@ -71,11 +71,13 @@ namespace nng.Tests
             var serverReady = new AsyncBarrier(2);
             var clientReady = new AsyncBarrier(2);
             var cts = new CancellationTokenSource();
+            var dialUrl = string.Empty;
             var pubTask = Task.Run(async () =>
             {
-                using (var socket = Factory.PublisherCreate(url).Unwrap())
+                using (var socket = Factory.PublisherOpen().ThenListenAs(out var listener, url).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
+                    dialUrl = GetDialUrl(listener, url);
                     await serverReady.SignalAndWait();
                     await clientReady.SignalAndWait();
                     // Give receivers a chance to actually start receiving
@@ -86,7 +88,7 @@ namespace nng.Tests
             var subTask = Task.Run(async () =>
             {
                 await serverReady.SignalAndWait();
-                using (var socket = Factory.SubscriberCreate(url).Unwrap())
+                using (var socket = Factory.SubscriberOpen().ThenDial(dialUrl).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     ctx.Subscribe(topic);
@@ -133,7 +135,8 @@ namespace nng.Tests
 
         public IReceiveAsyncContext<IMessage> CreateInSocket(string url)
         {
-            var socket = Factory.PullerCreate(url, true).Unwrap();
+            var socket = Factory.PullerOpen().Unwrap();
+            socket.Listen(url).Unwrap();
             var ctx = socket.CreateAsyncContext(Factory).Unwrap();
             disposable.Add(socket);
             disposable.Add(ctx);
@@ -142,7 +145,8 @@ namespace nng.Tests
 
         public ISendAsyncContext<IMessage> CreateOutSocket(string url)
         {
-            var socket = Factory.PublisherCreate(url).Unwrap();
+            var socket = Factory.PublisherOpen().Unwrap();
+            socket.Listen(url).Unwrap();
             var ctx = socket.CreateAsyncContext(Factory).Unwrap();
             disposable.Add(socket);
             disposable.Add(ctx);
@@ -151,7 +155,8 @@ namespace nng.Tests
 
         public IReceiveAsyncContext<IMessage> CreateClient(string url)
         {
-            var socket = Factory.SubscriberCreate(url).Unwrap();
+            var socket = Factory.SubscriberOpen().Unwrap();
+            socket.Dial(url).Unwrap();
             var ctx = socket.CreateAsyncContext(Factory).Unwrap();
             ctx.Subscribe(topic);
             disposable.Add(socket);

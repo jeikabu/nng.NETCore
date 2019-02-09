@@ -40,13 +40,16 @@ namespace nng.Native.Listener
         public static extern int nng_listener_getopt_size(nng_listener listener, string name, out UIntPtr data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_listener_getopt_sockaddr(nng_listener listener, string name, out nng_sockaddr data);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_listener_getopt_string(nng_listener listener, string name, out IntPtr data);
+
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_listener_getopt_uint64(nng_listener listener, string name, out UInt64 data);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_listener_getopt_ptr(nng_listener listener, string name, out IntPtr data);
-
-        // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        // public static extern int nng_listener_getopt_string(nng_listener listener, string name, out string data);
 
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
