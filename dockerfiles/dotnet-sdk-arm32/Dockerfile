@@ -1,7 +1,7 @@
-# jeikabu/debian-dotnet-sdk:arm64v8-stretch
+# jeikabu/debian-dotnet-sdk:arm32v7-stretch
 # .NET Core SDK for building
 
-FROM multiarch/debian-debootstrap:arm64-stretch
+FROM multiarch/debian-debootstrap:armhf-stretch
 
 RUN apt-get update && apt-get install -y \
     curl \
@@ -17,10 +17,10 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT 1
 # From:
 # https://github.com/dotnet/dotnet-docker/blob/master/3.0/sdk/stretch/arm64v8/Dockerfile
 ENV DOTNET_SDK_VERSION 3.0.100-preview-010184
-ARG SOURCE=https://download.visualstudio.microsoft.com/download/pr/716a5791-eca8-4b65-b1bd-6a9852327b00/4cb3c2c89e2428bebcdb7193eaa45b91/dotnet-sdk-$DOTNET_SDK_VERSION-linux-arm64.tar.gz
-#ARG SOURCE=https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$DOTNET_SDK_VERSION/dotnet-sdk-$DOTNET_SDK_VERSION-linux-arm64.tar.gz
+ARG SOURCE=https://download.visualstudio.microsoft.com/download/pr/83bca990-9618-46d8-b096-32ecdf3ae492/c2f9d2785e78f20de0c3bb2adb880c5e/dotnet-sdk-3.0.100-preview-010184-linux-arm.tar.gz
+#ARG SOURCE=https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$DOTNET_SDK_VERSION/dotnet-sdk-$DOTNET_SDK_VERSION-linux-arm.tar.gz
 RUN curl -SL --output dotnet.tar.gz $SOURCE \
-    && dotnet_sha512='3fd7338fdbcc194cdc4a7472a0639189830aba4f653726094a85469b383bd3dc005e3dad4427fee398f76b40b415cbd21b462bd68af21169b283f44325598305' \
+    && dotnet_sha512='d87144969cacb4730f630b4a6bcd5d103a64f278f1f5824a092c73bd30a86881021abd593467fc6a282cd3476ff96a5c60791ad8a9a4bf1929d71c4fb2f2cf1c' \
     && echo "$dotnet_sha512 dotnet.tar.gz" | sha512sum -c - \
     && mkdir -p /usr/share/dotnet \
     && tar -zxf dotnet.tar.gz -C /usr/share/dotnet \
