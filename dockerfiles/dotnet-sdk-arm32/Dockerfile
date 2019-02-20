@@ -27,7 +27,7 @@ RUN curl -SL --output dotnet.tar.gz $SOURCE \
     && rm dotnet.tar.gz \
     && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
 
-# .NET Core 2.2
-RUN curl -SL --output dotnet.tar.gz https://download.visualstudio.microsoft.com/download/pr/d9e60c5f-af85-4a9e-99ab-26d0cbbd70b7/5fde0e1f8ce2217494e325c9bc09fc0e/dotnet-sdk-2.2.103-linux-arm64.tar.gz \
+# .NET Core 2.2.2
+RUN curl -SL --output dotnet.tar.gz https://download.visualstudio.microsoft.com/download/pr/d9f37b73-df8d-4dfa-a905-b7648d3401d0/6312573ac13d7a8ddc16e4058f7d7dc5/dotnet-sdk-2.2.104-linux-arm.tar.gz \
     && tar -zxf dotnet.tar.gz -C /usr/share/dotnet \
     && rm dotnet.tar.gz
