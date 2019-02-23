@@ -50,7 +50,7 @@ var factory = nng.NngLoadContext.Init(ctx);
 // Use factory...
 ```
 
-See [`tests/`](https://github.com/subor/nng.NETCore/tree/master/tests) for basic examples.
+See [`tests/`](https://github.com/subor/nng.NETCore/tree/master/tests) and [`examples/`](https://github.com/subor/nng.NETCore/tree/master/examples) for usage examples.
 
 ## Build & Run
 
