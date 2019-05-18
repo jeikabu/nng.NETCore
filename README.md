@@ -1,6 +1,6 @@
-# nng.NETCore
+# nng.NET
 
-.NET Core bindings to [NNG](https://github.com/nanomsg/nng):
+.NET bindings to [NNG](https://github.com/nanomsg/nng):
 
 > NNG, like its predecessors nanomsg (and to some extent ZeroMQ), is a lightweight, broker-less library, offering a simple API to solve common recurring messaging problems, such as publish/subscribe, RPC-style request/reply, or service discovery. The API frees the programmer from worrying about details like connection management, retries, and other common considerations, so that they can focus on the application instead of the plumbing.
 
@@ -13,7 +13,7 @@ Using latest [NNG release](https://github.com/nanomsg/nng/releases).
 [![Build status](https://img.shields.io/appveyor/tests/jake-ruyi/nng-netcore/master.svg)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
 [![codecov](https://codecov.io/gh/subor/nng.NETCore/branch/master/graph/badge.svg)](https://codecov.io/gh/subor/nng.NETCore)
 
-For list of missing APIs/features see [`is:issue is:open label:enhancement`](https://github.com/subor/nng.NETCore/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
+For list of missing APIs/features see [`is:issue is:open label:enhancement`](https://github.com/jeikabu/nng.NETCore/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
 
 
 __Goals of nng.NETCore__:
@@ -32,13 +32,13 @@ Supports projects targetting:
     - [`SuppressUnmanagedCodeSecurity`](https://docs.microsoft.com/en-us/dotnet/api/system.security.suppressunmanagedcodesecurityattribute) is used with .NET Standard 2.0+ for improved PInvoke performance
 - .NET Framework 4.6.1+ ([caveats](#.net-framework))
 
-[Supported platforms](https://github.com/subor/nng.NETCore/tree/master/nng.NETCore/runtimes):
+[Supported platforms](https://github.com/jeikabu/nng.NETCore/tree/master/nng.NETCore/runtimes):
 - Windows Vista or later 32/64-bit
 - macOS/OSX 10.?+ 64-bit (built on 10.14)
 - Linux x86_64 (built on Ubuntu 18.04)
 - Linux ARM32/armv7l and ARM64/aarch64 (built on Debian 9/stretch)
 
-Should be easy to add others that are supported by both .NET Core and NNG.
+Should be easy to add others that are supported by both .NET Core/.NET 5 and NNG.
 
 After installing the package and building, your output folder should have `runtimes/` directory containing native binaries.
 
@@ -50,7 +50,7 @@ var factory = nng.NngLoadContext.Init(ctx);
 // Use factory...
 ```
 
-See [`tests/`](https://github.com/subor/nng.NETCore/tree/master/tests) for basic examples.
+See [`tests/`](https://github.com/jeikabu/nng.NETCore/tree/master/tests) for basic examples.
 
 ## Build & Run
 

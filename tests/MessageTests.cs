@@ -2,6 +2,7 @@ using nng.Native;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -219,6 +220,42 @@ namespace nng.Tests
             result = msg.Pipe.GetOpt("option-name", out ulong ulongData);
             Assert.NotEqual(0, result);
             Assert.Equal(0UL, ulongData);
+        }
+
+        struct InnerTestType
+        {
+            public bool boolValue;
+            public int intValue;
+            public string strValue;
+        }
+
+        struct TestType
+        {
+            public bool boolValue;
+            public int intValue;
+            public string strValue;
+            public InnerTestType nestedValue;
+        }
+
+        [Fact]
+        public void Marshalling()
+        {
+            var obj = new TestType { boolValue = true, intValue = Util.rng.Next(), strValue = Guid.NewGuid().ToString(), 
+                nestedValue = new InnerTestType {
+                    boolValue = false, intValue = Util.rng.Next(), strValue = Guid.NewGuid().ToString()
+                }
+            };
+            var size = Marshal.SizeOf<TestType>();
+            var msg = factory.CreateMessage();
+            {
+                var ptr = Marshal.AllocHGlobal(size);
+                Marshal.StructureToPtr(obj, ptr, false);
+                msg.Append(ptr, size);
+                Marshal.FreeHGlobal(ptr);
+            }
+
+            var newObj = Marshal.PtrToStructure<TestType>(msg.AsPtr());
+            Assert.Equal(obj, newObj);
         }
     }
 }
