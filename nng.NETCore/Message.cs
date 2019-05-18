@@ -1,6 +1,7 @@
 using nng.Native;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,8 +16,23 @@ namespace nng
             this.message = message;
         }
 
-        //public int Append(byte[] data) => nng_msg_header_append(NngMsg, data);
-        public int Append(ReadOnlySpan<byte> data) => nng_msg_header_append(NngMsg, data);
+        public int Append(IntPtr data, int size)
+        {
+            unsafe
+            {
+                return nng_msg_header_append(NngMsg, (byte*)data, (UIntPtr)size);
+            }
+        }
+        public int Append(ReadOnlySpan<byte> data)
+        {
+            unsafe
+            {
+                fixed (byte* ptr = &data[0])
+                {
+                    return nng_msg_header_append(message, ptr, (UIntPtr)data.Length);
+                }
+            }
+        }
         public int Append(UInt32 data) => nng_msg_header_append_u32(NngMsg, data);
         public int Chop(UIntPtr size) => nng_msg_header_chop(NngMsg, size);
         public int Chop(out uint data) => nng_msg_header_chop_u32(NngMsg, out data);
@@ -26,7 +42,20 @@ namespace nng
         public int Length => (int)nng_msg_header_len(NngMsg);
         public int Trim(UIntPtr size) => nng_msg_header_trim(NngMsg, size);
         public int Trim(out uint data) => nng_msg_header_trim_u32(NngMsg, out data);
-        public Span<byte> AsSpan() => nng_msg_header_span(NngMsg);
+        public Span<byte> AsSpan()
+        {
+            unsafe
+            {
+                return new Span<byte>(nng_msg_header(NngMsg), (int)nng_msg_header_len(message));
+            }
+        }
+        public IntPtr AsPtr()
+        {
+            unsafe
+            {
+                return (IntPtr)nng_msg_header(NngMsg);
+            }
+        }
 
         nng_msg NngMsg => message;
         readonly nng_msg message;
@@ -72,8 +101,23 @@ namespace nng
 
         public IPipe Pipe => _pipe ?? (_pipe = new Pipe(nng_msg_get_pipe(NngMsg)));
 
-        //public int Append(byte[] data) => nng_msg_append(NngMsg, data);
-        public int Append(ReadOnlySpan<byte> data) => nng_msg_append(NngMsg, data);
+        public int Append(IntPtr data, int size)
+        {
+            unsafe
+            {
+                return nng_msg_append(NngMsg, (byte*)data, (UIntPtr)size);
+            }
+        }
+        public int Append(ReadOnlySpan<byte> data)
+        {
+            unsafe
+            {
+                fixed (byte* ptr = &data[0])
+                {
+                    return nng_msg_append(NngMsg, ptr, (UIntPtr)data.Length);
+                }
+            }
+        }
         public int Append(uint data) => nng_msg_append_u32(NngMsg, data);
         public int Chop(UIntPtr size) => nng_msg_chop(NngMsg, size);
         public int Chop(out uint data) => nng_msg_chop_u32(NngMsg, out data);
@@ -83,7 +127,20 @@ namespace nng
         public int Length => (int)nng_msg_len(NngMsg);
         public int Trim(UIntPtr size) => nng_msg_trim(NngMsg, size);
         public int Trim(out uint data) => nng_msg_trim_u32(NngMsg, out data);
-        public Span<byte> AsSpan() => nng_msg_body_span(NngMsg);
+        public Span<byte> AsSpan()
+        {
+            unsafe
+            {
+                return new Span<byte>(nng_msg_body(message), (int)nng_msg_len(message));
+            }
+        }
+        public IntPtr AsPtr()
+        {
+            unsafe
+            {
+                return (IntPtr)nng_msg_body(NngMsg);
+            }
+        }
 
         nng_msg message;
         NngMessageHeader _header;

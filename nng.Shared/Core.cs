@@ -36,7 +36,8 @@ namespace nng
     /// </summary>
     public interface IMessagePart
     {
-        //int Append(byte[] data);
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
+        int Append(IntPtr data, int size);
         int Append(ReadOnlySpan<byte> data);
         int Append(uint data);
         int Chop(UIntPtr size);
@@ -49,6 +50,12 @@ namespace nng
         int Trim(out uint data);
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
         Span<byte> AsSpan();
+        /// <summary>
+        /// Get pointer to unmanaged memory.
+        /// </summary>
+        /// <returns></returns>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
+        IntPtr AsPtr();
     }
 
     /// <summary>
