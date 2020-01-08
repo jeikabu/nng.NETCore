@@ -11,8 +11,10 @@ namespace nng.Native.Aio
 #endif
     public sealed class UnsafeNativeMethods
     {
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void AioCallback(IntPtr arg);
+
+        //[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         //public delegate void AioCancelFunction(nng_aio aio, IntPtr ptr, Int32 val);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]

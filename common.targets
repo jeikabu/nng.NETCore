@@ -23,10 +23,10 @@
     <Authors>Subor</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Owners>Subor</Owners>
-    <PackageProjectUrl>https://github.com/subor/nng.NETCore</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/jeikabu/nng.NETCore</PackageProjectUrl>
     <Summary>.NET Core bindings to nng</Summary>
-    <PackageTags>subor nng csnng</PackageTags>
+    <PackageTags>nng csnng</PackageTags>
     <Description>.NET Core bindings to nng (https://github.com/nanomsg/nng)</Description>
-    <RepositoryUrl>https://github.com/subor/nng.NETCore</RepositoryUrl>
+    <RepositoryUrl>https://github.com/jeikabu/nng.NETCore</RepositoryUrl>
   </PropertyGroup>
 </Project>

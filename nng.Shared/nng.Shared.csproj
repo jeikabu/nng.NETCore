@@ -4,13 +4,14 @@
 
   <PropertyGroup>
     <OutputPath>..\packer\bin\$(Configuration)\lib\</OutputPath>
+    <!-- To enable code coverage -->
     <DebugType>full</DebugType>
   </PropertyGroup>
 
   <PropertyGroup>
     <PackageId>Subor.nng.NETCore.Shared</PackageId>
-    <PackageVersion>1.1.1.0</PackageVersion>
-    <Version>1.1.1.0</Version>
+    <PackageVersion>1.1.1.1</PackageVersion>
+    <Version>1.1.1.1</Version>
 
     <PackageOutputPath>../bin/$(Configuration)</PackageOutputPath>
   </PropertyGroup>

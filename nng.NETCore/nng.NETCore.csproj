@@ -10,8 +10,13 @@
     <!-- Including assembly as part of runtimes/ so don't want it placed in lib/ -->
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <PackageId>Subor.nng.NETCore</PackageId>
-    <PackageVersion>1.1.1.0</PackageVersion>
-    <Version>1.1.1.0</Version>
+    <PackageVersion>1.1.1.1</PackageVersion>
+    <Version>1.1.1.1</Version>
+    <!-- Needed to avoid `error NU5128` when running `dotnet pack`.
+    Assemblies for targetted frameworks are in runtimes/ instead of lib/ or ref/ 
+    See: https://docs.microsoft.com/en-us/nuget/reference/errors-and-warnings/nu5128#scenario-2
+    -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
