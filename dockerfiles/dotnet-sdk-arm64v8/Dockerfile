@@ -4,6 +4,7 @@
 FROM multiarch/debian-debootstrap:arm64-buster
 
 RUN apt-get update && apt-get install -y \
+    ca-certificates \
     curl \
     gnupg \
     icu-devtools
