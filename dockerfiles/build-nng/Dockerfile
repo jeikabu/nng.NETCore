@@ -1,14 +1,14 @@
-# jeikabu/debian-build-nng:arm64v8-stretch
+# jeikabu/debian-build-nng:arm64v8-buster
 # Build NNG ARM64
 # Volumes:
 # /usr/src = build output
 # Example:
 # cd /tmp && mkdir binary-output && cd binary-output
-# docker run --rm -t -v $(pwd):/usr/src jeikabu/debian-build-nng:arm64v8-stretch
+# docker run --rm -t -v $(pwd):/usr/src jeikabu/debian-build-nng:arm64v8-buster
 
-FROM jeikabu/debian-build:arm64v8-stretch
+FROM jeikabu/debian-build:arm64v8-buster
 
-ARG NNG_BRANCH=v1.1.1
+ARG NNG_BRANCH=v1.2.3
 
 RUN git clone https://github.com/nanomsg/nng.git \
     && cd nng && git checkout $NNG_BRANCH \
