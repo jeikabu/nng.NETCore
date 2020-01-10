@@ -18,11 +18,13 @@ if ($is_windows -and -not $(Get-Command msbuild -ErrorAction Ignore)) {
 
 $platforms = @()
 if ($is_windows) {
-    $platforms += @("win-x86","win32"), @("win-x64", "x64")
+    $platforms = @("win-x86","win32"), @("win-x64", "x64")
 } elseif ($IsMacOS) {
-    $platforms += @(@("osx-x64", ""))
+    # Need comma to create an array of arrays/tuples.  See:
+    # https://stackoverflow.com/questions/11138288/how-do-i-create-array-of-arrays-in-powershell
+    $platforms = ,@("osx-x64", "")
 } elseif ($IsLinux) {
-    $platform += @(@("linux-x64", ""))
+    $platforms = ,@("linux-x64", "")
 } else {
     throw "Unrecognized platform"
 }
@@ -35,6 +37,7 @@ try {
         $path, $arch = $platform
         
         $build_path = "build_$path"
+        Write-Host "Building $arch in $build_path..."
         if ($clean) {
             Remove-Item -Recurse $build_path -ErrorAction Ignore
         }
@@ -49,7 +52,11 @@ try {
         } else {
             cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DNNG_TESTS=OFF -DNNG_TOOLS=OFF ..
             make -j2
-            $dll = "libnng.dylib"
+            if ($IsMacOS) {
+                $dll = "libnng.dylib"
+            } else {
+                $dll = "libnng.so"
+            }
         }
         Copy-Item $dll "$runtimes/$path/native" -Force
         
