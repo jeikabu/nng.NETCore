@@ -1,0 +1,27 @@
+
+trigger:
+- master
+
+strategy:
+  matrix:
+    linux:
+      imageName: 'ubuntu-18.04'
+    mac:
+      imageName: 'macos-10.14'
+    vs2017:
+      imageName: 'vs2017-win2016'
+    vs2019:
+      imageName: 'windows-2019'
+
+pool:
+  vmImage: $(imageName)
+
+steps:
+- checkout: self
+  submodules: recursive
+- pwsh: dotnet restore
+  displayName: 'Restore'
+- pwsh: dotnet build
+  displayName: 'Build'
+- pwsh: dotnet test --filter "platform!=windows" --verbosity normal tests
+  displayName: 'Test'
