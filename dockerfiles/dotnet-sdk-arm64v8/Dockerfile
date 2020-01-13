@@ -4,6 +4,7 @@
 FROM multiarch/debian-debootstrap:arm64-buster
 
 RUN apt-get update && apt-get install -y \
+    ca-certificates \
     curl \
     gnupg \
     icu-devtools
@@ -28,7 +29,7 @@ RUN curl -SL --output dotnet.tar.gz $SOURCE \
     # Trigger first run experience by running arbitrary cmd
     && dotnet help
 
-# .NET Core 2.2
-RUN curl -SL --output dotnet.tar.gz https://download.visualstudio.microsoft.com/download/pr/d9e60c5f-af85-4a9e-99ab-26d0cbbd70b7/5fde0e1f8ce2217494e325c9bc09fc0e/dotnet-sdk-2.2.103-linux-arm64.tar.gz \
+# .NET Core 2.2.2
+RUN curl -SL --output dotnet.tar.gz https://download.visualstudio.microsoft.com/download/pr/2b201001-7074-476a-aa83-b5194c660a59/68233f3c3f16c97767a77216ec1f6e70/dotnet-sdk-2.2.104-linux-arm64.tar.gz \
     && tar -zxf dotnet.tar.gz -C /usr/share/dotnet \
     && rm dotnet.tar.gz
