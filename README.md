@@ -1,4 +1,4 @@
-# nng.NET
+# nng.NET/NETCore
 
 .NET bindings to [NNG](https://github.com/nanomsg/nng):
 
@@ -8,17 +8,17 @@ __Status__:
 
 Using latest [NNG release](https://github.com/nanomsg/nng/releases).
 
-[![NuGet](https://img.shields.io/nuget/v/Subor.nng.NETCore.svg?colorB=brightgreen)](https://www.nuget.org/packages/Subor.nng.NETCore)
-[![Build status](https://ci.appveyor.com/api/projects/status/ohpurtgoq42wauan/branch/master?svg=true)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
-[![Build status](https://img.shields.io/appveyor/tests/jake-ruyi/nng-netcore/master.svg)](https://ci.appveyor.com/project/jake-ruyi/nng-netcore/branch/master)
+[![NuGet](https://img.shields.io/nuget/vpre/Subor.nng.NETCore.svg?colorB=brightgreen)](https://www.nuget.org/packages/Subor.nng.NETCore)
+[![travis](https://img.shields.io/travis/jeikabu/nng.NETCore)]()
+[![Build Status](https://dev.azure.com/jeikabu/nng.net/_apis/build/status/jeikabu.nng.NETCore?branchName=master)](https://dev.azure.com/jeikabu/nng.net/_build/latest?definitionId=4&branchName=master)
 [![codecov](https://codecov.io/gh/subor/nng.NETCore/branch/master/graph/badge.svg)](https://codecov.io/gh/subor/nng.NETCore)
 
 For list of missing APIs/features see [`is:issue is:open label:enhancement`](https://github.com/jeikabu/nng.NETCore/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
 
 
-__Goals of nng.NETCore__:
+__Goals of nng.NET__:
 
-- __Async first__: async/await access to [nng_aio](https://nanomsg.github.io/nng/man/v1.0.0/nng_aio.5.html) and [nng_ctx](https://nanomsg.github.io/nng/man/v1.0.0/nng_ctx.5.html)
+- __Async first__: async/await access to [nng_aio](https://nanomsg.github.io/nng/man/v1.2.2/nng_aio.5.html) and [nng_ctx](https://nanomsg.github.io/nng/man/v1.2.2/nng_ctx.5.html)
 - __Native layer__: P/Invoke in separate files/namespace.  Don't like our high-level OO wrapper?  Re-use the pinvoke and make your own.  Also makes cross-platform-friendly pinvoke easier.
 - __Tests as Documentation__: [xUnit](https://xunit.github.io/) unit/integration tests in "plain" C# much like you'd write
 - __.NET Core friendly__: Using [`dotnet`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet) and targetting .NET Standard from the start
@@ -26,7 +26,7 @@ __Goals of nng.NETCore__:
 
 ## Usage
 
-Supports projects targetting:
+Supports projects targeting:
 - .NET Core App 1.0+
 - .NET Standard 1.5+
     - [`SuppressUnmanagedCodeSecurity`](https://docs.microsoft.com/en-us/dotnet/api/system.security.suppressunmanagedcodesecurityattribute) is used with .NET Standard 2.0+ for improved PInvoke performance
