@@ -48,7 +48,7 @@ namespace nng.Tests
                         port = (ushort)System.Net.IPAddress.NetworkToHostOrder((short)addr.s_in6.sa_port);
                         break;
                         default:
-                            Assert.True(false);
+                            Assert.True(false, addr.s_family.ToString());
                             break;
                     }
                     url = url.Substring(0, url.Length - 1) + port; 
