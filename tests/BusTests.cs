@@ -38,6 +38,8 @@ namespace nng.Tests
                 using (var bus0 = Factory.BusOpen().Unwrap())
                 using (var listener0 = bus0.ListenerCreate(url).Unwrap())
                 {
+                    // Must start listener before using `NNG_OPT_LOCADDR`
+                    listener0.Start();
                     using (var bus1 = Factory.BusOpen().Unwrap())
                     using (var dialer1 = bus1.DialerCreate(GetDialUrl(listener0, url)).Unwrap())
                     {
@@ -70,7 +72,8 @@ namespace nng.Tests
                     await readyToDial.SignalAndWait();
                     await readyToSend.SignalAndWait();
                     await ctx.Send(Factory.CreateMessage());
-                    await WaitShort();
+                    // Give it a chance to actually send
+                    await WaitReady();
                 }
             });
             var bus1Task = Task.Run(async () =>
@@ -101,7 +104,7 @@ namespace nng.Tests
                     messageReceipt.Signal();
                 }
             });
-            await CancelAfterAssertwait(cts, bus0Task, bus1Task, bus2Task);
+            await CancelAfterWait(cts, bus0Task, bus1Task, bus2Task);
             Assert.Equal(0, messageReceipt.Count);
         }
     }

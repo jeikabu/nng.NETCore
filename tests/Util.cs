@@ -10,12 +10,6 @@ using Xunit;
 
 namespace nng.Tests
 {
-    static class Traits
-    {
-        public const string PlatformName = "platform";
-        public const string PlatformWindows = "windows";
-        public const string PlatformPosix = "posix";
-    }
     static class Util
     {
         public const int ShortTestMs = 250;
@@ -24,7 +18,7 @@ namespace nng.Tests
         public static string UrlIpc() => "ipc://" + Guid.NewGuid().ToString();
         public static string UrlInproc() => "inproc://" + Guid.NewGuid().ToString();
         public static string UrlTcp() => "tcp://localhost:0";
-        public static string UrlWs() => "ws://localhost:" + rng.Next(1025, 65535) + "/" + rng.Next();
+        public static string UrlWs() => "ws://localhost:0";
 
         public static byte[] TopicRandom() => Guid.NewGuid().ToByteArray();
 
@@ -33,7 +27,9 @@ namespace nng.Tests
 
         public static string GetDialUrl(IListener listener, string url)
         {
-            if (url.StartsWith("tcp", StringComparison.OrdinalIgnoreCase) && url.EndsWith(":0", StringComparison.OrdinalIgnoreCase))
+            if (url.EndsWith(":0", StringComparison.OrdinalIgnoreCase)
+            && (url.StartsWith("tcp", StringComparison.OrdinalIgnoreCase) || url.StartsWith("ws", StringComparison.OrdinalIgnoreCase))
+            )
             {
                 var res = listener.GetOpt(nng.Native.Defines.NNG_OPT_LOCADDR, out nng_sockaddr addr);
                 if (res == 0)
@@ -57,6 +53,12 @@ namespace nng.Tests
             return url;
         }
 
+        public static async Task Wait(IEnumerable<Task> tasks, int timeoutMs = DefaultTimeoutMs)
+        {
+            var timeout = Task.Delay(timeoutMs);
+            await Task.WhenAny(Task.WhenAll(tasks), timeout);
+        }
+
         public static Task AssertWait(params Task[] tasks)
         {
             return AssertWait(tasks, DefaultTimeoutMs);
@@ -65,7 +67,19 @@ namespace nng.Tests
         public static async Task AssertWait(IEnumerable<Task> tasks, int timeoutMs = DefaultTimeoutMs)
         {
             var timeout = Task.Delay(timeoutMs);
-            Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
+            var first = await Task.WhenAny(Task.WhenAll(tasks), timeout);
+            Assert.NotEqual(timeout, first);
+        }
+
+        public static Task CancelAfterWait(CancellationTokenSource cts, params Task[] tasks)
+        {
+            return CancelAfterWait(tasks, cts);
+        }
+
+        public static async Task CancelAfterWait(IEnumerable<Task> tasks, CancellationTokenSource cts, int cancelAfterMs = ShortTestMs, int timeoutMs = DefaultTimeoutMs)
+        {
+            cts.CancelAfter(cancelAfterMs);
+            await Wait(tasks, timeoutMs);
         }
 
         public static Task CancelAfterAssertwait(CancellationTokenSource cts, params Task[] tasks)
@@ -195,7 +209,11 @@ namespace nng.Tests
         public IEnumerator<object[]> GetEnumerator()
         {
             yield return new object[] { Util.UrlInproc() };
-            yield return new object[] { Util.UrlIpc() };
+            // FIXME: Remove this when nng issue 1175 fixed: https://github.com/nanomsg/nng/issues/1175
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            {
+                yield return new object[] { Util.UrlIpc() };
+            }
             yield return new object[] { Util.UrlTcp() };
             yield return new object[] { Util.UrlWs() };
         }
@@ -210,7 +228,11 @@ namespace nng.Tests
     {
         public IEnumerator<object[]> GetEnumerator()
         {
-            yield return new object[] { Util.UrlIpc() };
+            // FIXME: Remove this when nng issue 1175 fixed: https://github.com/nanomsg/nng/issues/1175
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            {
+                yield return new object[] { Util.UrlIpc() };
+            }
             yield return new object[] { Util.UrlInproc() };
             yield return new object[] { Util.UrlTcp() };
         }
@@ -218,13 +240,16 @@ namespace nng.Tests
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    class TransportsNoTcpClassData : IEnumerable<object[]>
+    class TransportsNoEphemeralClassData : IEnumerable<object[]>
     {
         public IEnumerator<object[]> GetEnumerator()
         {
-            yield return new object[] { Util.UrlIpc() };
+            // FIXME: Remove this when nng issue 1175 fixed: https://github.com/nanomsg/nng/issues/1175
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            {
+                yield return new object[] { Util.UrlIpc() };
+            }
             yield return new object[] { Util.UrlInproc() };
-            yield return new object[] { Util.UrlWs() };
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

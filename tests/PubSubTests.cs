@@ -39,6 +39,34 @@ namespace nng.Tests
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
+        public async Task Basic(string url)
+        {
+            Fixture.TestIterate(() =>
+            {
+                using (var pub = Factory.PublisherOpen().Unwrap())
+                using (var sub = Factory.SubscriberOpen().Unwrap())
+                {
+                    var listener = pub.ListenWithListener(url).Unwrap();
+                    sub.Dial(GetDialUrl(listener, url)).Unwrap();
+                }
+
+                // Manually create listener/dialer
+                using (var pub = Factory.PublisherOpen().Unwrap())
+                using (var listener0 = pub.ListenerCreate(url).Unwrap())
+                {
+                    // Must start listener before using `NNG_OPT_LOCADDR`
+                    listener0.Start();
+                    using (var sub = Factory.SubscriberOpen().Unwrap())
+                    using (var dialer1 = sub.DialerCreate(GetDialUrl(listener0, url)).Unwrap())
+                    {
+
+                    }
+                }
+            });
+        }
+
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
         public async Task BasicPubSub(string url)
         {
             using (var pubSocket = Factory.PublisherOpen().ThenListenAs(out var listener, url).Unwrap())

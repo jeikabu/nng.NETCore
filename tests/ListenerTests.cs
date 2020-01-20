@@ -33,7 +33,7 @@ namespace nng.Tests
                 Assert.Equal(0, listener.Start());
                 await WaitReady();
                 var subSocket = Factory.SubscriberOpen().Unwrap();
-                Assert.NotNull(subSocket.DialerCreate(url));
+                Assert.NotNull(subSocket.DialerCreate(url).Unwrap());
             }
         }
 

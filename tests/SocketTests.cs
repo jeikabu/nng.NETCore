@@ -36,6 +36,20 @@ namespace nng.Tests
             Assert.True(Factory.SubscriberOpen().ThenDial(url).IsErr());
         }
 
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public void OpenClose(string url)
+        {
+            foreach (var _ in Enumerable.Range(0, 100))
+            {
+                using (var rep = Factory.ReplierOpen().ThenListenAs(out var listener, url).Unwrap())
+                using (var req = Factory.RequesterOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
+                {
+                    // Do nothing
+                }
+            }
+        }
+
         // Test to verify result of constructing two of the same socket:
         // 1. Call pre()
         // 2. Call func()
@@ -44,83 +58,92 @@ namespace nng.Tests
         // Basically, sockets that exclusively listen() should fail the second call
         struct DupeUrlTest
         {
-            public DupeUrlTest(Func<IDisposable> pre, Func<IDisposable> func, bool isNull)
+            public DupeUrlTest(Func<(IDisposable,IListener)> pre, Func<IListener, IDisposable> func, bool isNull)
             {
                 this.pre = pre;
                 this.func = func;
                 this.isOk = isNull;
             }
-            public Func<IDisposable> pre;
-            public Func<IDisposable> func;
+            public Func<(IDisposable,IListener)> pre;
+            public Func<IListener, IDisposable> func;
             public bool isOk;
         }
 
         [Theory]
-        [ClassData(typeof(TransportsNoTcpClassData))]
+        [ClassData(typeof(TransportsClassData))]
         public void DuplicateUrl(string url)
         {
-            Fixture.TestIterate(() => DoDuplicateUrl(url));
+            var tests = new DupeUrlTest[] {
+                new DupeUrlTest (
+                    () => (Factory.PusherOpen().ThenListenAs(out var listener, url).Unwrap(), listener),
+                    (listener) => Factory.PullerOpen().ThenDial(GetDialUrl(listener, url)).Unwrap(),
+                    true),
+                new DupeUrlTest (
+                    () => (Factory.PullerOpen().ThenListenAs(out var listener, url).Unwrap(), listener),
+                    (listener) => Factory.PusherOpen().ThenDial(GetDialUrl(listener, url)).Unwrap(),
+                    true),
+                new DupeUrlTest (
+                    () => (Factory.ReplierOpen().ThenListenAs(out var listener, url).Unwrap(), listener),
+                    (listener) => Factory.RequesterOpen().ThenDial(GetDialUrl(listener, url)).Unwrap(),
+                    true),
+                new DupeUrlTest (
+                    () => (Factory.PublisherOpen().ThenListenAs(out var listener, url).Unwrap(), listener),
+                    (listener) => Factory.SubscriberOpen().ThenDial(GetDialUrl(listener, url)).Unwrap(),
+                    true),
+            };
+            Fixture.TestIterate(() => DoDuplicateUrl(tests));
         }
 
-        void DoDuplicateUrl(string url)
+        [Theory]
+        [ClassData(typeof(TransportsNoEphemeralClassData))]
+        public void DuplicateListener(string url)
         {
             var tests = new DupeUrlTest[] {
                 new DupeUrlTest (
                     null,
-                    () => Factory.PublisherOpen().ThenListen(url).Unwrap(),
+                    (_) => Factory.PublisherOpen().ThenListen(url).Unwrap(),
                     false),
                 new DupeUrlTest (
                     null,
-                    () => Factory.PullerOpen().ThenListen(url).Unwrap(),
+                    (_) => Factory.PullerOpen().ThenListen(url).Unwrap(),
                     false),
-                new DupeUrlTest (
-                    () => Factory.PusherOpen().ThenListen(url).Unwrap(),
-                    () => Factory.PullerOpen().ThenDial(url).Unwrap(),
-                    true),
                 new DupeUrlTest (
                     null,
-                    () => Factory.PusherOpen().ThenListen(url).Unwrap(),
+                    (_) => Factory.PusherOpen().ThenListen(url).Unwrap(),
                     false),
-                new DupeUrlTest (
-                    () => Factory.PullerOpen().ThenListen(url).Unwrap(),
-                    () => Factory.PusherOpen().ThenDial(url).Unwrap(),
-                    true),
                 new DupeUrlTest (
                     null,
-                    () => Factory.ReplierOpen().ThenListen(url).Unwrap(),
+                    (_) => Factory.ReplierOpen().ThenListen(url).Unwrap(),
                     false),
-                new DupeUrlTest (
-                    () => Factory.ReplierOpen().ThenListen(url).Unwrap(),
-                    () => Factory.RequesterOpen().ThenDial(url).Unwrap(),
-                    true),
-                new DupeUrlTest (
-                    () => Factory.PublisherOpen().ThenListen(url).Unwrap(),
-                    () => Factory.SubscriberOpen().ThenDial(url).Unwrap(),
-                    true),
             };
+            Fixture.TestIterate(() => DoDuplicateUrl(tests));
+        }
 
+        void DoDuplicateUrl(DupeUrlTest[] tests)
+        {
             for (int i = 0; i < tests.Length; ++i)
             {
                 var test = tests[i];
                 IDisposable pre = null;
                 IDisposable obj0 = null;
                 IDisposable obj1 = null;
+                IListener listener = null;
                 try
                 {
                     if (test.pre != null)
                     {
-                        pre = test.pre.Invoke();
+                        (pre, listener) = test.pre.Invoke();
                         Assert.NotNull(pre);
                     }
-                    obj0 = test.func();
+                    obj0 = test.func(listener);
                     if (test.isOk)
                     {
-                        obj1 = test.func();
+                        obj1 = test.func(listener);
                         Assert.NotNull(obj1);
                     }
                     else
                     {
-                        Assert.ThrowsAny<Exception>(() => obj1 = test.func());
+                        Assert.ThrowsAny<Exception>(() => obj1 = test.func(listener));
                     }
                 }
                 finally

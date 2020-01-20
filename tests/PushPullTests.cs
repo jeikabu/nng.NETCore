@@ -23,6 +23,34 @@ namespace nng.Tests
         }
 
         [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public async Task Basic(string url)
+        {
+            Fixture.TestIterate(() =>
+            {
+                using (var push = Factory.PusherOpen().Unwrap())
+                using (var pull = Factory.PullerOpen().Unwrap())
+                {
+                    var listener = push.ListenWithListener(url).Unwrap();
+                    pull.Dial(GetDialUrl(listener, url)).Unwrap();
+                }
+
+                // Manually create listener/dialer
+                using (var push = Factory.PusherOpen().Unwrap())
+                using (var listener0 = push.ListenerCreate(url).Unwrap())
+                {
+                    // Must start listener before using `NNG_OPT_LOCADDR`
+                    listener0.Start();
+                    using (var pull = Factory.PullerOpen().Unwrap())
+                    using (var dialer1 = pull.DialerCreate(GetDialUrl(listener0, url)).Unwrap())
+                    {
+
+                    }
+                }
+            });
+        }
+
+        [Theory]
         [ClassData(typeof(TransportsNoWsClassData))]
         public Task PushPull(string url)
         {
@@ -43,8 +71,6 @@ namespace nng.Tests
                     dialUrl = GetDialUrl(listener, url);
                     await serverReady.SignalAndWait();
                     await clientReady.SignalAndWait();
-                    // Make sure receiver is actually receiving before start sending
-                    await WaitShort();
                     (await ctx.Send(Factory.CreateMessage())).Unwrap();
                 }
             });
@@ -54,8 +80,10 @@ namespace nng.Tests
                 using (var socket = Factory.PullerOpen().ThenDial(dialUrl).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
+                    var task = ctx.Receive(cts.Token);
+                    await WaitShort();
                     await clientReady.SignalAndWait();
-                    await ctx.Receive(cts.Token);
+                    var _ = await task;
                 }
             });
             return CancelAfterAssertwait(cts, pull, push);
