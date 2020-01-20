@@ -36,6 +36,8 @@ namespace nng.Tests
                 using (var bus0 = Factory.SurveyorOpen().Unwrap())
                 using (var listener0 = bus0.ListenerCreate(url).Unwrap())
                 {
+                    // Must start listener before using `NNG_OPT_LOCADDR`
+                    listener0.Start();
                     using (var bus1 = Factory.RespondentOpen().Unwrap())
                     using (var dialer1 = bus1.DialerCreate(GetDialUrl(listener0, url)).Unwrap())
                     {

@@ -18,7 +18,7 @@ services:
 script:
   - dotnet restore
   - dotnet build
-  - dotnet test --filter "platform!=windows" --verbosity normal tests
+  - dotnet test --verbosity normal tests
 
 after_success:
   - ./scripts/qemu_arm64.sh

@@ -50,15 +50,7 @@ namespace nng.Native
         public const string NNG_OPT_TLS_VERIFIED = "tls-verified";
         public const string NNG_OPT_TCP_NODELAY = "tcp-nodelay";
         public const string NNG_OPT_TCP_KEEPALIVE = "tcp-keepalive";
-
-        public const string NNG_OPT_REQ_RESENDTIME = "req:resend-time";
-
-        public const string NNG_OPT_SUB_SUBSCRIBE = "sub:subscribe";
-        public const string NNG_OPT_SUB_UNSUBSCRIBE = "sub:unsubscribe";
-
-        public const string NNG_OPT_PAIR1_POLY = "pair1:polyamorous";
-
-        public const string NNG_OPT_SURVEYOR_SURVEYTIME = "surveyor:survey-time";
+        public const string NNG_OPT_TCP_BOUND_PORT = "tcp-bound-port";
 
         public const string NNG_OPT_IPC_SECURITY_DESCRIPTOR = "ipc:security-descriptor";
         public const string NNG_OPT_IPC_PERMISSIONS = "ipc:permissions";
@@ -69,6 +61,23 @@ namespace nng.Native
 
         public const string NNG_OPT_WS_REQUEST_HEADERS = "ws:request-headers";
         public const string NNG_OPT_WS_RESPONSE_HEADERS = "ws:response-headers";
+        public const string NNG_OPT_WS_RESPONSE_HEADER = "ws:response-header:";
+        public const string NNG_OPT_WS_REQUEST_HEADER = "ws:request-header:";
+        public const string NNG_OPT_WS_REQUEST_URI = "ws:request-uri";
+        public const string NNG_OPT_WS_SENDMAXFRAME = "ws:txframe-max";
+        public const string NNG_OPT_WS_RECVMAXFRAME = "ws:rxframe-max";
+        public const string NNG_OPT_WS_PROTOCOL = "ws:protocol";
+
+        public const string NNG_OPT_REQ_RESENDTIME = "req:resend-time";
+
+        public const string NNG_OPT_SUB_SUBSCRIBE = "sub:subscribe";
+        public const string NNG_OPT_SUB_UNSUBSCRIBE = "sub:unsubscribe";
+        public const string NNG_OPT_SUB_PREFNEW = "sub:prefnew";
+
+        public const string NNG_OPT_PAIR1_POLY = "pair1:polyamorous";
+
+        public const string NNG_OPT_SURVEYOR_SURVEYTIME = "surveyor:survey-time";
+
         public const string NNG_OPT_WSS_REQUEST_HEADERS = NNG_OPT_WS_REQUEST_HEADERS;
         public const string NNG_OPT_WSS_RESPONSE_HEADERS = NNG_OPT_WS_RESPONSE_HEADERS;
         #endregion
@@ -105,6 +114,7 @@ namespace nng.Native
         public const int NNG_ENOARG = 28;
         public const int NNG_EAMBIGUOUS = 29;
         public const int NNG_EBADTYPE = 30;
+        public const int NNG_ECONNSHUT = 31;
         public const int NNG_EINTERNAL = 1000;
         public const int NNG_ESYSERR = 0x10000000;
         public const int NNG_ETRANERR = 0x20000000;
@@ -141,6 +151,7 @@ namespace nng.Native
             ENOARG = NNG_ENOARG,
             EAMBIGUOUS = NNG_EAMBIGUOUS,
             EBADTYPE = NNG_EBADTYPE,
+            ECONNSHUT = NNG_ECONNSHUT,
             EINTERNAL = NNG_EINTERNAL,
             ESYSERR = NNG_ESYSERR,
             ETRANERR = NNG_ETRANERR,

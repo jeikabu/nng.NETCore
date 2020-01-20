@@ -23,5 +23,6 @@ steps:
   displayName: 'Restore'
 - pwsh: dotnet build
   displayName: 'Build'
-- pwsh: dotnet test --filter "platform!=windows" --verbosity normal tests
+- pwsh: dotnet test --verbosity normal tests
   displayName: 'Test'
+  timeoutInMinutes: 10
