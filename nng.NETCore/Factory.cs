@@ -37,7 +37,8 @@ namespace nng.Tests
         public NngResult<ISubSocket> SubscriberOpen() => SubSocket.Open();
         public NngResult<IPushSocket> PusherOpen() => PushSocket.Open();
         public NngResult<IPullSocket> PullerOpen() => PullSocket.Open();
-        public NngResult<IPairSocket> PairOpen() => Pair1Socket.Open();
+        public NngResult<IPairSocket> Pair0Open() => Pair0Socket.Open();
+        public NngResult<IPairSocket> Pair1Open() => Pair1Socket.Open();
         public NngResult<IRespondentSocket> RespondentOpen() => RespondentSocket.Open();
         public NngResult<ISurveyorSocket> SurveyorOpen() => SurveyorSocket.Open();
 

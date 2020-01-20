@@ -25,7 +25,8 @@ namespace nng
         NngResult<ISubSocket> SubscriberOpen();
         NngResult<IPushSocket> PusherOpen();
         NngResult<IPullSocket> PullerOpen();
-        NngResult<IPairSocket> PairOpen();
+        NngResult<IPairSocket> Pair0Open();
+        NngResult<IPairSocket> Pair1Open();
         NngResult<IRespondentSocket> RespondentOpen();
         NngResult<ISurveyorSocket> SurveyorOpen();
     }
