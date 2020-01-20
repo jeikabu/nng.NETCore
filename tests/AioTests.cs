@@ -47,7 +47,7 @@ namespace nng.Tests
             pull.Cancel();
             // Cancel happens asynchronously.  Give callback a chance to happen
             await WaitReady();
-            Assert.Equal((await pullTask).Err(), NngErrno.ECANCELED);
+            Assert.Equal(NngErrno.ECANCELED, (await pullTask).Err());
         }
 
         // [Fact]
@@ -74,7 +74,7 @@ namespace nng.Tests
 
             // Immediate timeout
             pull.SetTimeout(NNG_DURATION_ZERO);
-            Assert.Equal((await pull.Receive(CancellationToken.None)).Err(), NngErrno.ETIMEDOUT);
+            Assert.Equal(NngErrno.ETIMEDOUT, (await pull.Receive(CancellationToken.None)).Err());
 
             // Infinite timeout
             pull.SetTimeout(NNG_DURATION_INFINITE);

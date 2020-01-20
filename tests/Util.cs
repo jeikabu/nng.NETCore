@@ -57,6 +57,12 @@ namespace nng.Tests
             return url;
         }
 
+        public static async Task Wait(IEnumerable<Task> tasks, int timeoutMs = DefaultTimeoutMs)
+        {
+            var timeout = Task.Delay(timeoutMs);
+            await Task.WhenAny(Task.WhenAll(tasks), timeout);
+        }
+
         public static Task AssertWait(params Task[] tasks)
         {
             return AssertWait(tasks, DefaultTimeoutMs);
@@ -65,7 +71,19 @@ namespace nng.Tests
         public static async Task AssertWait(IEnumerable<Task> tasks, int timeoutMs = DefaultTimeoutMs)
         {
             var timeout = Task.Delay(timeoutMs);
-            Assert.NotEqual(timeout, await Task.WhenAny(timeout, Task.WhenAll(tasks)));
+            var first = await Task.WhenAny(Task.WhenAll(tasks), timeout);
+            Assert.NotEqual(timeout, first);
+        }
+
+        public static Task CancelAfterWait(CancellationTokenSource cts, params Task[] tasks)
+        {
+            return CancelAfterWait(tasks, cts);
+        }
+
+        public static async Task CancelAfterWait(IEnumerable<Task> tasks, CancellationTokenSource cts, int cancelAfterMs = ShortTestMs, int timeoutMs = DefaultTimeoutMs)
+        {
+            cts.CancelAfter(cancelAfterMs);
+            await Wait(tasks, timeoutMs);
         }
 
         public static Task CancelAfterAssertwait(CancellationTokenSource cts, params Task[] tasks)
