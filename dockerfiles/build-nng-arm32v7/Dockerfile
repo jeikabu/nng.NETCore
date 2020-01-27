@@ -8,7 +8,7 @@
 
 FROM jeikabu/debian-build:arm32v7-buster
 
-ARG NNG_BRANCH=v1.2.3
+ARG NNG_BRANCH=v1.2.4
 
 RUN git clone https://github.com/nanomsg/nng.git \
     && cd nng && git checkout $NNG_BRANCH

@@ -35,7 +35,7 @@ Supports projects targeting:
 [Supported platforms](https://github.com/jeikabu/nng.NETCore/tree/master/nng.NETCore/runtimes):
 - Windows Vista or later 32/64-bit
 - macOS/OSX 10.?+ 64-bit (built on 10.14)
-- Linux x86_64 (built on Ubuntu 18.04)
+- Linux x86_64 (built on Debian 10/Buster)
 - Linux ARM32/armv7l and ARM64/aarch64 (built on Debian 10/Buster)
 
 Should be easy to add others that are supported by both .NET Core/.NET 5 and NNG.

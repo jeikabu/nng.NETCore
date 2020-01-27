@@ -17,6 +17,10 @@ pool:
   vmImage: $(imageName)
 
 steps:
+- task: UseDotNet@2
+  inputs:
+    version: 3.1.101
+    performMultiLevelLookup: true
 - checkout: self
   submodules: recursive
 - pwsh: dotnet restore
@@ -25,4 +29,4 @@ steps:
   displayName: 'Build'
 - pwsh: dotnet test --verbosity normal tests
   displayName: 'Test'
-  timeoutInMinutes: 10
+  timeoutInMinutes: 7
