@@ -10,14 +10,14 @@
 
   <PropertyGroup>
     <PackageId>Subor.nng.NETCore.Shared</PackageId>
-    <PackageVersion>1.2.4-rc0</PackageVersion>
-    <Version>1.2.4.0</Version>
+    <PackageVersion>1.2.4-rc1</PackageVersion>
+    <Version>1.2.4.1</Version>
 
     <PackageOutputPath>../bin/$(Configuration)</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="system.memory" Version="4.5.1" />
+    <PackageReference Include="system.memory" Version="4.5.3" />
     <PackageReference Include="system.valuetuple" Version="4.5.0" />
   </ItemGroup>
 

@@ -2,13 +2,14 @@ language: csharp
 mono: none
 # Need explicit dotnet version otherwise OSX fails to download/install dotnet
 # Test runner requires dotnet core 2.1 sdk
-dotnet: 2.2.207
+dotnet: 3.1.101
 
-jobs:
+matrix:
   include:
-    # No matter what, can't get it to use Ubuntu Bionic (18.04) instead of Xenial (16.04)
-    #- dist: bionic
     - os: osx
+      osx_image: xcode11
+    - os: linux
+      dist: bionic
 sudo: required
 services:
   - docker
