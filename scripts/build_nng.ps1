@@ -30,7 +30,7 @@ if ($is_windows) {
 $current_dir = $(Get-Location)
 try {
     if ($IsLinux) {
-        docker build -t jeikabu/build-nng dockerfiles/build
+        docker build -t jeikabu/build-nng dockerfiles/build_nng
         docker run -i -t --rm -v "$PWD/nng.NETCore/runtimes:/runtimes" jeikabu/build-nng
     }
     else {
