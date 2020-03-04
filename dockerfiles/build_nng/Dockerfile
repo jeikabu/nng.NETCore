@@ -1,7 +1,7 @@
 # Build NNG native shared library for: linux-x64, linux-arm, linux-arm64
 #
 # USAGE:
-# docker build -t jeikabu/build-nng dockerfiles/build
+# docker build -t jeikabu/build-nng dockerfiles/build_nng
 # docker run -i -t --rm -v "$PWD/nng.NETCore/runtimes:/runtimes" jeikabu/build-nng
 
 ARG SRC=/usr/src
@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     git
 
 ARG SRC
-ARG NNG_BRANCH=v1.2.4
+ARG NNG_BRANCH=v1.3.0
 WORKDIR ${SRC}
 
 RUN git clone https://github.com/nanomsg/nng.git \
