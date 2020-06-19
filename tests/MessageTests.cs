@@ -73,7 +73,7 @@ namespace nng.Tests
             Assert.True(msg.Header.AsSpan().EndsWith(bytes0));
         }
 
-        [Fact]
+        [Fact(Skip = "fix #1252 https://github.com/nanomsg/nng/commit/b12081bebe85dfc02bbc2b23d48458613be20fa2")]
         public void InsertBytesAndClear()
         {
             var bytes0 = Guid.NewGuid().ToByteArray();

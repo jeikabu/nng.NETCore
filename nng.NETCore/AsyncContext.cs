@@ -37,17 +37,11 @@ namespace nng
 
         protected int InitAio()
         {
-            // Make a copy to ensure an auto-matically created delegate doesn't get GC'd while native code 
+            // Make a copy to ensure an automatically created delegate doesn't get GC'd while native code 
             // is still using it:
             // https://stackoverflow.com/questions/6193711/call-has-been-made-on-garbage-collected-delegate-in-c
             aioCallback = new AioCallback(callback);
             var res = nng_aio_alloc(out aioHandle, aioCallback, IntPtr.Zero);
-            if (res == 0)
-            {
-                // FIXME: TODO: callbacks still getting GC'd.  Maybe I need to move nng_aio_free() out of Dispose()?
-                var added = callbacks.TryAdd(aioCallback, true);
-                System.Diagnostics.Debug.Assert(added);
-            }
             return res;
         }
 
@@ -87,6 +81,11 @@ namespace nng
         // FIXME: TODO: callbacks still getting GC'd
         static ConcurrentDictionary<AioCallback, bool> callbacks = new ConcurrentDictionary<AioCallback, bool>();
 
+        ~AsyncBase()
+        {
+            Dispose(false);
+        }
+
         #region IDisposable
         public void Dispose()
         {
@@ -100,11 +99,11 @@ namespace nng
                 return;
             if (disposing)
             {
-                nng_aio_cancel(aioHandle);
-                nng_aio_free(aioHandle);
-                var removed = callbacks.TryRemove(aioCallback, out var _);
-                System.Diagnostics.Debug.Assert(removed);
+                nng_aio_stop(aioHandle);
             }
+            
+            nng_aio_free(aioHandle);
+            aioHandle = nng_aio.Null;
             disposed = true;
         }
         bool disposed = false;

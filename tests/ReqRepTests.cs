@@ -21,7 +21,33 @@ namespace nng.Tests
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
-        public async Task ReqRepBasic(string url)
+        public Task ReqRepBasic(string url)
+        {
+            return Fixture.TestIterate(() => DoReqRepBasic(url));
+        }
+
+        async Task DoReqRepBasic(string url)
+        {
+            using (var repSocket = Factory.ReplierOpen().ThenListenAs(out var listener, url).Unwrap())
+            using (var reqSocket = Factory.RequesterOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
+            {
+                Util.SetTestOptions(reqSocket);
+                Util.SetTestOptions(repSocket);
+                reqSocket.SendMsg(Factory.CreateMessage()).Unwrap();
+                var msg = repSocket.RecvMsg().Unwrap();
+                repSocket.SendMsg(msg).Unwrap();
+                var _ = reqSocket.RecvMsg().Unwrap();
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public Task ReqRepAsyncBasic(string url)
+        {
+            return Fixture.TestIterate(() => DoReqRepAsyncBasic(url));
+        }
+
+        async Task DoReqRepAsyncBasic(string url)
         {
             using (var repSocket = Factory.ReplierOpen().ThenListenAs(out var listener, url).Unwrap())
             using (var repAioCtx = repSocket.CreateAsyncContext(Factory).Unwrap())
@@ -103,17 +129,63 @@ namespace nng.Tests
 
         async Task DoSendRecvNonBlock(string url)
         {
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(Util.ShortTestMs);
             using (var rep = Factory.ReplierOpen().ThenListenAs(out var listener, url).Unwrap())
             using (var req = Factory.RequesterOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
             {
                 var msg = Factory.CreateMessage();
-                var res = await RetryAgain(() => req.SendMsg(msg, Defines.NngFlag.NNG_FLAG_NONBLOCK));
+                var flags = Defines.NngFlag.NNG_FLAG_NONBLOCK;
+                var res = await RetryAgain(cts, () => req.SendMsg(msg, flags));
                 res.Unwrap();
-                var request = (await RetryAgain(() => rep.RecvMsg(Defines.NngFlag.NNG_FLAG_NONBLOCK))).Unwrap();
-                res = await RetryAgain(() => rep.SendMsg(request, Defines.NngFlag.NNG_FLAG_NONBLOCK));
-                var reply = await RetryAgain(() => req.RecvMsg(Defines.NngFlag.NNG_FLAG_NONBLOCK));
-                reply.Unwrap();
+                var request = (await RetryAgain(cts, () => rep.RecvMsg(flags))).Unwrap();
+                res = await RetryAgain(cts, () => rep.SendMsg(request, flags));
+
+                // NOTE: Using NB req/rep from same thread seems to not work
+                Assert.Equal(res.Err(), Defines.NngErrno.EAGAIN);
+
+                // var reply = await RetryAgain(cts, () => req.RecvMsg(flags));
+                // reply.Unwrap();
             }
+        }
+
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        public Task SendRecvNonBlockTasks(string url)
+        {
+            return Fixture.TestIterate(() => DoSendRecvNonBlockTasks(url));
+        }
+
+        async Task DoSendRecvNonBlockTasks(string url)
+        {
+            var dialUrl = String.Empty;
+            var barrier = new AsyncBarrier(2);
+            var cts = new CancellationTokenSource();
+            var flags = Defines.NngFlag.NNG_FLAG_NONBLOCK;
+
+            var rep = Task.Run(async () => {
+                using (var rep = Factory.ReplierOpen().ThenListenAs(out var listener, url).Unwrap())
+                {
+                    dialUrl = GetDialUrl(listener, url);
+                    await barrier.SignalAndWait();
+                    var msg = Factory.CreateMessage();
+                    var request = (await RetryAgain(cts, () => rep.RecvMsg(flags))).Unwrap();
+                    var res = await RetryAgain(cts, () => rep.SendMsg(request, flags));
+                    res.Unwrap();
+                }
+            });
+            var req = Task.Run(async () => {
+                await barrier.SignalAndWait();
+                using (var req = Factory.RequesterOpen().ThenDial(dialUrl).Unwrap())
+                {
+                    var msg = Factory.CreateMessage();
+                    var res = await RetryAgain(cts, () => req.SendMsg(msg, flags));
+                    res.Unwrap();
+                    var reply = await RetryAgain(cts, () => req.RecvMsg(flags));
+                    var _ = reply.Unwrap();
+                }
+            });
+            await Util.CancelAfterAssertwait(cts, req, rep);
         }
     }
 }
