@@ -187,5 +187,91 @@ namespace nng.Tests
                 // ptr
             }
         }
+
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        async Task SendMsgTakesOwnership(string url)
+        {
+            await Fixture.TestIterate(() => DoSendMsgTakesOwnership(url));
+        }
+
+        async Task DoSendMsgTakesOwnership(string url)
+        {
+            var cts = new CancellationTokenSource();
+            var numMessages = 0;
+            using (var sock = Factory.PullerOpen().ThenListenAs(out var listener, url).Unwrap())
+            {
+                Util.SetTestOptions(sock);
+                var receiver = Task.Run(() =>
+                {
+                    while (!cts.IsCancellationRequested)
+                    {
+                        sock.RecvMsg().Unwrap();
+                        Interlocked.Increment(ref numMessages);
+                    }
+                });
+
+                var sender = Task.Run(() =>
+                {
+                    using (var sock = Factory.PusherOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
+                    {
+                        Util.SetTestOptions(sock);
+                        while (!cts.IsCancellationRequested)
+                        {
+                            using (var msg = Factory.CreateMessage())
+                            {
+                                msg.Append(0);
+                                sock.SendMsg(msg).Unwrap();
+                            }
+                        }
+                    }
+                });
+                await Util.CancelAfterAssertwait(cts, sender, receiver);
+                Assert.True(numMessages > 1);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
+        async Task SendZeroCopyTakesOwnership(string url)
+        {
+            await Fixture.TestIterate(() => DoSendZeroCopyTakesOwnership(url));
+        }
+
+        async Task DoSendZeroCopyTakesOwnership(string url)
+        {
+            var numMessages = 0;
+            var cts = new CancellationTokenSource();
+            using (var sock = Factory.PullerOpen().ThenListenAs(out var listener, url).Unwrap())
+            {
+                Util.SetTestOptions(sock);
+                var receiver = Task.Run(() =>
+                {
+                    while (!cts.IsCancellationRequested)
+                    {
+                        var _ = sock.RecvZeroCopy().Unwrap();
+                        Interlocked.Increment(ref numMessages);
+                    }
+                });
+
+                var sender = Task.Run(() =>
+                {
+                    using (var sock = Factory.PusherOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
+                    {
+                        Util.SetTestOptions(sock);
+                        while (!cts.IsCancellationRequested)
+                        {
+                            using (var msg = Factory.CreateAlloc(4))
+                            {
+                                sock.SendZeroCopy(msg).Unwrap();
+                            }
+                        }
+                    }
+                });
+                await Util.CancelAfterAssertwait(cts, sender, receiver);
+                Assert.True(numMessages > 1);
+            }
+            
+        }
     }
 }

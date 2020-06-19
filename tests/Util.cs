@@ -164,15 +164,21 @@ namespace nng.Tests
             return null;
         }
 
-        public static async Task<NngResult<T>> RetryAgain<T>(Func<NngResult<T>> func)
+        public static async Task<NngResult<T>> RetryAgain<T>(CancellationTokenSource cts, Func<NngResult<T>> func)
         {
             NngResult<T> res = func();
-            while (res.IsErr(Defines.NngErrno.EAGAIN))
+            while (res.IsErr(Defines.NngErrno.EAGAIN) && !cts.IsCancellationRequested)
             {
                 await Task.Delay(10);
                 res = func();
             }
             return res;
+        }
+
+        public static void SetTestOptions(ISocket socket, int timeoutMs = Util.ShortTestMs)
+        {
+            socket.SetOpt(nng.Native.Defines.NNG_OPT_RECVTIMEO, new nng_duration{TimeMs = timeoutMs});
+            socket.SetOpt(nng.Native.Defines.NNG_OPT_SENDTIMEO, new nng_duration{TimeMs = timeoutMs});
         }
 
         public static readonly Random rng = new Random();

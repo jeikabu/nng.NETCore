@@ -4,14 +4,14 @@ using System;
 namespace nng
 {
     /// <summary>
-    /// Represents nng options to get/set
+    /// Represents NNG options to get/set
     /// </summary>
     public interface IOptions : IGetOptions, ISetOptions
     {
     }
 
     /// <summary>
-    /// Represents nng options to get
+    /// Represents NNG options to get
     /// </summary>
     public interface IGetOptions
     {
@@ -25,7 +25,7 @@ namespace nng
     }
 
     /// <summary>
-    /// Represents nng options to set
+    /// Represents NNG options to set
     /// </summary>
     public interface ISetOptions
     {

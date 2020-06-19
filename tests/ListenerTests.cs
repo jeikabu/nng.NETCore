@@ -46,9 +46,11 @@ namespace nng.Tests
 
         async Task DoNonblock(string url)
         {
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(Util.ShortTestMs);
             using (var pub = Factory.PublisherOpen().Unwrap())
             {
-                var listener = await Util.RetryAgain(() => pub.ListenWithListener(url, Defines.NngFlag.NNG_FLAG_NONBLOCK));
+                var listener = await Util.RetryAgain(cts, () => pub.ListenWithListener(url, Defines.NngFlag.NNG_FLAG_NONBLOCK));
                 using (var sub = Factory.SubscriberOpen().ThenDial(GetDialUrl(listener.Unwrap(), url)).Unwrap())
                 {
 

@@ -15,6 +15,8 @@ namespace nng
     {
         public nng_socket NngSocket { get; protected set; }
 
+        ISocket IHasSocket.Socket => this;
+
         public NngResult<Unit> Dial(string url, Defines.NngFlag flags = default)
             => Unit.OkIfZero(nng_dial(NngSocket, url, flags));
         public NngResult<Unit> Listen(string url, Defines.NngFlag flags = default)
@@ -84,15 +86,25 @@ namespace nng
 
         public NngResult<Unit> SendZeroCopy(IMemory message, Defines.NngFlag flags = default)
         {
-            // Unconditionally set NNG_FLAG_ALLOC for "zero-copy" send
             flags = flags | Defines.NngFlag.NNG_FLAG_ALLOC;
-            var res = nng_send(NngSocket, message.Ptr, message.Length, flags);
-            return Unit.OkIfZero(res);
+            var res = Unit.OkIfZero(nng_send(NngSocket, message.Ptr, message.Length, flags));
+            if (res.IsOk())
+            {
+                // If call succeeds, nng takes ownership of message.
+                message.Take();
+            }
+            return res;
         }
 
         public NngResult<Unit> SendMsg(IMessage message, Defines.NngFlag flags = default)
         {
-            return Unit.OkIfZero(nng_sendmsg(NngSocket, message.NngMsg, flags));
+            var res = Unit.OkIfZero(nng_sendmsg(NngSocket, message.NngMsg, flags));
+            if (res.IsOk())
+            {
+                // If call succeeds, nng takes ownership of message.
+                var _ = message.Take();
+            }
+            return res;
         }
 
         public NngResult<UIntPtr> Recv(ref IMemory buffer, Defines.NngFlag flags = default)
