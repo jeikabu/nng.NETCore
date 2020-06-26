@@ -86,6 +86,7 @@ namespace nng
 
         public NngResult<Unit> SendZeroCopy(IMemory message, Defines.NngFlag flags = default)
         {
+            // Unconditionally set NNG_FLAG_ALLOC for "zero-copy" send
             flags = flags | Defines.NngFlag.NNG_FLAG_ALLOC;
             var res = Unit.OkIfZero(nng_send(NngSocket, message.Ptr, message.Length, flags));
             if (res.IsOk())
