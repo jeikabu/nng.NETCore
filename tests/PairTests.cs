@@ -35,7 +35,7 @@ namespace nng.Tests
             var dialUrl = string.Empty;
             var push = Task.Run(async () =>
             {
-                using (var socket = Factory.Pair1Open().ThenListenAs(out var listener, url).Unwrap())
+                using (var socket = Factory.PairOpen().ThenListenAs(out var listener, url).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     dialUrl = GetDialUrl(listener, url);
@@ -47,7 +47,7 @@ namespace nng.Tests
             var pull = Task.Run(async () =>
             {
                 await barrier.SignalAndWait();
-                using (var socket = Factory.Pair1Open().ThenDial(dialUrl).Unwrap())
+                using (var socket = Factory.PairOpen().ThenDial(dialUrl).Unwrap())
                 using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
                 {
                     await ctx.Receive(cts.Token);

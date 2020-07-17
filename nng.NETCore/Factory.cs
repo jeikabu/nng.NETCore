@@ -1,12 +1,12 @@
 using nng.Native;
 
-namespace nng.Tests
+namespace nng.Factories
 {
     using static nng.Native.Defines;
     using static nng.Native.Msg.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
-    public class TestFactory : IAPIFactory<IMessage>
+    public abstract class FactoryBase : IAPIFactory<IMessage>
     {
         public IMessage CreateMessage()
         {
@@ -39,6 +39,7 @@ namespace nng.Tests
         public NngResult<IPullSocket> PullerOpen() => PullSocket.Open();
         public NngResult<IPairSocket> Pair0Open() => Pair0Socket.Open();
         public NngResult<IPairSocket> Pair1Open() => Pair1Socket.Open();
+        public NngResult<IPairSocket> PairOpen() => Pair0Socket.Open();
         public NngResult<IRespondentSocket> RespondentOpen() => RespondentSocket.Open();
         public NngResult<ISurveyorSocket> SurveyorOpen() => SurveyorSocket.Open();
 
@@ -89,4 +90,19 @@ namespace nng.Tests
         #endregion
     }
 
+    namespace Compat
+    {
+        public class Factory : FactoryBase
+        {
+            public new NngResult<IPairSocket> PairOpen() => Pair0Socket.Open();   
+        }
+    }
+    
+    namespace Latest
+    {
+        public class Factory : FactoryBase
+        {
+            public new NngResult<IPairSocket> PairOpen() => Pair1Socket.Open();   
+        }
+    }
 }

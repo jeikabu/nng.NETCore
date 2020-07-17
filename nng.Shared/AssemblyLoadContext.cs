@@ -16,11 +16,12 @@ namespace nng
         /// Loads nng native library using specified load context and returns factory instance to create nng objects.
         /// </summary>
         /// <param name="loadContext">Load context into which native library is loaded</param>
+        /// <param name="factoryName">Name of factory type instance to create</param>
         /// <returns></returns>
-        public static IAPIFactory<IMessage> Init(AssemblyLoadContext loadContext)
+        public static IAPIFactory<IMessage> Init(AssemblyLoadContext loadContext, string factoryName = "nng.Factories.Compat.Factory")
         {
-            var assem = loadContext.LoadFromAssemblyName(new System.Reflection.AssemblyName(managedAssemblyName));
-            var type = assem.GetType("nng.Tests.TestFactory");
+            var assem = loadContext.LoadFromAssemblyName(new AssemblyName(managedAssemblyName));
+            var type = assem.GetType(factoryName);
             return (IAPIFactory<IMessage>)Activator.CreateInstance(type);
         }
 

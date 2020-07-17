@@ -1,4 +1,5 @@
 using nng.Native;
+using System;
 
 namespace nng
 {
@@ -25,8 +26,11 @@ namespace nng
         NngResult<ISubSocket> SubscriberOpen();
         NngResult<IPushSocket> PusherOpen();
         NngResult<IPullSocket> PullerOpen();
+        [Obsolete("Use PairOpen")]
         NngResult<IPairSocket> Pair0Open();
+        [Obsolete("Use PairOpen")]
         NngResult<IPairSocket> Pair1Open();
+        NngResult<IPairSocket> PairOpen();
         NngResult<IRespondentSocket> RespondentOpen();
         NngResult<ISurveyorSocket> SurveyorOpen();
     }
