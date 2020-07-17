@@ -20,9 +20,9 @@ __Goals of nng.NET__:
 
 - __Async first__: async/await access to [nng_aio](https://nanomsg.github.io/nng/man/v1.2.2/nng_aio.5.html) and [nng_ctx](https://nanomsg.github.io/nng/man/v1.2.2/nng_ctx.5.html)
 - __Native layer__: P/Invoke in separate files/namespace.  Don't like our high-level OO wrapper?  Re-use the pinvoke and make your own.  Also makes cross-platform-friendly pinvoke easier.
-- __Tests as Documentation__: [xUnit](https://xunit.github.io/) unit/integration tests in "plain" C# much like you'd write
-- __.NET Core friendly__: Using [`dotnet`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet) and targetting .NET Standard from the start
-- __Few surprises__: Simple class heirarchy (more composition than inheritance), minimal exceptions, idiomatic C# that when reasonable is similar to original native code
+- __Tests as Documentation__: [xUnit](https://xunit.github.io/) unit/integration tests in "plain" C# similar to application code
+- __Modern .NET__: Using [`dotnet`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet) and targeting .NET Standard and .NET Core from the start
+- __Few surprises__: Simple class heirarchy (more composition than inheritance), minimal exceptions and `null`, idiomatic C# similar to original native code when reasonable.
 
 ## Usage
 
@@ -30,7 +30,7 @@ Supports projects targeting:
 - .NET Core App 1.0+
 - .NET Standard 1.5+
     - [`SuppressUnmanagedCodeSecurity`](https://docs.microsoft.com/en-us/dotnet/api/system.security.suppressunmanagedcodesecurityattribute) is used with .NET Standard 2.0+ for improved PInvoke performance
-- .NET Framework 4.6.1+ ([caveats](#.net-framework))
+- __DEPRECATED__ .NET Framework 4.6.1+ ([caveats](#.net-framework))
 
 [Supported platforms](https://github.com/jeikabu/nng.NETCore/tree/master/nng.NETCore/runtimes):
 - Windows Vista or later 32/64-bit
@@ -42,7 +42,7 @@ Should be easy to add others that are supported by both .NET Core/.NET 5 and NNG
 
 After installing the package and building, your output folder should have `runtimes/` directory containing native binaries.
 
-On .NET Core/Standard use `NngLoadContext` (or your own [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext)) to load the appropriate native library and use NNG:  
+Use `NngLoadContext` (or your own [`AssemblyLoadContext`](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext)) to load the appropriate native library and use NNG:  
 ```csharp
 var path = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 var ctx = new nng.NngLoadContext(path);
@@ -74,6 +74,8 @@ You should be able to build the NNG native shared library for any [platform supp
 1. Copy library to appropriate `nng.NETCore/runtimes/XXX/native/` directory
 
 ## .NET Framework
+
+__NOTE__: [.NET Core/.NET 5 is the future of .NET and 4.8 is the last major update of .NET Framework](https://devblogs.microsoft.com/dotnet/net-core-is-the-future-of-net/).  Support for .NET Framework is deprecated and will soon be removed.
 
 [System.Runtime.Loader is not available in .NET Framework](https://github.com/dotnet/corefx/issues/22142), so the correct assembly must be loaded by some other means.
 

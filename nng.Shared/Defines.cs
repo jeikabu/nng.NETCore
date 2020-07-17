@@ -74,6 +74,7 @@ namespace nng.Native
         public const string NNG_OPT_SUB_UNSUBSCRIBE = "sub:unsubscribe";
         public const string NNG_OPT_SUB_PREFNEW = "sub:prefnew";
 
+        [Obsolete("pair v1 polyamorous mode is deprecated in NNG v1.3.0")]
         public const string NNG_OPT_PAIR1_POLY = "pair1:polyamorous";
 
         public const string NNG_OPT_SURVEYOR_SURVEYTIME = "surveyor:survey-time";
