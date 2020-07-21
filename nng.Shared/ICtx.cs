@@ -4,11 +4,16 @@ using System;
 namespace nng
 {
     /// <summary>
-    /// Context supporting nng_ctx
+    /// Represents object that has, is, or is like a `nng_ctx`.
     /// </summary>
-    public interface ICtx
+    public interface IHasCtx
     {
         INngCtx Ctx { get; }
+    }
+
+    [Obsolete("Downcast to ICtx no longer needed, use IHasCtx")]
+    public interface ICtx : IHasCtx
+    {
     }
 
     /// <summary>

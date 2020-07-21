@@ -39,7 +39,6 @@ namespace nng
     {
         Bus,
         Pair,
-        Survey,
     }
 
     /// <summary>
@@ -53,6 +52,7 @@ namespace nng
         NngResult<ISubAsyncContext<T>> CreateSubAsyncContext(ISocket socket);
         NngResult<IReqRepAsyncContext<T>> CreateReqRepAsyncContext(ISocket socket);
         NngResult<IRepReqAsyncContext<T>> CreateRepReqAsyncContext(ISocket socket);
+        NngResult<ISurveyorAsyncContext<T>> CreateSurveyorAsyncContext(ISocket socket);
     }
 
     public interface IMiscFactory

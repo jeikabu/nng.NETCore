@@ -30,6 +30,12 @@ namespace nng
             return NngResult<IReqRepAsyncContext<T>>.Fail(res);
         }
 
+        public NngResult<Unit> SetResendTime(int msTimeout)
+        {
+            var res = nng_ctx_setopt_ms(Ctx.NngCtx, nng.Native.Defines.NNG_OPT_REQ_RESENDTIME, new nng_duration { TimeMs = msTimeout });
+            return Unit.OkIfZero(res);
+        }
+
         /// <summary>
         /// Send the specified message.
         /// </summary>
