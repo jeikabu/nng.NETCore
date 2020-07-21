@@ -59,8 +59,6 @@ namespace nng.Factories
                 case SendReceiveContextSubtype.Bus:
                 case SendReceiveContextSubtype.Pair:
                     return SendReceiveAsyncContext<IMessage>.Create(this, socket);
-                case SendReceiveContextSubtype.Survey:
-                    return SurveyAsyncContext<IMessage>.Create(this, socket);
                 default:
                     return NngResult<ISendReceiveAsyncContext<IMessage>>.Err(NngErrno.EINVAL);
             }
@@ -79,6 +77,11 @@ namespace nng.Factories
         public NngResult<IRepReqAsyncContext<IMessage>> CreateRepReqAsyncContext(ISocket socket)
         {
             return RepAsyncCtx<IMessage>.Create(this, socket);
+        }
+
+        public NngResult<ISurveyorAsyncContext<IMessage>> CreateSurveyorAsyncContext(ISocket socket)
+        {
+            return SurveyAsyncContext<IMessage>.Create(this, socket);
         }
         #endregion
 

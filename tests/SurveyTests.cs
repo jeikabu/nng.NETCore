@@ -64,10 +64,11 @@ namespace nng.Tests
                 {
                     // Receive with no survey fails
                     await Util.AssertThrowsNng(() => ctx.Receive(cts.Token), Defines.NngErrno.ESTATE);
+                    // TODO: remove this after deprecating ICtx
+                    var _asyncctx = (ctx as ICtx).Ctx;
                     // Survey with no responses times out
-                    var asyncctx = (ctx as ICtx).Ctx;
                     // NB: when using nng_ctx must call ctx_setopt instead of (socket) setopt
-                    asyncctx.SetOpt(Native.Defines.NNG_OPT_SURVEYOR_SURVEYTIME, new nng_duration { TimeMs = 10 });
+                    ctx.Ctx.SetOpt(Native.Defines.NNG_OPT_SURVEYOR_SURVEYTIME, new nng_duration { TimeMs = 10 });
                     //ctx.Socket.SetOpt(Native.Defines.NNG_OPT_SURVEYOR_SURVEYTIME, new nng_duration { TimeMs = 10 });
                     await ctx.Send(Factory.CreateMessage());
                     await Util.AssertThrowsNng(() => ctx.Receive(cts.Token), Defines.NngErrno.ETIMEDOUT);
@@ -198,8 +199,8 @@ namespace nng.Tests
                     {
                         using (var ctx = surveySocket.CreateAsyncContext(Factory).Unwrap())
                         {
-                            (ctx as ICtx).Ctx.SetOpt(Native.Defines.NNG_OPT_RECVTIMEO, nng_duration.Infinite);
-                            (ctx as ICtx).Ctx.SetOpt(Native.Defines.NNG_OPT_SURVEYOR_SURVEYTIME, nng_duration.Infinite);
+                            ctx.Ctx.SetOpt(Native.Defines.NNG_OPT_RECVTIMEO, nng_duration.Infinite);
+                            ctx.Ctx.SetOpt(Native.Defines.NNG_OPT_SURVEYOR_SURVEYTIME, nng_duration.Infinite);
 
                             await readyToDial.SignalAndWait();
                             await readyToSend.SignalAndWait();

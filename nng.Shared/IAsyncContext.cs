@@ -21,25 +21,6 @@ namespace nng
     //     }
     // }
 
-    // public interface IFactory
-    // {
-    //     IReplySocket CreateRep();
-    //     IRequestSocket CreateReq();
-    // }
-
-    // public class AsyncFactory : IFactory
-    // {
-    //     public IReplySocket CreateRep()
-    //     {
-
-    //     }
-
-    //     public IRequestSocket CreateReq()
-    //     {
-
-    //     }
-    // }
-
     /// <summary>
     /// Context for asynchronous nng operations.  Most likely involves nng_aio, only involves nng_ctx if supported by protocol.
     /// </summary>
@@ -79,16 +60,17 @@ namespace nng
     /// Context with asynchronous request half of request/reply protocol
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IReqRepAsyncContext<T> : IAsyncContext
+    public interface IReqRepAsyncContext<T> : IAsyncContext, IHasCtx
     {
         Task<NngResult<T>> Send(T message);
+        NngResult<Unit> SetResendTime(int msTimeout);
     }
 
     /// <summary>
     /// Context with asynchronous reply half of request/reply protocol
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IRepReqAsyncContext<T> : IAsyncContext
+    public interface IRepReqAsyncContext<T> : IAsyncContext, IHasCtx
     {
         Task<NngResult<T>> Receive();
         Task<NngResult<Unit>> Reply(T message);
@@ -105,6 +87,14 @@ namespace nng
     {
     }
 
+    /// <summary>
+    /// Context with surveyor half of survey pattern
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface ISurveyorAsyncContext<T> : ISendReceiveAsyncContext<T>, IHasCtx
+    {
+    }
+
     public static class AsyncContextExt
     {
         #region ISocket.CreateAsyncContext
@@ -116,8 +106,8 @@ namespace nng
         public static NngResult<IReqRepAsyncContext<T>> CreateAsyncContext<T>(this IReqSocket socket, IAPIFactory<T> factory) => factory.CreateReqRepAsyncContext(socket);
         public static NngResult<IRepReqAsyncContext<T>> CreateAsyncContext<T>(this IRepSocket socket, IAPIFactory<T> factory) => factory.CreateRepReqAsyncContext(socket);
         public static NngResult<ISendReceiveAsyncContext<T>> CreateAsyncContext<T>(this IPairSocket socket, IAPIFactory<T> factory) => factory.CreateSendReceiveAsyncContext(socket, SendReceiveContextSubtype.Pair);
-        public static NngResult<ISendReceiveAsyncContext<T>> CreateAsyncContext<T>(this IRespondentSocket socket, IAPIFactory<T> factory) => factory.CreateSendReceiveAsyncContext(socket, SendReceiveContextSubtype.Survey);
-        public static NngResult<ISendReceiveAsyncContext<T>> CreateAsyncContext<T>(this ISurveyorSocket socket, IAPIFactory<T> factory) => factory.CreateSendReceiveAsyncContext(socket, SendReceiveContextSubtype.Survey);
+        public static NngResult<ISurveyorAsyncContext<T>> CreateAsyncContext<T>(this IRespondentSocket socket, IAPIFactory<T> factory) => factory.CreateSurveyorAsyncContext(socket);
+        public static NngResult<ISurveyorAsyncContext<T>> CreateAsyncContext<T>(this ISurveyorSocket socket, IAPIFactory<T> factory) => factory.CreateSurveyorAsyncContext(socket);
         #endregion
     }
 }

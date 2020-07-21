@@ -16,7 +16,8 @@
     Assemblies for targetted frameworks are in runtimes/ instead of lib/ or ref/ 
     See: https://docs.microsoft.com/en-us/nuget/reference/errors-and-warnings/nu5128#scenario-2
     -->
-    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <!-- TODO: renable CS0618 after removing ICtx -->
+    <NoWarn>$(NoWarn);NU5128;CS0618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

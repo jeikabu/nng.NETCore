@@ -15,11 +15,11 @@ namespace nng
     /// There can only be one survey at a time.  Responses received when there is no outstanding survey are discarded.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class SurveyAsyncContext<T> : AsyncBase<T>, ISendReceiveAsyncContext<T>, ICtx
+    public class SurveyAsyncContext<T> : AsyncBase<T>, ISurveyorAsyncContext<T>
     {
         public INngCtx Ctx { get; protected set; }
 
-        public static NngResult<ISendReceiveAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
+        public static NngResult<ISurveyorAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
         {
             var context = new SurveyAsyncContext<T> { Factory = factory, Socket = socket };
             var res = context.InitAio();
@@ -30,11 +30,11 @@ namespace nng
                 if (ctx.IsOk())
                 {
                     context.Ctx = ctx.Ok();
-                    return NngResult<ISendReceiveAsyncContext<T>>.Ok(context);
+                    return NngResult<ISurveyorAsyncContext<T>>.Ok(context);
                 }
-                return NngResult<ISendReceiveAsyncContext<T>>.Err(ctx.Err());
+                return NngResult<ISurveyorAsyncContext<T>>.Err(ctx.Err());
             }
-            return NngResult<ISendReceiveAsyncContext<T>>.Fail(res);
+            return NngResult<ISurveyorAsyncContext<T>>.Fail(res);
         }
 
         /// <summary>
