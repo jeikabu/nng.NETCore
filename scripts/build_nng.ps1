@@ -31,6 +31,7 @@ $current_dir = $(Get-Location)
 try {
     if ($IsLinux) {
         docker build -t jeikabu/build-nng dockerfiles/build_nng
+        docker run --rm --privileged multiarch/qemu-user-static:register
         docker run -i -t --rm -v "$PWD/nng.NETCore/runtimes:/runtimes" jeikabu/build-nng
     }
     else {
