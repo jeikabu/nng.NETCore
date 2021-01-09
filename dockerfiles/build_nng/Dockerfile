@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     git
 
 ARG SRC
-ARG NNG_BRANCH=v1.3.1
+ARG NNG_BRANCH=v1.3.2
 WORKDIR ${SRC}
 
 RUN git clone https://github.com/nanomsg/nng.git \
