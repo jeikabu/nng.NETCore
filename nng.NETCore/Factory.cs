@@ -43,7 +43,13 @@ namespace nng.Factories
         public NngResult<IRespondentSocket> RespondentOpen() => RespondentSocket.Open();
         public NngResult<ISurveyorSocket> SurveyorOpen() => SurveyorSocket.Open();
 
+        #region INngAsyncFactory
+        public NngResult<INngAio> CreateAio(AioCallback callback) => AsyncIO.Create(callback);
+        public NngResult<INngCtx> CreateCtx(ISocket socket) => AsyncCtx.Create(socket);
+        #endregion
+
         #region IAsyncContextFactory
+
         public NngResult<ISendAsyncContext<IMessage>> CreateSendAsyncContext(ISocket socket)
         {
             return SendAsyncContext<IMessage>.Create(this, socket);
@@ -85,10 +91,25 @@ namespace nng.Factories
         }
         #endregion
 
-        #region IMiscFactory
+        #region INngMiscFactory
         public NngResult<IStatRoot> GetStatSnapshot()
         {
             return Stat.GetStatSnapshot();
+        }
+        #endregion
+
+        #region INngStreamFactory
+        public NngResult<INngStreamListener> StreamListenerCreate(string addr)
+        {
+            return StreamListener.Alloc(addr);
+        }
+        public NngResult<INngStreamDialer> StreamDialerCreate(string addr)
+        {
+            return StreamDialer.Alloc(addr);
+        }
+        public NngResult<INngStream> StreamFrom(INngAio aio)
+        {
+            return Stream.From(aio);
         }
         #endregion
     }

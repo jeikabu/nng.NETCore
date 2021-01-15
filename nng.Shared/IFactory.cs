@@ -35,6 +35,12 @@ namespace nng
         NngResult<ISurveyorSocket> SurveyorOpen();
     }
 
+    public interface INngAsyncFactory
+    {
+        NngResult<INngAio> CreateAio(AioCallback callback = default);
+        NngResult<INngCtx> CreateCtx(ISocket socket);
+    }
+
     public enum SendReceiveContextSubtype
     {
         Bus,
@@ -55,12 +61,22 @@ namespace nng
         NngResult<ISurveyorAsyncContext<T>> CreateSurveyorAsyncContext(ISocket socket);
     }
 
-    public interface IMiscFactory
+    public interface INngMiscFactory
     {
         NngResult<IStatRoot> GetStatSnapshot();
     }
 
-    public interface IAPIFactory<T> : IMessageFactory<T>, ISocketFactory, IAsyncContextFactory<T>, IMiscFactory
+    public interface INngStreamFactory
+    {
+        NngResult<INngStreamListener> StreamListenerCreate(string addr);
+        NngResult<INngStreamDialer> StreamDialerCreate(string addr);
+        NngResult<INngStream> StreamFrom(INngAio aio);
+    }
+
+    public interface INngApiFactory : ISocketFactory, INngAsyncFactory, INngStreamFactory, INngMiscFactory
+    {}
+
+    public interface IAPIFactory<T> : INngApiFactory, IMessageFactory<T>,  IAsyncContextFactory<T>
     { }
 
 }

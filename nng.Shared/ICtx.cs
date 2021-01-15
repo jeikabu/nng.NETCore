@@ -22,5 +22,7 @@ namespace nng
     public interface INngCtx : IOptions
     {
         nng_ctx NngCtx { get; }
+        void Send(INngAio aio);
+        void Recv(INngAio aio);
     }
 }

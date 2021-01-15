@@ -49,7 +49,7 @@ namespace nng
         {
             var context = new SubAsyncContext<T> { Factory = factory, Socket = socket };
             var res = context.InitAio();
-            return NngResult<ISubAsyncContext<T>>.OkIfZero(res, context);
+            return res.Into<ISubAsyncContext<T>>(context);
         }
     }
 }

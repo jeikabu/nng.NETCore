@@ -24,9 +24,11 @@ namespace nng
     /// <summary>
     /// Context for asynchronous nng operations.  Most likely involves nng_aio, only involves nng_ctx if supported by protocol.
     /// </summary>
-    public interface IAsyncContext : IHasSocket, IDisposable
+    public interface IAsyncContext : IHasSocket, IHasAio, IDisposable
     {
+        [Obsolete("Use SetTimeout() on IHasAio.Aio property")]
         void SetTimeout(int msTimeout);
+        [Obsolete("Use Cancel() on IHasAio.Aio property")]
         void Cancel();
     }
 

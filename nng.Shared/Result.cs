@@ -152,6 +152,16 @@ namespace nng
             return Err((NngErrno)errno);
         }
 
+        /// <summary>
+        /// Create fail result using errno.
+        /// </summary>
+        /// <param name="errno"></param>
+        /// <returns></returns>
+        public static NngResult<TOk> Fail(NngErrno errno)
+        {
+            return Err(errno);
+        }
+
         public bool IsOk() => result.IsOk();
         public bool IsErr() => !IsOk();
         public bool IsErr(NngErrno err) => IsErr() && Err() == err;
@@ -198,6 +208,18 @@ namespace nng
             if (IsOk())
             {
                 return NngResult<T>.Ok(func());
+            }
+            else
+            {
+                return IntoErr<T>();
+            }
+        }
+
+        public NngResult<T> Into<T>(T value)
+        {
+            if (IsOk())
+            {
+                return NngResult<T>.Ok(value);
             }
             else
             {
