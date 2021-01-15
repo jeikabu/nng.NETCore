@@ -1,5 +1,6 @@
 using nng.Native;
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -15,15 +16,19 @@ namespace nng.Tests
         public const int ShortTestMs = 250;
         public const int DefaultTimeoutMs = 5000;
 
+        public const int DelayShortMs = 25;
+
         public static string UrlIpc() => "ipc://" + Guid.NewGuid().ToString();
         public static string UrlInproc() => "inproc://" + Guid.NewGuid().ToString();
         public static string UrlTcp() => "tcp://localhost:0";
         public static string UrlWs() => "ws://localhost:0";
 
-        public static byte[] TopicRandom() => Guid.NewGuid().ToByteArray();
+        public static byte[] RandomBytes() => Guid.NewGuid().ToByteArray();
+        public static byte[] TopicRandom() => RandomBytes();
+
 
         public static Task WaitReady() => Task.Delay(100);
-        public static Task WaitShort() => Task.Delay(25);
+        public static Task WaitShort() => Task.Delay(DelayShortMs);
 
         public static string GetDialUrl(IListener listener, string url)
         {
@@ -179,6 +184,24 @@ namespace nng.Tests
         {
             socket.SetOpt(nng.Native.Defines.NNG_OPT_RECVTIMEO, new nng_duration{TimeMs = timeoutMs});
             socket.SetOpt(nng.Native.Defines.NNG_OPT_SENDTIMEO, new nng_duration{TimeMs = timeoutMs});
+        }
+
+        const int ITERATIONS = 10;
+
+        public static void RepeatTest(Action testFunction)
+        {
+            foreach (var _  in Enumerable.Range(0, ITERATIONS))
+            {
+                testFunction();
+            }
+        }
+
+        public static async Task RepeatTest(Func<Task> testFunction)
+        {
+            foreach (var _  in Enumerable.Range(0, ITERATIONS))
+            {
+                await testFunction();
+            }
         }
 
         public static readonly Random rng = new Random();

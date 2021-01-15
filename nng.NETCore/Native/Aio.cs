@@ -11,9 +11,6 @@ namespace nng.Native.Aio
 #endif
     public sealed class UnsafeNativeMethods
     {
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        public delegate void AioCallback(IntPtr arg);
-
         //[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         //public delegate void AioCancelFunction(nng_aio aio, IntPtr ptr, Int32 val);
 
@@ -71,7 +68,12 @@ namespace nng.Native.Aio
         public static extern void nng_aio_set_timeout(nng_aio aio, nng_duration timeout);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
-        public static extern int nng_aio_set_iov(nng_aio aio, UInt32 count, nng_iov iov);
+        static extern int nng_aio_set_iov(nng_aio aio, UInt32 niov, nng_iov[] iov);
+
+        public static Int32 nng_aio_set_iov(nng_aio aio, nng_iov[] iov)
+        {
+            return nng_aio_set_iov(aio, (UInt32)iov.Length, iov);
+        }
 
         // [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         // public static extern bool nng_aio_begin(nng_aio aio);

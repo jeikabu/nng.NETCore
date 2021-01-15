@@ -13,7 +13,7 @@ namespace nng
         {
             var context = new SendAsyncContext<T> { Factory = factory, Socket = socket };
             var res = context.InitAio();
-            return NngResult<ISendAsyncContext<T>>.OkIfZero(res, context);
+            return res.Into<ISendAsyncContext<T>>(context);
         }
 
         /// <summary>
@@ -29,24 +29,24 @@ namespace nng
 
                 tcs = Extensions.CreateSendResultSource();
                 State = AsyncState.Send;
-                nng_aio_set_msg(aioHandle, Factory.Take(ref message));
-                nng_send_aio(Socket.NngSocket, aioHandle);
+                Aio.SetMsg(Factory.Take(ref message));
+                nng_send_aio(Socket.NngSocket, Aio.NngAio);
                 return tcs.Task;
             }
         }
 
         protected override void AioCallback(IntPtr argument)
         {
-            var res = 0;
+            var res = Unit.Ok;
             switch (State)
             {
                 case AsyncState.Send:
-                    res = nng_aio_result(aioHandle);
-                    if (res != 0)
+                    res = Aio.GetResult();
+                    if (res.IsErr())
                     {
                         HandleFailedSend();
                         State = AsyncState.Init;
-                        tcs.TrySetNngError(res);
+                        tcs.TrySetNngError(res.Err());
                         return;
                     }
                     State = AsyncState.Init;
@@ -68,7 +68,7 @@ namespace nng
         {
             var context = new ResvAsyncContext<T> { Factory = factory, Socket = socket };
             var res = context.InitAio();
-            return NngResult<IReceiveAsyncContext<T>>.OkIfZero(res, context);
+            return res.Into<IReceiveAsyncContext<T>>(context);
         }
 
         /// <summary>
@@ -84,26 +84,26 @@ namespace nng
 
                 tcs = Extensions.CreateReceiveSource<T>(token);
                 State = AsyncState.Recv;
-                nng_recv_aio(Socket.NngSocket, aioHandle);
+                nng_recv_aio(Socket.NngSocket, Aio.NngAio);
                 return tcs.Task;
             }
         }
 
         protected override void AioCallback(IntPtr argument)
         {
-            var res = 0;
+            var res = Unit.Ok;
             switch (State)
             {
                 case AsyncState.Recv:
-                    res = nng_aio_result(aioHandle);
-                    if (res != 0)
+                    res = Aio.GetResult();
+                    if (res.IsErr())
                     {
                         State = AsyncState.Init;
-                        tcs.TrySetNngError(res);
+                        tcs.TrySetNngError(res.Err());
                         return;
                     }
                     State = AsyncState.Init;
-                    nng_msg msg = nng_aio_get_msg(aioHandle);
+                    nng_msg msg = Aio.GetMsg();
                     var message = Factory.CreateMessage(msg);
                     tcs.TrySetResult(NngResult<T>.Ok(message));
                     break;

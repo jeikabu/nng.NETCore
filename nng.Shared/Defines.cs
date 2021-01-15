@@ -6,6 +6,11 @@ namespace nng.Native
 {
     public sealed partial class Defines
     {
+        /// <summary>
+        /// Maximum number of scatter/gather iov supported (see <a href=https://nng.nanomsg.org/man/v1.3.2/nng_aio_set_iov.3.html>nng_aio_set_iov</a>)
+        /// </summary>
+        public const int MAX_IOV_BUFFERS = 8;
+
         public const int NNG_MAXADDRLEN = 128;
 
         public const int NNG_DURATION_INFINITE = -1;
@@ -241,8 +246,8 @@ namespace nng.Native
     [StructLayout(LayoutKind.Sequential)]
     public struct nng_iov
     {
-#pragma warning disable CS0169
-        IntPtr ptr;
+        public IntPtr iov_buf;
+        public UIntPtr iov_len;
     }
 
     public enum nng_stat_type_enum
@@ -380,6 +385,33 @@ namespace nng.Native
     [StructLayout(LayoutKind.Sequential, Size = 16)]
     struct uint8_16_blob
     {
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_stream
+    {
+        IntPtr opaque_ptr;
+        public static readonly nng_stream Null = new nng_stream { opaque_ptr = IntPtr.Zero };
+
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public nng_stream(IntPtr ptr)
+        {
+            opaque_ptr = ptr;
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_stream_dialer
+    {
+        IntPtr opaque_ptr;
+        public static readonly nng_stream_dialer Null = new nng_stream_dialer { opaque_ptr = IntPtr.Zero };
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct nng_stream_listener
+    {
+        IntPtr opaque_ptr;
+        public static readonly nng_stream_listener Null = new nng_stream_listener { opaque_ptr = IntPtr.Zero };
     }
 
 #endregion

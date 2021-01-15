@@ -106,7 +106,7 @@ namespace nng
         int Id { get; }
     }
 
-    public static class Extensions
+    public static partial class Extensions
     {
         public static TaskCompletionSource<NngResult<T>> CreateSource<T>()
         {
@@ -140,20 +140,12 @@ namespace nng
         {
             socket.TrySetResult(NngResult<T>.Ok(message));
         }
-        public static void TrySetNngError<T>(this TaskCompletionSource<NngResult<T>> socket, int error)
+        public static void TrySetNngError<T>(this TaskCompletionSource<NngResult<T>> socket, NngErrno error)
         {
-            if (error == 0)
-            {
-                return;
-            }
             socket.TrySetResult(NngResult<T>.Fail(error));
         }
-        public static void TrySetNngError<T>(this CancellationTokenTaskSource<NngResult<T>> socket, int error)
+        public static void TrySetNngError<T>(this CancellationTokenTaskSource<NngResult<T>> socket, NngErrno error)
         {
-            if (error == 0)
-            {
-                return;
-            }
             socket.TrySetResult(NngResult<T>.Fail(error));
         }
     }

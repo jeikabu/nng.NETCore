@@ -30,7 +30,7 @@ namespace nng
     }
 
     /// <summary>
-    /// Pair version 0 socket for pair protocol
+    /// Pair version 1 socket for pair protocol
     /// </summary>
     public class Pair1Socket : Socket, IPairSocket
     {

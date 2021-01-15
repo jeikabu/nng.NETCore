@@ -5,11 +5,6 @@ using System.Threading.Tasks;
 
 namespace nng
 {
-    using static nng.Native.Aio.UnsafeNativeMethods;
-    using static nng.Native.Basic.UnsafeNativeMethods;
-    using static nng.Native.Ctx.UnsafeNativeMethods;
-    using static nng.Native.Msg.UnsafeNativeMethods;
-
     /// <summary>
     /// In the survey pattern, surveyors broadcast a survey to all respondents.  Respondents can reply within some time limit but don't have to.
     /// There can only be one survey at a time.  Responses received when there is no outstanding survey are discarded.
@@ -23,7 +18,7 @@ namespace nng
         {
             var context = new SurveyAsyncContext<T> { Factory = factory, Socket = socket };
             var res = context.InitAio();
-            if (res == 0)
+            if (res.IsOk())
             {
                 //TODO: when get default interface methods in C#8 move this to ICtx
                 var ctx = AsyncCtx.Create(socket);
@@ -34,7 +29,10 @@ namespace nng
                 }
                 return NngResult<ISurveyorAsyncContext<T>>.Err(ctx.Err());
             }
-            return NngResult<ISurveyorAsyncContext<T>>.Fail(res);
+            else 
+            {
+                return NngResult<ISurveyorAsyncContext<T>>.Fail(res.Err());
+            }
         }
 
         /// <summary>
@@ -51,8 +49,8 @@ namespace nng
 
                 sendTcs = Extensions.CreateSendResultSource();
                 State = AsyncState.Send;
-                nng_aio_set_msg(aioHandle, Factory.Take(ref message));
-                nng_ctx_send(Ctx.NngCtx, aioHandle);
+                Aio.SetMsg(Factory.Take(ref message));
+                Ctx.Send(Aio);
                 return sendTcs.Task;
             }
         }
@@ -73,39 +71,39 @@ namespace nng
 
                 receiveTcs = Extensions.CreateReceiveSource<T>(token);
                 State = AsyncState.Recv;
-                nng_ctx_recv(Ctx.NngCtx, aioHandle);
+                Ctx.Recv(Aio);
                 return receiveTcs.Task;
             }
         }
 
         protected override void AioCallback(IntPtr argument)
         {
-            var res = 0;
+            var res = Unit.Ok;
             switch (State)
             {
                 case AsyncState.Send:
-                    res = nng_aio_result(aioHandle);
-                    if (res != 0)
+                    res = Aio.GetResult();
+                    if (res.IsErr())
                     {
                         HandleFailedSend();
                         State = AsyncState.Init;
-                        sendTcs.TrySetNngError(res);
+                        sendTcs.TrySetNngError(res.Err());
                         return;
                     }
                     State = AsyncState.Init;
-                    sendTcs.TrySetNngResult();
+                    sendTcs.TrySetResult(res);
                     break;
 
                 case AsyncState.Recv:
-                    res = nng_aio_result(aioHandle);
-                    if (res != 0)
+                    res = Aio.GetResult();
+                    if (res.IsErr())
                     {
                         State = AsyncState.Init;
-                        receiveTcs.TrySetNngError(res);
+                        receiveTcs.TrySetNngError(res.Err());
                         return;
                     }
                     State = AsyncState.Init;
-                    nng_msg msg = nng_aio_get_msg(aioHandle);
+                    var msg = Aio.GetMsg();
                     var message = Factory.CreateMessage(msg);
                     receiveTcs.TrySetNngResult(message);
                     break;
