@@ -16,14 +16,14 @@ namespace nng.Tests
     [Collection("nng")]
     public class MsgTests
     {
-        IAPIFactory<IMessage> factory;
+        IAPIFactory<INngMsg> factory;
 
         public MsgTests(NngCollectionFixture collectionFixture)
         {
             this.factory = collectionFixture.Factory;
         }
 
-        IMessage MsgRandom()
+        INngMsg MsgRandom()
         {
             var bytes0 = Guid.NewGuid().ToByteArray();
             var bytes1 = Guid.NewGuid().ToByteArray();
@@ -38,7 +38,7 @@ namespace nng.Tests
         {
             var msg = MsgRandom();
 
-            var clone = msg.Dup();
+            var clone = msg.Dup().Unwrap();
             Assert.True(Util.Equals(msg, clone));
         }
 
@@ -139,7 +139,7 @@ namespace nng.Tests
             Assert.True(Util.BytesEqual(headerBytes, msg.Header.AsSpan()));
         }
 
-        void ChopTrimPart(IMessagePart part)
+        void ChopTrimPart(INngMsgPart part)
         {
             var bytes0 = Guid.NewGuid().ToByteArray();
             var int0 = (uint)Util.rng.Next(1000, 1000000);

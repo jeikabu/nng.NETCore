@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!-- Needed so tests run in similar environment as consumers of nupkg -->
-  <Import Project="..\nng.NETCore\build\Subor.nng.NETCore.targets" />
+  <Import Project="..\nng.NET\build\nng.NET.targets" />
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -23,7 +23,7 @@
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\nng.Shared\nng.Shared.csproj" />
+    <ProjectReference Include="..\nng.NET.Shared\nng.NET.Shared.csproj" />
   </ItemGroup>
   
 </Project>

@@ -21,7 +21,7 @@ namespace nng.Tests
             Factory = NngLoadContext.Init(alc);
         }
 
-        public IAPIFactory<IMessage> Factory { get; private set; }
+        public IAPIFactory<INngMsg> Factory { get; private set; }
 
         public void TestIterate(Action testFunction)
         {

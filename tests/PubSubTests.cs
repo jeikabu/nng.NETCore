@@ -15,7 +15,7 @@ namespace nng.Tests
     public class PubSubTests
     {
         NngCollectionFixture Fixture;
-        IAPIFactory<IMessage> Factory => Fixture.Factory;
+        IAPIFactory<INngMsg> Factory => Fixture.Factory;
 
         public PubSubTests(NngCollectionFixture collectionFixture)
         {
@@ -204,17 +204,17 @@ namespace nng.Tests
     }
 
 
-    class PubSubBrokerImpl : IBrokerImpl<IMessage>
+    class PubSubBrokerImpl : IBrokerImpl<INngMsg>
     {
-        public IAPIFactory<IMessage> Factory { get; private set; }
+        public IAPIFactory<INngMsg> Factory { get; private set; }
 
-        public PubSubBrokerImpl(IAPIFactory<IMessage> factory)
+        public PubSubBrokerImpl(IAPIFactory<INngMsg> factory)
         {
             Factory = factory;
             topic = TopicRandom();
         }
 
-        public IReceiveAsyncContext<IMessage> CreateInSocket(string url)
+        public IReceiveAsyncContext<INngMsg> CreateInSocket(string url)
         {
             var socket = Factory.PullerOpen().Unwrap();
             socket.Listen(url).Unwrap();
@@ -224,7 +224,7 @@ namespace nng.Tests
             return ctx;
         }
 
-        public ISendAsyncContext<IMessage> CreateOutSocket(string url)
+        public ISendAsyncContext<INngMsg> CreateOutSocket(string url)
         {
             var socket = Factory.PublisherOpen().Unwrap();
             socket.Listen(url).Unwrap();
@@ -234,7 +234,7 @@ namespace nng.Tests
             return ctx;
         }
 
-        public IReceiveAsyncContext<IMessage> CreateClient(string url)
+        public IReceiveAsyncContext<INngMsg> CreateClient(string url)
         {
             var socket = Factory.SubscriberOpen().Unwrap();
             socket.Dial(url).Unwrap();
@@ -245,7 +245,7 @@ namespace nng.Tests
             return ctx;
         }
 
-        public IMessage CreateMessage()
+        public INngMsg CreateMessage()
         {
             return Factory.CreateTopicMessage(topic);
         }

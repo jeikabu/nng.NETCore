@@ -14,7 +14,7 @@ namespace nng.Tests
     [Collection("nng")]
     public class StreamTests
     {
-        IAPIFactory<IMessage> factory;
+        IAPIFactory<INngMsg> factory;
 
         public StreamTests(NngCollectionFixture collectionFixture)
         {
@@ -86,7 +86,7 @@ namespace nng.Tests
         public readonly INngStream lstream;
         public readonly INngStream dstream;
 
-        public StreamStuff(IAPIFactory<IMessage> factory)
+        public StreamStuff(IAPIFactory<INngMsg> factory)
         {
             var url = UrlIpc();
             laio = factory.CreateAio().Unwrap();

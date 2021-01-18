@@ -2,5 +2,5 @@ bin/
 obj/
 .vs/
 
-# Output of nng.NETCore.csproj placed in runtimes/any/
-nng.NETCore/runtimes/any/
+# Output of nng.NET.csproj placed in runtimes/any/
+nng.NET/runtimes/any/

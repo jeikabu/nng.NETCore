@@ -15,7 +15,7 @@ namespace nng.Tests
     public class ListenerTests
     {
         NngCollectionFixture Fixture;
-        IAPIFactory<IMessage> Factory => Fixture.Factory;
+        IAPIFactory<INngMsg> Factory => Fixture.Factory;
 
         public ListenerTests(NngCollectionFixture collectionFixture)
         {

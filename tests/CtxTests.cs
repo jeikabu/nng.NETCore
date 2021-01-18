@@ -15,7 +15,7 @@ namespace nng.Tests
     public class CtxTests
     {
         NngCollectionFixture Fixture;
-        IAPIFactory<IMessage> Factory => Fixture.Factory;
+        IAPIFactory<INngMsg> Factory => Fixture.Factory;
 
         public CtxTests(NngCollectionFixture collectionFixture)
         {
@@ -29,8 +29,6 @@ namespace nng.Tests
             using (var socket = Factory.ReplierOpen().ThenListen(url).Unwrap())
             using (var rep = socket.CreateAsyncContext(Factory).Unwrap())
             {
-                // TODO: remove this after deprecating ICtx
-                var _remove = (rep as ICtx).Ctx;
                 // Get a value, set a new value, get back the new value
                 Assert.Equal(0, rep.Ctx.GetOpt(NNG_OPT_RECVTIMEO, out nng_duration recvTimeout));
                 var newResvTimeout = new nng_duration(recvTimeout);

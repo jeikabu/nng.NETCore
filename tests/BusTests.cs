@@ -14,7 +14,7 @@ namespace nng.Tests
     public class BusTests
     {
         NngCollectionFixture Fixture;
-        IAPIFactory<IMessage> Factory => Fixture.Factory;
+        IAPIFactory<INngMsg> Factory => Fixture.Factory;
 
         public BusTests(NngCollectionFixture collectionFixture)
         {

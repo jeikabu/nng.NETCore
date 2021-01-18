@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../common.targets" />
+
+  <PropertyGroup>
+    <OutputPath>runtimes\any\lib\</OutputPath>
+    <DebugType>full</DebugType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PackageOutputPath>../bin/$(Configuration)</PackageOutputPath>
+    <!-- Including assembly as part of runtimes/ so don't want it placed in lib/ -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <PackageId>nng.NET</PackageId>
+    <!-- Needed to avoid `error NU5128` when running `dotnet pack`.
+    Assemblies for targetted frameworks are in runtimes/ instead of lib/ or ref/ 
+    See: https://docs.microsoft.com/en-us/nuget/reference/errors-and-warnings/nu5128#scenario-2
+    -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="system.memory" Version="4.5.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\nng.NET.Shared\nng.NET.Shared.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!-- Must be run after build so output assembly is in runtimes/ -->
+  <Target Name="Runtimes" AfterTargets="Build">
+    <ItemGroup>
+      <Content Include="runtimes\**">
+        <PackagePath>runtimes</PackagePath>
+        <Visible>false</Visible>
+      </Content>
+      <Content Include="build\**">
+        <PackagePath>build</PackagePath>
+      </Content>
+    </ItemGroup>
+  </Target>
+</Project>

@@ -14,7 +14,7 @@ namespace nng.Tests
     public class SurveyTests
     {
         NngCollectionFixture Fixture;
-        IAPIFactory<IMessage> Factory => Fixture.Factory;
+        IAPIFactory<INngMsg> Factory => Fixture.Factory;
 
         public SurveyTests(NngCollectionFixture collectionFixture)
         {
@@ -64,8 +64,6 @@ namespace nng.Tests
                 {
                     // Receive with no survey fails
                     await Util.AssertThrowsNng(() => ctx.Receive(cts.Token), Defines.NngErrno.ESTATE);
-                    // TODO: remove this after deprecating ICtx
-                    var _asyncctx = (ctx as ICtx).Ctx;
                     // Survey with no responses times out
                     // NB: when using nng_ctx must call ctx_setopt instead of (socket) setopt
                     ctx.Ctx.SetOpt(Native.Defines.NNG_OPT_SURVEYOR_SURVEYTIME, new nng_duration { TimeMs = 10 });

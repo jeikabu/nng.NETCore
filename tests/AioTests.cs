@@ -14,7 +14,7 @@ namespace nng.Tests
     [Collection("nng")]
     public class AioTests
     {
-        IAPIFactory<IMessage> factory;
+        IAPIFactory<INngMsg> factory;
 
         public AioTests(NngCollectionFixture collectionFixture)
         {
@@ -108,7 +108,7 @@ namespace nng.Tests
             Assert.Equal(timeoutTask, await Task.WhenAny(timeoutTask, pullTask));
         }
 
-        async Task<(ISendAsyncContext<IMessage>, IReceiveAsyncContext<IMessage>)> CreatePusherAndPuller()
+        async Task<(ISendAsyncContext<INngMsg>, IReceiveAsyncContext<INngMsg>)> CreatePusherAndPuller()
         {
             var url = UrlIpc();
             var pushSocket = factory.PusherOpen().Unwrap();

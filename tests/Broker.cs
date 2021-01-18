@@ -13,12 +13,12 @@ namespace nng.Tests
         IReceiveAsyncContext<T> CreateInSocket(string url);
         ISendAsyncContext<T> CreateOutSocket(string url);
         IReceiveAsyncContext<T> CreateClient(string url);
-        IMessage CreateMessage();
+        INngMsg CreateMessage();
     }
 
     class Broker: System.IDisposable
     {
-        public Broker(IBrokerImpl<IMessage> implementation)
+        public Broker(IBrokerImpl<INngMsg> implementation)
         {
             this.implementation = implementation;
         }
@@ -98,6 +98,6 @@ namespace nng.Tests
             implementation.Dispose();
         }
 
-        IBrokerImpl<IMessage> implementation;
+        IBrokerImpl<INngMsg> implementation;
     }
 }

@@ -1,30 +1,26 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
-    <TargetFrameworks>netstandard1.5;netstandard2.0;net461</TargetFrameworks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(OS)' != 'Windows_NT' ">
-    <TargetFrameworks>netstandard1.5;netstandard2.0</TargetFrameworks>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)'=='netstandard1.5' or '$(TargetFramework)'=='netstandard1.6' or '$(TargetFramework)'=='netstandard2.0' or '$(TargetFramework)'=='netstandard2.1'">
-    <DefineConstants>FEATURE_NETSTANDARD1_5_AND_UP</DefineConstants>
-  </PropertyGroup>
-
   <PropertyGroup>
+    <TargetFrameworks>netstandard1.5;netstandard2.0;net5.0</TargetFrameworks>
     <RootNamespace>nng</RootNamespace>
     <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsAsErrors />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net5.0'">
+    <LangVersion>9.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)'!='net5.0'">
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <VersionPrefix>1.3.2</VersionPrefix>
     <VersionSuffix>rc2</VersionSuffix>
-    <Authors>Subor</Authors>
+    <Authors>Jeikabu</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Owners>Subor</Owners>
+    <Owners>Jeikabu</Owners>
     <PackageProjectUrl>https://github.com/jeikabu/nng.NETCore</PackageProjectUrl>
     <Summary>.NET Core bindings to nng</Summary>
     <PackageTags>nng csnng</PackageTags>
