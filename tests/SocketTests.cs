@@ -15,7 +15,7 @@ namespace nng.Tests
     public class SocketTests
     {
         NngCollectionFixture Fixture;
-        IAPIFactory<IMessage> Factory => Fixture.Factory;
+        IAPIFactory<INngMsg> Factory => Fixture.Factory;
 
         public SocketTests(NngCollectionFixture collectionFixture)
         {
@@ -58,14 +58,14 @@ namespace nng.Tests
         // Basically, sockets that exclusively listen() should fail the second call
         struct DupeUrlTest
         {
-            public DupeUrlTest(Func<(IDisposable,IListener)> pre, Func<IListener, IDisposable> func, bool isNull)
+            public DupeUrlTest(Func<(IDisposable,INngListener)> pre, Func<INngListener, IDisposable> func, bool isNull)
             {
                 this.pre = pre;
                 this.func = func;
                 this.isOk = isNull;
             }
-            public Func<(IDisposable,IListener)> pre;
-            public Func<IListener, IDisposable> func;
+            public Func<(IDisposable,INngListener)> pre;
+            public Func<INngListener, IDisposable> func;
             public bool isOk;
         }
 
@@ -127,7 +127,7 @@ namespace nng.Tests
                 IDisposable pre = null;
                 IDisposable obj0 = null;
                 IDisposable obj1 = null;
-                IListener listener = null;
+                INngListener listener = null;
                 try
                 {
                     if (test.pre != null)

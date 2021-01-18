@@ -15,7 +15,7 @@ namespace nng.Tests
     [Collection("nng")]
     public class MsgBuilderTests
     {
-        IAPIFactory<IMessage> factory;
+        IAPIFactory<INngMsg> factory;
 
         public MsgBuilderTests(NngCollectionFixture collectionFixture)
         {

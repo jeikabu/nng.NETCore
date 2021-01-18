@@ -14,14 +14,14 @@ namespace nng.Tests
     [Collection("nng")]
     public class ComplexTests
     {
-        IAPIFactory<IMessage> factory;
+        IAPIFactory<INngMsg> factory;
 
         public ComplexTests(NngCollectionFixture collectionFixture)
         {
             factory = collectionFixture.Factory;
         }
 
-        IMessage MsgRandom()
+        INngMsg MsgRandom()
         {
             var msg = factory.CreateMessage();
             msg.Append(Guid.NewGuid().ToByteArray());

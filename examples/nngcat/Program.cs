@@ -72,7 +72,7 @@ namespace nngcat
     static class SocketExt
     {
         public static T listenOrDial<T>(this NngResult<T> socket, CommandOption listenOpt, CommandOption dialOpt)
-            where T: ISocket
+            where T: INngSocket
         {
             if (listenOpt.HasValue())
                 return socket.ThenListen(listenOpt.Value()).Unwrap();

@@ -1,4 +1,4 @@
-# nng.NET/NETCore
+# nng<span>.</span>NET/NETCore
 
 .NET bindings to [NNG](https://github.com/nanomsg/nng):
 
@@ -12,32 +12,32 @@ Using latest [NNG release](https://github.com/nanomsg/nng/releases).
 ![](https://github.com/jeikabu/nng.NETCore/workflows/build/badge.svg)
 [![codecov](https://codecov.io/gh/jeikabu/nng.NETCore/branch/master/graph/badge.svg?token=KZMer5zeMv)](https://codecov.io/gh/jeikabu/nng.NETCore)
 
-For list of missing APIs/features see [`is:issue is:open label:enhancement`](https://github.com/jeikabu/nng.NETCore/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
+For list of missing APIs/features see [issues (`is:open label:enhancement`)](https://github.com/jeikabu/nng.NETCore/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
 
 
-__Goals of nng.NET__:
+__Goals of nng<span>.</span>NET__:
 
-- __Async first__: async/await access to [nng_aio](https://nanomsg.github.io/nng/man/v1.2.2/nng_aio.5.html) and [nng_ctx](https://nanomsg.github.io/nng/man/v1.2.2/nng_ctx.5.html)
+- __Async first__: async/await access to [nng_aio](https://nng.nanomsg.org/man/v1.3.2/nng_aio.5.html) and [nng_ctx](https://nng.nanomsg.org/man/v1.3.2/nng_ctx.5.html)
 - __Native layer__: P/Invoke in separate files/namespace.  Don't like our high-level OO wrapper?  Re-use the pinvoke and make your own.  Also makes cross-platform-friendly pinvoke easier.
 - __Tests as Documentation__: [xUnit](https://xunit.github.io/) unit/integration tests in "plain" C# similar to application code
-- __Modern .NET__: Using [`dotnet`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet) and targeting .NET Standard and .NET Core from the start
-- __Few surprises__: Simple class heirarchy (more composition than inheritance), minimal exceptions and `null`, idiomatic C# similar to original native code when reasonable.
+- __Modern .NET__: C# 7.3 and using [`dotnet`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet) and targeting .NET Standard and .NET Core/5 from the start
+- __Safety__: Minimal exceptions and `null`, type system avoids many runtime errors at compile time.
+- __Understandable__: Simple class hierarchy (more composition than inheritance), idiomatic C# similar to original native code when reasonable.
 
 ## Usage
 
 Supports projects targeting:
+- .NET 5
 - .NET Core App 1.0+
 - .NET Standard 1.5+
     - [`SuppressUnmanagedCodeSecurity`](https://docs.microsoft.com/en-us/dotnet/api/system.security.suppressunmanagedcodesecurityattribute) is used with .NET Standard 2.0+ for improved PInvoke performance
-- __DEPRECATED__ .NET Framework 4.6.1+ ([caveats](#.net-framework))
 
 [Supported platforms](https://github.com/jeikabu/nng.NETCore/tree/master/nng.NETCore/runtimes):
 - Windows Vista or later 32/64-bit
-- macOS/OSX 10.?+ 64-bit (built on 10.14)
-- Linux x86_64 (built on Debian 10/Buster)
-- Linux ARM32/armv7l and ARM64/aarch64 (built on Debian 10/Buster)
+- macOS/OSX 10.?+ 64-bit (built on 10.15)
+- Linux x86_64, ARM32/armv7l, ARM64/aarch64 (built on Debian 10/Buster)
 
-Should be easy to add others that are supported by both .NET Core/.NET 5 and NNG.
+Should be easy to add others that are supported by both .NET Core/5 and NNG.
 
 After installing the package and building, your output folder should have `runtimes/` directory containing native binaries.
 
@@ -53,43 +53,20 @@ See [`tests/`](https://github.com/jeikabu/nng.NETCore/tree/master/tests) and [`e
 
 ## Build & Run
 
-You should be able to build nng.NETCore for/on any platform supported by [.NET Core](https://dotnet.github.io/):
+You should be able to build nng<span>.</span>NET for/on any platform supported by [.NET Core/5](https://dotnet.microsoft.com/download):
 
 1. Build: `dotnet build`
 1. Run: `dotnet run` or `dotnet test tests`
 
-You should be able to build the NNG native shared library for any [platform supported by NNG](https://github.com/nanomsg/nng#supported-platforms):
+You should be able to build the NNG native shared library for any [platform supported by NNG](https://github.com/nanomsg/nng#supported-platforms).  See `scripts/build_nng.ps1` for details, but in general:
 1. Download/clone [NNG source](https://github.com/nanomsg/nng)
 1. On Windows, create Command Prompt suitable for Visual Studio:
     - Run __x64__ _Visual Studio Developer Command Prompt_ to create a 64-bit library (or __x86__ for 32-bit)
     - OR, run `vcvars64.bat` in cmd.exe (or `vcvars32.bat`)
-1. Make sure [cmake](https://cmake.org/) and [Ninja](https://ninja-build.org/) are in `PATH` environment variable
 1. Run:
     ```
     mkdir build && cd build
-    cmake -G Ninja -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release ..
-    ninja
+    cmake -DBUILD_SHARED_LIBS=ON ..
+    cmake --build .
     ```
-1. Copy library to appropriate `nng.NETCore/runtimes/XXX/native/` directory
-
-## .NET Framework
-
-__NOTE__: [.NET Core/.NET 5 is the future of .NET and 4.8 is the last major update of .NET Framework](https://devblogs.microsoft.com/dotnet/net-core-is-the-future-of-net/).  Support for .NET Framework is deprecated and will soon be removed.
-
-[System.Runtime.Loader is not available in .NET Framework](https://github.com/dotnet/corefx/issues/22142), so the correct assembly must be loaded by some other means.
-
-If your application is targetting .Net Framework 4.6+ and you get lots of:
-```
-message NETSDK1041: Encountered conflict between 'Reference:XXX\.nuget\packages\subor.nng.netcore\0.0.5\lib\netstandard2.0\Microsoft.Win32.Primitives.dll' and 'Reference:Microsoft.Win32.Primitives'.  NETSDK1034: Choosing 'Reference:XXX\.nuget\packages\subor.nng.netcore\0.0.5\lib\netstandard2.0\Microsoft.Win32.Primitives.dll' because file version '4.6.26419.2' is greater than '4.6.25714.1'.
-
-<snip>
-
-XXX\Properties\AssemblyInfo.cs(8,12,8,25): error CS0246: The type or namespace name 'AssemblyTitleAttribute' could not be found (are you missing a using directive or an assembly reference?)
-```
-
-Try adding the following to your project:
-```xml
-<PropertyGroup>
-    <DependsOnNETStandard>false</DependsOnNETStandard>
-</PropertyGroup>
-```
+1. Copy library to [appropriate directory](https://docs.microsoft.com/en-us/dotnet/core/rid-catalog) (i.e. `nng.NET/runtimes/XXX/native/`)

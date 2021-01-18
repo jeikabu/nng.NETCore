@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nng.NETCore", "nng.NETCore\nng.NETCore.csproj", "{9A861DF2-DA60-407A-A8D2-81EF372C0ACE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nng.NET", "nng.NET\nng.NET.csproj", "{9A861DF2-DA60-407A-A8D2-81EF372C0ACE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests", "tests\tests.csproj", "{0A30A86E-25F9-4F5A-AB6A-0E21AE508F52}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nng.Shared", "nng.Shared\nng.Shared.csproj", "{3B3D9790-B9E1-419B-AF0A-23204D639AB1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nng.NET.Shared", "nng.NET.Shared\nng.NET.Shared.csproj", "{3B3D9790-B9E1-419B-AF0A-23204D639AB1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

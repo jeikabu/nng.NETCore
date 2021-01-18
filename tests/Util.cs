@@ -30,7 +30,7 @@ namespace nng.Tests
         public static Task WaitReady() => Task.Delay(100);
         public static Task WaitShort() => Task.Delay(DelayShortMs);
 
-        public static string GetDialUrl(IListener listener, string url)
+        public static string GetDialUrl(INngListener listener, string url)
         {
             if (url.EndsWith(":0", StringComparison.OrdinalIgnoreCase)
             && (url.StartsWith("tcp", StringComparison.OrdinalIgnoreCase) || url.StartsWith("ws", StringComparison.OrdinalIgnoreCase))
@@ -103,7 +103,7 @@ namespace nng.Tests
             return lhs.SequenceEqual(rhs);
         }
 
-        public static bool Equals(IMessage lhs, IMessage rhs)
+        public static bool Equals(INngMsg lhs, INngMsg rhs)
         {
             return BytesEqual(lhs.AsSpan(), rhs.AsSpan()) && BytesEqual(lhs.Header.AsSpan(), rhs.Header.AsSpan());
         }
@@ -180,7 +180,7 @@ namespace nng.Tests
             return res;
         }
 
-        public static void SetTestOptions(ISocket socket, int timeoutMs = Util.ShortTestMs)
+        public static void SetTestOptions(INngSocket socket, int timeoutMs = Util.ShortTestMs)
         {
             socket.SetOpt(nng.Native.Defines.NNG_OPT_RECVTIMEO, new nng_duration{TimeMs = timeoutMs});
             socket.SetOpt(nng.Native.Defines.NNG_OPT_SENDTIMEO, new nng_duration{TimeMs = timeoutMs});
@@ -228,7 +228,7 @@ namespace nng.Tests
 
     static class FactoryExt
     {
-        public static IMessage CreateTopicMessage(this IMessageFactory<IMessage> socket, byte[] topic)
+        public static INngMsg CreateTopicMessage(this IMessageFactory<INngMsg> socket, byte[] topic)
         {
             var res = socket.CreateMessage();
             res.Append(topic);

@@ -15,7 +15,7 @@ namespace nng.Tests
     public class StatsTests
     {
         NngCollectionFixture Fixture;
-        IAPIFactory<IMessage> Factory => Fixture.Factory;
+        IAPIFactory<INngMsg> Factory => Fixture.Factory;
 
         public StatsTests(NngCollectionFixture collectionFixture)
         {

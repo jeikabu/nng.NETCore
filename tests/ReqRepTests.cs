@@ -12,7 +12,7 @@ namespace nng.Tests
     public class ReqRepTests
     {
         NngCollectionFixture Fixture;
-        IAPIFactory<IMessage> Factory => Fixture.Factory;
+        IAPIFactory<INngMsg> Factory => Fixture.Factory;
 
         public ReqRepTests(NngCollectionFixture collectionFixture)
         {

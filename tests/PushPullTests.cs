@@ -15,7 +15,7 @@ namespace nng.Tests
     public class PushPullTests
     {
         NngCollectionFixture Fixture;
-        IAPIFactory<IMessage> Factory => Fixture.Factory;
+        IAPIFactory<INngMsg> Factory => Fixture.Factory;
 
         public PushPullTests(NngCollectionFixture collectionFixture)
         {
@@ -110,16 +110,16 @@ namespace nng.Tests
         }
     }
 
-    class PushPullBrokerImpl : IBrokerImpl<IMessage>
+    class PushPullBrokerImpl : IBrokerImpl<INngMsg>
     {
-        public IAPIFactory<IMessage> Factory { get; private set; }
+        public IAPIFactory<INngMsg> Factory { get; private set; }
 
-        public PushPullBrokerImpl(IAPIFactory<IMessage> factory)
+        public PushPullBrokerImpl(IAPIFactory<INngMsg> factory)
         {
             Factory = factory;
         }
 
-        public IReceiveAsyncContext<IMessage> CreateInSocket(string url)
+        public IReceiveAsyncContext<INngMsg> CreateInSocket(string url)
         {
             var socket = Factory.PullerOpen().Unwrap();
             socket.Listen(url).Unwrap();
@@ -128,7 +128,7 @@ namespace nng.Tests
             disposable.Add(ctx);
             return ctx;
         }
-        public ISendAsyncContext<IMessage> CreateOutSocket(string url)
+        public ISendAsyncContext<INngMsg> CreateOutSocket(string url)
         {
             var socket = Factory.PusherOpen().Unwrap();
             socket.Listen(url).Unwrap();
@@ -137,7 +137,7 @@ namespace nng.Tests
             disposable.Add(ctx);
             return ctx;
         }
-        public IReceiveAsyncContext<IMessage> CreateClient(string url)
+        public IReceiveAsyncContext<INngMsg> CreateClient(string url)
         {
             var socket = Factory.PullerOpen().Unwrap();
             socket.Dial(url).Unwrap();
@@ -147,7 +147,7 @@ namespace nng.Tests
             return ctx;
         }
 
-        public IMessage CreateMessage()
+        public INngMsg CreateMessage()
         {
             return Factory.CreateMessage();
         }

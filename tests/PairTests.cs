@@ -14,7 +14,7 @@ namespace nng.Tests
     public class PairTests
     {
         NngCollectionFixture Fixture;
-        IAPIFactory<IMessage> Factory => Fixture.Factory;
+        IAPIFactory<INngMsg> Factory => Fixture.Factory;
 
         public PairTests(NngCollectionFixture collectionFixture)
         {
@@ -72,8 +72,8 @@ namespace nng.Tests
             var dialerReady = new AsyncBarrier(numListeners + numDialers);
             var cts = new CancellationTokenSource();
 
-            using (var listenSocket = Factory.Pair1Open().ThenListenAs(out var listener, url).Unwrap())
-            using (var dialerSocket = Factory.Pair1Open().ThenDial(GetDialUrl(listener, url)).Unwrap())
+            using (var listenSocket = Factory.PairOpen().ThenListenAs(out var listener, url).Unwrap())
+            using (var dialerSocket = Factory.PairOpen().ThenDial(GetDialUrl(listener, url)).Unwrap())
             {
                 // Make sure sends can timeout since they aren't canceleable
                 listenSocket.SetOpt(nng.Native.Defines.NNG_OPT_SENDTIMEO, new nng_duration{TimeMs = 50});

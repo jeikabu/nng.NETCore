@@ -1,8 +1,9 @@
 # Build NNG native shared library for: linux-x64, linux-arm, linux-arm64
 #
 # USAGE:
+# docker run --rm --privileged multiarch/qemu-user-static:register
 # docker build -t jeikabu/build-nng dockerfiles/build_nng
-# docker run -i -t --rm -v "$PWD/nng.NETCore/runtimes:/runtimes" jeikabu/build-nng
+# docker run -i -t --rm -v "$PWD/nng.NET/runtimes:/runtimes" jeikabu/build-nng
 
 ARG SRC=/usr/src
 
@@ -15,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     git
 
 ARG SRC
-ARG NNG_BRANCH=v1.3.2
+ARG NNG_BRANCH=v1.4.0
 WORKDIR ${SRC}
 
 RUN git clone https://github.com/nanomsg/nng.git \
@@ -35,7 +36,7 @@ ARG RUNTIME_NATIVE=${SRC}/runtimes/linux-x64/native
 WORKDIR ${SRC}
 COPY --from=nng ${SRC}/nng .
 RUN mkdir -p build && cd build \
-    && cmake -G "Unix Makefiles" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DNNG_TESTS=OFF -DNNG_TOOLS=OFF .. \
+    && cmake -G "Unix Makefiles" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DNNG_ELIDE_DEPRECATED=ON -DNNG_TESTS=OFF -DNNG_TOOLS=OFF .. \
     && make -j2 \
     && mkdir -p ${RUNTIME_NATIVE} \
     && cp libnng.so ${RUNTIME_NATIVE}
@@ -53,7 +54,7 @@ ARG RUNTIME_NATIVE=${SRC}/runtimes/linux-arm/native
 WORKDIR ${SRC}
 COPY --from=nng ${SRC}/nng .
 RUN mkdir -p build && cd build \
-    && cmake -G "Unix Makefiles" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DNNG_TESTS=OFF -DNNG_TOOLS=OFF .. \
+    && cmake -G "Unix Makefiles" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DNNG_ELIDE_DEPRECATED=ON -DNNG_TESTS=OFF -DNNG_TOOLS=OFF .. \
     && make -j2 \
     && mkdir -p ${RUNTIME_NATIVE} \
     && cp libnng.so ${RUNTIME_NATIVE}
@@ -71,7 +72,7 @@ ARG RUNTIME_NATIVE=${SRC}/runtimes/linux-arm64/native
 WORKDIR ${SRC}
 COPY --from=nng ${SRC}/nng .
 RUN mkdir -p build && cd build \
-    && cmake -G "Unix Makefiles" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DNNG_TESTS=OFF -DNNG_TOOLS=OFF .. \
+    && cmake -G "Unix Makefiles" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DNNG_ELIDE_DEPRECATED=ON -DNNG_TESTS=OFF -DNNG_TOOLS=OFF .. \
     && make -j2 \
     && mkdir -p ${RUNTIME_NATIVE} \
     && cp libnng.so ${RUNTIME_NATIVE}
