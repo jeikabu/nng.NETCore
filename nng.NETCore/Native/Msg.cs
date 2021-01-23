@@ -126,9 +126,18 @@ namespace nng.Native.Msg
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern nng_pipe nng_msg_get_pipe(nng_msg message);
 
-
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int          nng_pipe_close(nng_pipe pipe);
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_pipe_id(nng_pipe pipe);
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern nng_socket   nng_pipe_socket(nng_pipe pipe);
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern nng_dialer   nng_pipe_dialer(nng_pipe pipe);
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern nng_listener nng_pipe_listener(nng_pipe pipe);
+        [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int nng_pipe_notify(nng_socket socket, Defines.NngPipeEv ev, Defines.PipeEventCallback callback, IntPtr arg);
 
         [DllImport(NngDll, CallingConvention = CallingConvention.Cdecl)]
         public static extern int nng_pipe_getopt_bool(nng_pipe pipe, string opt, out bool val);

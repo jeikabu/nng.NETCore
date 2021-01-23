@@ -11,6 +11,8 @@ namespace nng
     public interface ISocket : IHasSocket, IOptions, IDisposable
     {
         nng_socket NngSocket { get; }
+
+        int Id { get; }
         
         /// <summary>
         /// Create and start a listener that listens at the specified url for incoming connections from dialers.
@@ -52,6 +54,8 @@ namespace nng
         /// <param name="url"></param>
         /// <returns></returns>
         NngResult<IDialer> DialerCreate(string url);
+
+        NngResult<Unit> Notify(Defines.NngPipeEv ev, Defines.PipeEventCallback callback, IntPtr arg);
     }
 
 
@@ -106,6 +110,7 @@ namespace nng
     /// </summary>
     public interface IListener : IStart, IOptions
     {
+        int Id { get; }
         int GetOpt(string name, out nng_sockaddr data);
     }
 
@@ -113,7 +118,9 @@ namespace nng
     /// Represents NNG dialer
     /// </summary>
     public interface IDialer : IStart, IOptions
-    { }
+    {
+        int Id { get; }   
+    }
 
     /// <summary>
     /// Represents a socket that can send messages

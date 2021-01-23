@@ -14,6 +14,7 @@ namespace nng
     public class Listener : IListener
     {
         public nng_listener NngListener { get; protected set; }
+        public int Id => nng_listener_id(NngListener);
 
         public static IListener Create(ISocket socket, string url)
         {

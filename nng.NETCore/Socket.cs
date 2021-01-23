@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace nng
 {
+    using static nng.Native.Msg.UnsafeNativeMethods;
     using static nng.Native.Socket.UnsafeNativeMethods;
 
     /// <summary>
@@ -14,6 +15,7 @@ namespace nng
     public abstract class Socket : ISocket
     {
         public nng_socket NngSocket { get; protected set; }
+        public int Id => nng_socket_id(NngSocket);
 
         ISocket IHasSocket.Socket => this;
 
@@ -144,6 +146,11 @@ namespace nng
             nng_msg message;
             var res = nng_recvmsg(NngSocket, out message, flags);
             return NngResult<IMessage>.OkThen(res, () => new Message(message));
+        }
+
+        public NngResult<Unit> Notify(Defines.NngPipeEv ev, Defines.PipeEventCallback callback, IntPtr arg)
+        {
+            return Unit.OkIfZero(nng_pipe_notify(NngSocket, ev, callback, arg));
         }
 
         #region IDisposable

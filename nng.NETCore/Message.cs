@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace nng
 {
+    using static nng.Native.Defines;
     using static nng.Native.Msg.UnsafeNativeMethods;
 
     public class NngMessageHeader : IMessagePart
@@ -178,6 +179,9 @@ namespace nng
 
         public nng_pipe NngPipe { get; }
         public int Id => nng_pipe_id(NngPipe);
+        public nng_socket Socket => nng_pipe_socket(NngPipe);
+        public IDialer Dialer => nng.Dialer.Create(nng_pipe_dialer(NngPipe));
+        public IListener Listener => nng.Listener.Create(nng_pipe_listener(NngPipe));
 
         public int GetOpt(string name, out bool data)
             => nng_pipe_getopt_bool(NngPipe, name, out data);
@@ -204,5 +208,7 @@ namespace nng
 
         public int GetOpt(string name, out ulong data)
             => nng_pipe_getopt_uint64(NngPipe, name, out data);
+
+        public NngResult<Unit> Close() => Unit.OkIfZero( nng_pipe_close(NngPipe) );
     }
 }

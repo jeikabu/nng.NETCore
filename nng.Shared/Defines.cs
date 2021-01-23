@@ -6,6 +6,9 @@ namespace nng.Native
 {
     public sealed partial class Defines
     {
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void PipeEventCallback(nng_pipe pipe, NngPipeEv ev, IntPtr arg);
+
         /// <summary>
         /// Maximum number of scatter/gather iov supported (see <a href=https://nng.nanomsg.org/man/v1.3.2/nng_aio_set_iov.3.html>nng_aio_set_iov</a>)
         /// </summary>
@@ -161,6 +164,19 @@ namespace nng.Native
             EINTERNAL = NNG_EINTERNAL,
             ESYSERR = NNG_ESYSERR,
             ETRANERR = NNG_ETRANERR,
+        }
+        #endregion
+
+        #region nng_pipe_ev
+        public const int NNG_PIPE_EV_ADD_PRE = 0;
+        public const int NNG_PIPE_EV_ADD_POST = 1;
+        public const int NNG_PIPE_EV_REM_POST = 2;
+
+        public enum NngPipeEv
+        {
+            AddPre = NNG_PIPE_EV_ADD_PRE,
+            AddPost = NNG_PIPE_EV_ADD_POST,
+            RemPost = NNG_PIPE_EV_REM_POST,
         }
         #endregion
     }
