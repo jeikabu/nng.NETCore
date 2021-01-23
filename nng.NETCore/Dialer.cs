@@ -14,6 +14,7 @@ namespace nng
     public class Dialer : IDialer
     {
         public nng_dialer NngDialer { get; protected set; }
+        public int Id => nng_dialer_id(NngDialer);
 
         public static IDialer Create(ISocket socket, string url)
         {

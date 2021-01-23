@@ -104,6 +104,13 @@ namespace nng
         /// A positive identifier for the pipe, if it is valid.
         /// </summary>
         int Id { get; }
+
+        [Obsolete("TODO: return instance of correct wrapped socket type")]
+        nng_socket Socket { get; }
+        IDialer Dialer { get; }
+        IListener Listener { get; }
+
+        NngResult<Unit> Close();
     }
 
     public static partial class Extensions
@@ -147,6 +154,23 @@ namespace nng
         public static void TrySetNngError<T>(this CancellationTokenTaskSource<NngResult<T>> socket, NngErrno error)
         {
             socket.TrySetResult(NngResult<T>.Fail(error));
+        }
+
+        public static bool IsValid(this ISocket self)
+        {
+            return self.Id != -1;
+        }
+        public static bool IsValid(this IListener self)
+        {
+            return self.Id != -1;
+        }
+        public static bool IsValid(this IDialer self)
+        {
+            return self.Id != -1;
+        }
+        public static bool IsValid(this IPipe self)
+        {
+            return self.Id != -1;
         }
     }
 }
