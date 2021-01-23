@@ -129,6 +129,57 @@ namespace nng.Tests
 
         [Theory]
         [ClassData(typeof(TransportsClassData))]
+        public Task PubSubCtx(string url)
+        {
+            return Fixture.TestIterate(() => DoPubSubCtx(url));
+        }
+
+        async Task DoPubSubCtx(string url)
+        {
+            var topic = TopicRandom();
+            const int NUM_PUB = 1;
+            const int NUM_SUB = 2;
+            var serverReady = new AsyncBarrier(NUM_PUB + 1);  // Shared by all subscribers
+            var clientReady = new AsyncBarrier(NUM_PUB + NUM_SUB);
+            var cts = new CancellationTokenSource();
+            var dialUrl = string.Empty;
+            var tasks = new List<Task>();
+            var task = Task.Run(async () =>
+            {
+                using (var socket = Factory.PublisherOpen().ThenListenAs(out var listener, url).Unwrap())
+                using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
+                {
+                    dialUrl = GetDialUrl(listener, url);
+                    await serverReady.SignalAndWait();
+                    await clientReady.SignalAndWait();
+                    // Give receivers a chance to actually start receiving
+                    await WaitShort();
+                    (await ctx.Send(Factory.CreateTopicMessage(topic))).Unwrap();
+                }
+            });
+            tasks.Add(task);
+            await serverReady.SignalAndWait();
+            using (var socket = Factory.SubscriberOpen().ThenDial(dialUrl).Unwrap())
+            {
+                foreach (var _ in Enumerable.Range(0, NUM_SUB))
+                {
+                    var subTask = Task.Run(async () =>
+                    {
+                        using (var ctx = socket.CreateAsyncContext(Factory).Unwrap())
+                        {
+                            ctx.Subscribe(topic);
+                            await clientReady.SignalAndWait();
+                            await ctx.Receive(cts.Token);
+                        }    
+                    });
+                    
+                }
+                await CancelAfterAssertwait(tasks, cts);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(TransportsClassData))]
         public async Task BrokerTest(string url)
         {
             await PubSubBrokerAsync(1, 1, 1);
