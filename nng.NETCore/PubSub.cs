@@ -42,14 +42,4 @@ namespace nng
 
         private SubSocket() { }
     }
-
-    public class SubAsyncContext<T> : ResvAsyncContext<T>, ISubAsyncContext<T>
-    {
-        public static new NngResult<ISubAsyncContext<T>> Create(IMessageFactory<T> factory, ISocket socket)
-        {
-            var context = new SubAsyncContext<T> { Factory = factory, Socket = socket };
-            var res = context.InitAio();
-            return res.Into<ISubAsyncContext<T>>(context);
-        }
-    }
 }
