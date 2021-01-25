@@ -138,12 +138,13 @@ namespace nng.Tests
         {
             var topic = TopicRandom();
             const int NUM_PUB = 1;
-            const int NUM_SUB = 2;
+            const int NUM_SUB = 3;
             var serverReady = new AsyncBarrier(NUM_PUB + 1);  // Shared by all subscribers
             var clientReady = new AsyncBarrier(NUM_PUB + NUM_SUB);
             var cts = new CancellationTokenSource();
             var dialUrl = string.Empty;
             var tasks = new List<Task>();
+            int numReceived = 0;
             var task = Task.Run(async () =>
             {
                 using (var socket = Factory.PublisherOpen().ThenListenAs(out var listener, url).Unwrap())
@@ -170,12 +171,14 @@ namespace nng.Tests
                             ctx.Subscribe(topic);
                             await clientReady.SignalAndWait();
                             await ctx.Receive(cts.Token);
+                            Interlocked.Increment(ref numReceived);
                         }    
                     });
                     
                 }
                 await CancelAfterAssertwait(tasks, cts);
             }
+            Assert.Equal(NUM_SUB, numReceived);
         }
 
         [Theory]

@@ -85,7 +85,7 @@ namespace nng
     /// <remarks>
     /// For publish half see <see cref="ISendAsyncContext{T}"/>
     /// </remarks>
-    public interface ISubAsyncContext<T> : IReceiveAsyncContext<T>, ISubscriber
+    public interface ISubAsyncContext<T> : IReceiveAsyncContext<T>, IHasCtx
     {
     }
 

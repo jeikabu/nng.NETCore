@@ -2,13 +2,6 @@ namespace nng
 {
     using static nng.Native.Defines;
 
-    /// <summary>
-    /// Represents subscribe half of publish/subscribe protocol
-    /// </summary>
-    public interface ISubscriber : IHasSocket
-    {
-    }
-
     public static class Subscriber
     {
         /// <summary>
@@ -17,7 +10,7 @@ namespace nng
         /// <returns>The subscribe.</returns>
         /// <param name="socket">Socket.</param>
         /// <param name="topic">Topic.</param>
-        public static int Subscribe(this ISubscriber socket, byte[] topic)
+        public static int Subscribe(this ISubSocket socket, byte[] topic)
         {
             return socket.Socket.SetOpt(NNG_OPT_SUB_SUBSCRIBE, topic);
         }
@@ -28,9 +21,31 @@ namespace nng
         /// <returns>The unsubscribe.</returns>
         /// <param name="socket">Socket.</param>
         /// <param name="topic">Topic.</param>
-        public static int Unsubscribe(this ISubscriber socket, byte[] topic)
+        public static int Unsubscribe(this ISubSocket socket, byte[] topic)
         {
             return socket.Socket.SetOpt(NNG_OPT_SUB_UNSUBSCRIBE, topic);
+        }
+
+        /// <summary>
+        /// Subscribe to the specified topic.
+        /// </summary>
+        /// <returns>The subscribe.</returns>
+        /// <param name="socket">Socket.</param>
+        /// <param name="topic">Topic.</param>
+        public static int Subscribe<T>(this ISubAsyncContext<T> socket, byte[] topic)
+        {
+            return socket.Ctx.SetOpt(NNG_OPT_SUB_SUBSCRIBE, topic);
+        }
+
+        /// <summary>
+        /// Unsubscribe from the specified topic.
+        /// </summary>
+        /// <returns>The unsubscribe.</returns>
+        /// <param name="socket">Socket.</param>
+        /// <param name="topic">Topic.</param>
+        public static int Unsubscribe<T>(this ISubAsyncContext<T> socket, byte[] topic)
+        {
+            return socket.Ctx.SetOpt(NNG_OPT_SUB_UNSUBSCRIBE, topic);
         }
     }
 }

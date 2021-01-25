@@ -190,7 +190,7 @@ namespace nng
     /// <summary>
     /// Represents subscribe half of publish/subscribe protocol
     /// </summary>
-    public interface ISubSocket : IRecvSocket, ISocket, ISubscriber { }
+    public interface ISubSocket : IRecvSocket, ISocket { }
 
     /// <summary>
     /// Represents push half of push/pull protocol
