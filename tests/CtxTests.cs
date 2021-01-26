@@ -44,31 +44,36 @@ namespace nng.Tests
         [Fact]
         public async Task MustUseCtxGetSetOpt()
         {
-            var url = UrlIpc();
+            var url = UrlInproc();
 
-            // Setting receive timeout on nng_ctx works
+            // Aborting aio cancels read
             var task = Task.Run(async () => {
                 using (var socket = Factory.ReplierOpen().ThenListen(url).Unwrap())
                 using (var rep = socket.CreateAsyncContext(Factory).Unwrap())
                 {
-                    Assert.Equal(0, rep.Ctx.SetOpt(NNG_OPT_RECVTIMEO, nng_duration.Zero));
-                    Assert.True((await rep.Receive()).Err() == NngErrno.ECLOSED);
+                    var recv = rep.Receive();
+                    rep.Aio.Cancel();
+                    return await recv;
                 }
             });
-            var first = await Task.WhenAny(Task.WhenAll(task), Task.Delay(Util.ShortTestMs));
+            var first = await Task.WhenAny(task, Task.Delay(Util.ShortTestMs));
             Assert.Equal(task, first);
+            Assert.Equal(NngErrno.ECANCELED, task.Result.Err());
 
-            // Setting receive timeout on socket doesn't timeout read from nng_ctx
+            // Setting receive timeout on aio/ctx/socket doesn't timeout read
             task = Task.Run(async () => {
                 using (var socket = Factory.ReplierOpen().ThenListen(url).Unwrap())
                 using (var rep = socket.CreateAsyncContext(Factory).Unwrap())
                 {
+                    rep.Aio.SetTimeout(0);
+                    Assert.Equal(0, rep.Ctx.SetOpt(NNG_OPT_RECVTIMEO, nng_duration.Zero));
                     Assert.Equal(0, rep.Socket.SetOpt(NNG_OPT_RECVTIMEO, nng_duration.Zero));
-                    (await rep.Receive()).Unwrap();
+                    // Never return
+                    return await rep.Receive();
                 }
             });
             var timeout = Task.Delay(Util.ShortTestMs);
-            first = await Task.WhenAny(Task.WhenAll(task), timeout);
+            first = await Task.WhenAny(task, timeout);
             Assert.Equal(timeout, first);
         }
     }

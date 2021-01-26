@@ -90,6 +90,11 @@ namespace nng
             errorValue = error;
             okValue = ok;
         }
+
+        public override string ToString()
+        {
+            return (isOk ? "Ok(" + ok : "Err(" + error) + ")";
+        }
     }
 
     /// <summary>
@@ -245,5 +250,7 @@ namespace nng
         }
 
         public void Deconstruct(out bool isOk, out NngErrno errorValue, out TOk okValue) => result.Deconstruct(out isOk, out errorValue, out okValue);
+
+        public override string ToString() => result.ToString();
     }
 }

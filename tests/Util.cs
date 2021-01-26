@@ -187,21 +187,40 @@ namespace nng.Tests
         }
 
         const int ITERATIONS = 10;
+        const int MAX_ITERATION_FAILURES = 2;
 
         public static void RepeatTest(Action testFunction)
         {
+            int numFailures = 0;
             foreach (var _  in Enumerable.Range(0, ITERATIONS))
             {
-                testFunction();
+                try
+                {
+                    testFunction();
+                }
+                catch
+                {
+                    ++numFailures;
+                }
             }
+            Assert.True(numFailures <= MAX_ITERATION_FAILURES);
         }
 
         public static async Task RepeatTest(Func<Task> testFunction)
         {
+            int numFailures = 0;
             foreach (var _  in Enumerable.Range(0, ITERATIONS))
             {
-                await testFunction();
+                try
+                {
+                    await testFunction();
+                }
+                catch
+                {
+                    ++numFailures;
+                }
             }
+            Assert.True(numFailures <= MAX_ITERATION_FAILURES);
         }
 
         public static readonly Random rng = new Random();
