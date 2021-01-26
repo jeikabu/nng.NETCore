@@ -25,19 +25,22 @@ namespace nng.Tests
         [Fact]
         public void Basic()
         {
-            // FIXME: Can be removed in nng 1.1.2 or 1.2.0
-            // https://github.com/nanomsg/nng/issues/841
-            using (var pushSocket = Factory.PusherOpen().Unwrap())
-            using (var pullSocket = Factory.PullerOpen().Unwrap())
+            // Snapshop without sockets shouldn't crash
+            using (var root = Factory.GetStatSnapshot().Unwrap())
             {
-                pushSocket.Listen("inproc://stats").Unwrap();
-                pullSocket.Dial("inproc://stats").Unwrap();
-                using (var root = Factory.GetStatSnapshot().Unwrap())
+                foreach (var _ in root.Child())
                 {
-                    foreach (var child in root.Child())
-                    {
-                        var _ = String.Format("Child {0}[{1}]: {2}", child.Name, child.Type, child.Desc);
-                    }
+                }
+            }
+
+            var url = UrlInproc();
+            using (var pushSocket = Factory.PairOpen().ThenListen(url).Unwrap())
+            using (var pullSocket = Factory.PairOpen().ThenDial(url).Unwrap())
+            using (var root = Factory.GetStatSnapshot().Unwrap())
+            {
+                foreach (var child in root.Child())
+                {
+                    var _ = $"{child.Name} {child.Type} {child.Desc}";
                 }
             }
         }

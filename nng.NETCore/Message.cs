@@ -83,8 +83,7 @@ namespace nng
         public nng_msg Take()
         {
             var msg = message;
-            _header = null;
-            message = default;
+            release();
             return msg;
         }
 
@@ -143,11 +142,19 @@ namespace nng
             }
         }
 
+        private void release()
+        {
+            _header = null;
+            message = default;
+        }
+
         nng_msg message;
         NngMessageHeader _header;
         Pipe _pipe;
 
         #region IDisposable
+        ~Message() => Dispose(false);
+
         public void Dispose()
         {
             Dispose(true);
@@ -158,10 +165,8 @@ namespace nng
         {
             if (disposed)
                 return;
-            if (disposing)
-            {
-                nng_msg_free(message);
-            }
+            nng_msg_free(message);
+            release();
             disposed = true;
         }
         bool disposed = false;

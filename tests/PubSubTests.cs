@@ -138,7 +138,7 @@ namespace nng.Tests
         {
             var topic = TopicRandom();
             const int NUM_PUB = 1;
-            const int NUM_SUB = 3;
+            const int NUM_SUB = 2;
             var serverReady = new AsyncBarrier(NUM_PUB + 1);  // Shared by all subscribers
             var clientReady = new AsyncBarrier(NUM_PUB + NUM_SUB);
             var cts = new CancellationTokenSource();
@@ -153,9 +153,8 @@ namespace nng.Tests
                     dialUrl = GetDialUrl(listener, url);
                     await serverReady.SignalAndWait();
                     await clientReady.SignalAndWait();
-                    // Give receivers a chance to actually start receiving
-                    await WaitShort();
                     (await ctx.Send(Factory.CreateTopicMessage(topic))).Unwrap();
+                    await WaitShort();
                 }
             });
             tasks.Add(task);
@@ -174,8 +173,8 @@ namespace nng.Tests
                             Interlocked.Increment(ref numReceived);
                         }    
                     });
-                    
                 }
+                await WaitReady();
                 await CancelAfterAssertwait(tasks, cts);
             }
             Assert.Equal(NUM_SUB, numReceived);
