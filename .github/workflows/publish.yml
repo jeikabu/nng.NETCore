@@ -1,0 +1,16 @@
+name: publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: windows-2019
+    steps:
+    - name: Checkout nng.NET
+      uses: actions/checkout@v2
+    - name: Package
+      run: |
+        ./scripts/nupkg.ps1 -Version ${{ github.event.release.tag_name }} -NugetApiKey ${{ secrets.NUGET_API_KEY }}
+        

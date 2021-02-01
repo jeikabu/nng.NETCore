@@ -10,7 +10,7 @@ Using latest [NNG release](https://github.com/nanomsg/nng/releases).
 
 [![NuGet](https://img.shields.io/nuget/vpre/Subor.nng.NETCore.svg?colorB=brightgreen)](https://www.nuget.org/packages/Subor.nng.NETCore)
 ![](https://github.com/jeikabu/nng.NETCore/workflows/build/badge.svg)
-[![codecov](https://codecov.io/gh/subor/nng.NETCore/branch/master/graph/badge.svg)](https://codecov.io/gh/subor/nng.NETCore)
+[![codecov](https://codecov.io/gh/jeikabu/nng.NETCore/branch/master/graph/badge.svg?token=KZMer5zeMv)](https://codecov.io/gh/jeikabu/nng.NETCore)
 
 For list of missing APIs/features see [`is:issue is:open label:enhancement`](https://github.com/jeikabu/nng.NETCore/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
 
