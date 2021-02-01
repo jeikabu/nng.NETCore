@@ -4,6 +4,7 @@
 
 param([string]$nng_source = "../nng/",
 [switch]$clean,
+[string]$git_branch,
 [string]$runtimes = "$PSScriptRoot/../nng.NETCore/runtimes"
 )
 
@@ -64,7 +65,25 @@ try {
             Pop-Location
         }
     }
-    
 } finally {
     Set-Location $current_dir
+}
+
+if ($git_branch) {
+    if (!$(git config user.email) -or !(git config user.name)) {
+        git config user.email "jeikabu@users.noreply.github.com"
+        git config user.name "jeikabu"
+    }
+    
+    git checkout -b $git_branch
+    git add $runtimes
+    git commit -m "Update native NNG libs"
+    git push --set-upstream origin $git_branch
+    if (!$?) {
+        Write-Output "$? ExitCode: $LASTEXITCODE"
+        git pull origin $git_branch
+        Write-Output "$? ExitCode: $LASTEXITCODE"
+        git push --set-upstream origin $git_branch
+        Write-Output "$? ExitCode: $LASTEXITCODE"
+    }
 }
