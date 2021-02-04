@@ -1,16 +1,26 @@
 name: publish
 
 on:
+  workflow_dispatch:
+    inputs:
+        version:
+          required: true
   release:
     types: [published]
 
 jobs:
   build:
     runs-on: windows-2019
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
     steps:
     - name: Checkout nng.NET
       uses: actions/checkout@v2
     - name: Package
+      shell: pwsh
       run: |
-        ./scripts/nupkg.ps1 -Version ${{ github.event.release.tag_name }} -NugetApiKey ${{ secrets.NUGET_API_KEY }}
+        $version = "${{ github.event.release.tag_name }}" ?  "${{ github.event.release.tag_name }}" : "${{ github.event.inputs.version }}"
+        ./scripts/nupkg.ps1 -Version $version -CertBase64 ${{ secrets.CODE_SIGN_CERT_BASE64 }} -CertPassword ${{ secrets.CODE_SIGN_CERT_PASSWORD }} -NugetApiKey ${{ secrets.NUGET_API_KEY }}
         
