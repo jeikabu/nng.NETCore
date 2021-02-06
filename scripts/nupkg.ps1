@@ -3,7 +3,8 @@ param(
     [string]$NugetApiKey = "",
     [string]$Nuget = "nuget",
     [string]$CertFile = "",
-    [string]$CertBase64 = ""
+    [string]$CertBase64 = "",
+    [string]$CertPassword = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -26,7 +27,7 @@ if ($CertFile -or $CertBase64) {
     }
     
     try {
-        # If $Cert isn't a file assume it's a base64-encoded code-signing certificate
+        # If $Cert isn't a file, $CertBase64 is a base64-encoded code-signing certificate
         $tempCert = $null
         if (-not $(Test-Path $CertFile -PathType Leaf)) {
             $tempCert = New-TemporaryFile
@@ -35,7 +36,7 @@ if ($CertFile -or $CertBase64) {
         }
         
         foreach ($pkg in $packages) {
-            & $Nuget sign $pkg -Timestamper http://sha256timestamp.ws.symantec.com/sha256/timestamp -CertificatePath $CertFile
+            & $Nuget sign $pkg -Timestamper http://sha256timestamp.ws.symantec.com/sha256/timestamp -CertificatePath $CertFile -CertificatePassword $CertPassword
         }
     } finally {
         if ($tempCert) {

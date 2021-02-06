@@ -1,6 +1,10 @@
 name: publish
 
 on:
+  workflow_dispatch:
+    inputs:
+        version:
+          required: true
   release:
     types: [published]
 
@@ -15,6 +19,8 @@ jobs:
     - name: Checkout nng.NET
       uses: actions/checkout@v2
     - name: Package
+      shell: pwsh
       run: |
-        ./scripts/nupkg.ps1 -Version ${{ github.event.release.tag_name }} -CertBase64 ${{ secrets.CODE_SIGN_CERT_BASE64 }} -NugetApiKey ${{ secrets.NUGET_API_KEY }}
+        $version = ${{ github.event.release.tag_name }} ?? ${{ github.event.inputs.version }}
+        ./scripts/nupkg.ps1 -Version $version -CertBase64 ${{ secrets.CODE_SIGN_CERT_BASE64 }} -CertPassword ${{ secrets.CODE_SIGN_CERT_PASSWORD }} -NugetApiKey ${{ secrets.NUGET_API_KEY }}
         
