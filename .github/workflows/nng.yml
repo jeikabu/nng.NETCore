@@ -25,5 +25,12 @@ jobs:
         path: nng
     - name: Build
       run: |
-        ./scripts/build_nng.ps1 -nng_source ./nng -git_branch nng_update
+        ./scripts/build_nng.ps1 -nng_source ./nng
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        path: |
+          nng.NETCore/runtimes/**/*
+          !nng.NETCore/runtimes/any/**/*
+        if-no-files-found: error
 

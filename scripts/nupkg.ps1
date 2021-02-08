@@ -35,8 +35,9 @@ if ($CertFile -or $CertBase64) {
             $CertFile = $tempCert.FullName
         }
         
+        # Sign packages.  Verbosity quiet to avoid printing registered name/address in logs
         foreach ($pkg in $packages) {
-            & $Nuget sign $pkg -Timestamper http://sha256timestamp.ws.symantec.com/sha256/timestamp -CertificatePath $CertFile -CertificatePassword $CertPassword
+            & $Nuget sign $pkg -Timestamper http://sha256timestamp.ws.symantec.com/sha256/timestamp -CertificatePath $CertFile -CertificatePassword $CertPassword -Verbosity quiet
         }
     } finally {
         if ($tempCert) {
