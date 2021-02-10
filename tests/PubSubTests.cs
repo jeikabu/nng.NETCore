@@ -153,8 +153,9 @@ namespace nng.Tests
                     dialUrl = GetDialUrl(listener, url);
                     await serverReady.SignalAndWait();
                     await clientReady.SignalAndWait();
-                    (await ctx.Send(Factory.CreateTopicMessage(topic))).Unwrap();
+                    // Give receivers a chance to start receiving
                     await WaitShort();
+                    (await ctx.Send(Factory.CreateTopicMessage(topic))).Unwrap();
                 }
             });
             tasks.Add(task);
@@ -174,7 +175,6 @@ namespace nng.Tests
                         }    
                     });
                 }
-                await WaitReady();
                 await CancelAfterAssertwait(tasks, cts);
             }
             Assert.Equal(NUM_SUB, numReceived);
