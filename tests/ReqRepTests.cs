@@ -141,11 +141,16 @@ namespace nng.Tests
                 var request = (await RetryAgain(cts, () => rep.RecvMsg(flags))).Unwrap();
                 res = await RetryAgain(cts, () => rep.SendMsg(request, flags));
 
-                // NOTE: Using NB req/rep from same thread seems to not work
-                Assert.Equal(res.Err(), Defines.NngErrno.EAGAIN);
-
-                // var reply = await RetryAgain(cts, () => req.RecvMsg(flags));
-                // reply.Unwrap();
+                if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+                {
+                    var reply = await RetryAgain(cts, () => req.RecvMsg(flags));
+                    reply.Unwrap();
+                }
+                else
+                {
+                    // NOTE: Using NB req/rep from same thread seems to not work
+                    Assert.Equal(Defines.NngErrno.EAGAIN, res.Err());
+                }
             }
         }
 

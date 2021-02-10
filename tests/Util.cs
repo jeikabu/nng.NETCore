@@ -187,7 +187,7 @@ namespace nng.Tests
         }
 
         const int ITERATIONS = 10;
-        const int MAX_ITERATION_FAILURES = 2;
+        const int MAX_ITERATION_FAILURES = 1;
 
         public static void RepeatTest(Action testFunction)
         {
