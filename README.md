@@ -8,8 +8,8 @@ __Status__:
 
 Using latest [NNG release](https://github.com/nanomsg/nng/releases).
 
-[![NuGet](https://img.shields.io/nuget/vpre/Subor.nng.NETCore.svg?colorB=brightgreen)](https://www.nuget.org/packages/Subor.nng.NETCore)
-![](https://github.com/jeikabu/nng.NETCore/workflows/build/badge.svg)
+[![NuGet](https://img.shields.io/nuget/vpre/nng.NET.svg?colorB=brightgreen)](https://www.nuget.org/packages/nng.NET)
+[![GithubActions](https://github.com/jeikabu/nng.NETCore/workflows/build/badge.svg)](https://github.com/jeikabu/nng.NETCore/actions?query=workflow%3Abuild)
 [![codecov](https://codecov.io/gh/jeikabu/nng.NETCore/branch/master/graph/badge.svg?token=KZMer5zeMv)](https://codecov.io/gh/jeikabu/nng.NETCore)
 
 For list of missing APIs/features see [issues (`is:open label:enhancement`)](https://github.com/jeikabu/nng.NETCore/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
@@ -19,10 +19,10 @@ __Goals of nng<span>.</span>NET__:
 
 - __Async first__: async/await access to [nng_aio](https://nng.nanomsg.org/man/v1.3.2/nng_aio.5.html) and [nng_ctx](https://nng.nanomsg.org/man/v1.3.2/nng_ctx.5.html)
 - __Native layer__: P/Invoke in separate files/namespace.  Don't like our high-level OO wrapper?  Re-use the pinvoke and make your own.  Also makes cross-platform-friendly pinvoke easier.
-- __Tests as Documentation__: [xUnit](https://xunit.github.io/) unit/integration tests in "plain" C# similar to application code
+- __Tests as Documentation__: [xUnit](https://xunit.net/) unit/integration tests in "plain" C# similar to application code
 - __Modern .NET__: C# 7.3 and using [`dotnet`](https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet) and targeting .NET Standard and .NET Core/5 from the start
 - __Safety__: Minimal exceptions and `null`, type system avoids many runtime errors at compile time.
-- __Understandable__: Simple class hierarchy (more composition than inheritance), idiomatic C# similar to original native code when reasonable.
+- __Simple__: Shallow class hierarchy (more composition than inheritance), idiomatic C# similar to original native code when reasonable.
 
 ## Usage
 
@@ -33,7 +33,7 @@ Supports projects targeting:
     - [`SuppressUnmanagedCodeSecurity`](https://docs.microsoft.com/en-us/dotnet/api/system.security.suppressunmanagedcodesecurityattribute) is used with .NET Standard 2.0+ for improved PInvoke performance
 
 [Supported platforms](https://github.com/jeikabu/nng.NETCore/tree/master/nng.NETCore/runtimes):
-- Windows Vista or later 32/64-bit
+- Windows Vista or later 32/64-bit (built on Windows Server 2019)
 - macOS/OSX 10.?+ 64-bit (built on 10.15)
 - Linux x86_64, ARM32/armv7l, ARM64/aarch64 (built on Debian 10/Buster)
 
