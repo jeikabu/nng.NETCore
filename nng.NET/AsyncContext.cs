@@ -253,12 +253,19 @@ namespace nng
         {
             if (disposed)
                 return;
+
             if (disposing)
             {
-                var _ = nng_ctx_close(NativeNngStruct);
+                // No managed resources to dispose
             }
+
+            var _ = nng_ctx_close(NativeNngStruct);
+
             disposed = true;
         }
+
+        ~NngCtx() => Dispose(false);
+
         bool disposed = false;
         #endregion
     }
