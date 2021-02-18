@@ -175,12 +175,19 @@ namespace nng
         {
             if (disposed)
                 return;
+
             if (disposing)
             {
-                int _ = nng_close(NativeNngStruct);
+                // No managed resources to dispose
             }
+
+            int _ = nng_close(NativeNngStruct);
+
             disposed = true;
         }
+
+        ~NngSocket() => Dispose(false);
+
         bool disposed = false;
         #endregion
     }
