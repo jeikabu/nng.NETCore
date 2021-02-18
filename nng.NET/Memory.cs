@@ -40,7 +40,7 @@ namespace nng
             Ptr = default;
             Length = default;
         }
-        
+
         #region IDisposable
         public void Dispose()
         {
@@ -52,13 +52,20 @@ namespace nng
         {
             if (disposed)
                 return;
+
             if (disposing)
             {
-                if (Ptr != IntPtr.Zero)
-                    nng_free(Ptr, Length);
+                // No managed resources to dispose
             }
+
+            if (Ptr != IntPtr.Zero)
+                nng_free(Ptr, Length);
+
             disposed = true;
         }
+
+        ~NngAlloc() => Dispose(false);
+
         bool disposed = false;
         #endregion
     }
