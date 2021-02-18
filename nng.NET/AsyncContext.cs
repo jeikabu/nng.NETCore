@@ -174,10 +174,24 @@ namespace nng
         protected object sync = new object();
 
         #region IDisposable
-        public void Dispose()
+        public void Dispose() => Dispose(true);
+
+        protected virtual void Dispose(bool disposing)
         {
-            Aio?.Dispose();
+            if (disposed)
+                return;
+
+            if (disposing)
+            {
+                Aio?.Dispose();
+            }
+
+            // No unmanaged resources to cleanup
+
+            disposed = true;
         }
+
+        bool disposed = false;
         #endregion
     }
 
