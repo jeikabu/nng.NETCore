@@ -82,12 +82,19 @@ namespace nng
         {
             if (disposed)
                 return;
+
             if (disposing)
             {
-                int _ = nng_dialer_close(NativeNngStruct);
+                // No managed resources to dispose
             }
+
+            int _ = nng_dialer_close(NativeNngStruct);
+
             disposed = true;
         }
+
+        ~NngDialer() => Dispose(false);
+
         bool disposed = false;
         #endregion
 
