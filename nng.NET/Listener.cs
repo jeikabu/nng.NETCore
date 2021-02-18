@@ -84,12 +84,19 @@ namespace nng
         {
             if (disposed)
                 return;
+
             if (disposing)
             {
-                int _ = nng_listener_close(NativeNngStruct);
+                // No managed resources to dispose
             }
+
+            int _ = nng_listener_close(NativeNngStruct);
+
             disposed = true;
         }
+
+        ~NngListener() => Dispose(false);
+
         bool disposed = false;
         #endregion
 
