@@ -174,10 +174,24 @@ namespace nng
         protected object sync = new object();
 
         #region IDisposable
-        public void Dispose()
+        public void Dispose() => Dispose(true);
+
+        protected virtual void Dispose(bool disposing)
         {
-            Aio?.Dispose();
+            if (disposed)
+                return;
+
+            if (disposing)
+            {
+                Aio?.Dispose();
+            }
+
+            // No unmanaged resources to cleanup
+
+            disposed = true;
         }
+
+        bool disposed = false;
         #endregion
     }
 
@@ -253,12 +267,19 @@ namespace nng
         {
             if (disposed)
                 return;
+
             if (disposing)
             {
-                var _ = nng_ctx_close(NativeNngStruct);
+                // No managed resources to dispose
             }
+
+            var _ = nng_ctx_close(NativeNngStruct);
+
             disposed = true;
         }
+
+        ~NngCtx() => Dispose(false);
+
         bool disposed = false;
         #endregion
     }
