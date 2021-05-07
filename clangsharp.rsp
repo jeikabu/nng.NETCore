@@ -1,0 +1,6 @@
+--file
+nng/include/nng/nng.h
+--namespace
+nng
+--output
+./interop
