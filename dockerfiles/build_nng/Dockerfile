@@ -19,9 +19,9 @@ ARG SRC
 ARG NNG_BRANCH=v1.4.0
 WORKDIR ${SRC}
 
-RUN git clone https://github.com/nanomsg/nng.git \
-    && cd nng \
-    && git checkout ${NNG_BRANCH}
+RUN git clone \
+    -b ${NNG_BRANCH} --depth 1 --recursive --single-branch \
+    https://github.com/nanomsg/nng.git
 
 # Build x64 Linux
 FROM debian:buster AS linux-x64
