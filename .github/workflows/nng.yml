@@ -30,7 +30,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         path: |
-          nng.NETCore/runtimes/**/*
-          !nng.NETCore/runtimes/any/**/*
+          nng.NET/runtimes/**/*
+          !nng.NET/runtimes/any/**/*
         if-no-files-found: error
 
