@@ -5,7 +5,7 @@
 param([string]$nng_source = "../nng/",
 [switch]$clean,
 [string]$git_branch,
-[string]$runtimes = "$PSScriptRoot/../nng.NETCore/runtimes"
+[string]$runtimes = "$PSScriptRoot/../nng.NET/runtimes"
 )
 
 if (-not $IsLinux -and -not $(Test-Path $nng_source -PathType Container)){
@@ -33,7 +33,7 @@ try {
     if ($IsLinux) {
         docker build -t jeikabu/build-nng dockerfiles/build_nng
         docker run --rm --privileged multiarch/qemu-user-static:register
-        docker run -i -t --rm -v "$PWD/nng.NETCore/runtimes:/runtimes" jeikabu/build-nng
+        docker run -i -t --rm -v "$PWD/nng.NET/runtimes:/runtimes" jeikabu/build-nng
     }
     else {
         Write-Host "Placing nng $platforms binaries in $runtimes..."
