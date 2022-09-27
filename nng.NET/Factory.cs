@@ -116,17 +116,25 @@ namespace nng.Factories
 
     namespace Compat
     {
-        public class Factory : FactoryBase
+        public class Factory : FactoryBase, ISocketFactory
         {
-            public new NngResult<IPairSocket> PairOpen() => Pair0Socket.Open();   
+            public new NngResult<IPairSocket> PairOpen() => Pair0Socket.Open();
+            NngResult<IPairSocket> ISocketFactory.PairOpen()
+            {
+                return this.PairOpen();
+            }
         }
     }
-    
+
     namespace Latest
     {
-        public class Factory : FactoryBase
+        public class Factory : FactoryBase, ISocketFactory
         {
-            public new NngResult<IPairSocket> PairOpen() => Pair1Socket.Open();   
+            public new NngResult<IPairSocket> PairOpen() => Pair1Socket.Open();
+            NngResult<IPairSocket> ISocketFactory.PairOpen()
+            {
+                return this.PairOpen();
+            }
         }
     }
 }
